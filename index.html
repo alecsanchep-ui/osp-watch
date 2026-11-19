@@ -9,7 +9,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser runs only the one script and one stylesheet below, identified by hash, and refuses any
      request the page tries to make. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-h/eB7eAweWDaJaUxzPVE7etU2feSGiNq4fBQ/h/XbU8='; style-src 'sha256-gziN7RL6VVPu6MSaD4gm0YfsmgYeokpd92DSudxXXuQ='; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-4lPQwgkoUxUCNUNqqne9Z6ZJXjmGybo/Ma/RksilbNs='; style-src 'sha256-PYUvMNPiCRumefddWoBNW2pxKDq9IgWiyPMNr2tmi5s='; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>OSP Watch</title>
 <style>/* The layout borrows from the office software these users already work in: Today is a mail inbox with a
    reading pane, Jobs is a spreadsheet. Neutral grays, one blue accent, colour only where a job is in trouble.
@@ -1227,7 +1227,7 @@ body.drag::after {
 @media print {
   .banner,
   nav,
-  .tb .grow,
+  .tb,
   .toast,
   .panel,
   .scrim,
@@ -1258,8 +1258,19 @@ body.drag::after {
   .tiles {
     break-inside: avoid;
   }
-  th {
+  /* Paper is narrower than the screen: nothing scrolls, so tables tighten up to fit the sheet. */
+  .card {
+    overflow: visible;
+    box-shadow: none;
+    border: 1px solid var(--line);
+  }
+  th,
+  td,
+  td.n,
+  th.n {
     position: static;
+    padding: 5px 7px;
+    font-size: 12px;
   }
 
   .psheet {
@@ -1308,11 +1319,14 @@ body.drag::after {
   .psheet th {
     font-size: 9px;
   }
+  .psheet tr:last-child td {
+    border-bottom: 1px solid #000;
+  }
   .psheet td {
     height: 30px;
   }
   .psheet th:nth-child(1) {
-    width: 8%;
+    width: 11%;
   }
   .psheet th:nth-child(2) {
     width: 13%;
@@ -1326,7 +1340,7 @@ body.drag::after {
     white-space: nowrap;
   }
   .psheet th:nth-child(5) {
-    width: 36%;
+    width: 33%;
   }
   .psheet th:nth-child(6) {
     width: 21%;
@@ -1959,29 +1973,41 @@ function parseDate(v) {
   return out && isDate(out) ? out : null;
 }
 
-/* The columns the import reads: key, label, and the header pattern that suggests it. Order matters: each
-   header is claimed by the first field that matches it. Nothing else in a sheet is read or stored. */
+/* The columns the import reads: key, label, and the heading pattern that suggests it. Order matters: each
+   heading is claimed by the first field that matches it. Nothing else in a sheet is read or stored. */
 const FIELDS = [
-  ['job', 'Job number', /^(?!.*(date|due|qty|quant|purchase|sales|\bp\.?o\b)).*(job|\bw\.?o\b|work.?order|order)/i],
-  ['po', 'PO number', /^(?!.*date).*(\bpo\b|p\.o\.|purchase)/i],
+  [
+    'job',
+    'Job number',
+    /^(?!.*(date|\bdt\b|due|qty|quant|purchase|sales|\bp ?o\b)).*(job|\bw ?o\b|work ?order|order)/i,
+  ],
+  ['po', 'PO number', /^(?!.*(date|\bdt\b)).*(\bp ?o\b|purchase)/i],
   ['proc', 'Processor', /vendor|processor|supplier|sub/i],
   ['process', 'Process', /^(?!.*part).*(process|\bop(er|\b)|finish|spec|service)/i],
   ['qty', 'Qty', /qty|quant|pcs/i],
   ['back', 'Date received back', /^(?!.*(exp|due|promis|req)).*(rec|return|came|actual|date in)/i],
   ['due', 'Due back', /due|promis|req|expect/i],
-  ['sent', 'Date sent', /^(?!.*(exp|rush)).*(sent|ship.*out|out|date)/i],
+  ['sent', 'Date sent', /^(?!.*(exp|rush)).*(sent|ship.*out|out|date|\bdt\b)/i],
   ['carrier', 'Carrier', /carrier|via/i],
   ['trk', 'Tracking', /track/i],
-  ['fee', 'Expedite fee', /exp.*(\$|fee|cost)|rush.*\$/i],
-  ['by', 'Expedite date', /exp.*(by|date)|rush.*by/i],
+  ['fee', 'Expedite fee', /exp.*(\$|fee|cost|amt|amount)|rush.*(\$|fee|cost|amt|amount)/i],
+  ['by', 'Expedite date', /exp.*(by|date|\bdt\b)|rush.*(by|date|\bdt\b)/i],
 ];
+
+/* A heading as words: an ERP export writes Due_Date, VendorName or P.O. where a person writes "Due date". */
+const headingWords = (h) =>
+  String(h)
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/[_.\-\/#:]+/g, ' ')
+    .trim();
 
 /** A first guess at which column holds which field: { field: column index }. The person corrects it on screen. */
 function guessColumns(header) {
+  const headings = header.map(headingWords);
   const used = new Set();
   const map = {};
   for (const [field, , re] of FIELDS) {
-    const i = header.findIndex((h, ix) => !used.has(ix) && re.test(h));
+    const i = headings.findIndex((h, ix) => !used.has(ix) && re.test(h));
     if (i >= 0) {
       map[field] = i;
       used.add(i);
@@ -4481,7 +4507,7 @@ function vSum(J) {
 
   return html`${pageHead(
       'Monthly summary',
-      `What was caught in ${monthName()}, through ${fmtDay(T)}.`,
+      `${shopName()} · what was caught in ${monthName()}, through ${fmtDay(T)}.`,
       html`<button type="button" class="btn" data-print>Print</button>`,
     )}
     <div class="tiles">
