@@ -9,7 +9,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser runs only the one script and one stylesheet below, identified by hash. connect-src lists
      every address the page may send to: 'none' unless this build carries the optional usage signal. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-L1gZkUROpvXVlH+IR/ex9/Y4YTFM0JzNcNO+idPbuAI='; style-src 'sha256-QxgsXtp5epP8j+O8pLvjTmVFBpntKS4Tiqt6COk2T4E='; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-DLmEppRkipZSwrXW0++zl835nwhQFQ6e7jQ8iN52Cqo='; style-src 'sha256-QxgsXtp5epP8j+O8pLvjTmVFBpntKS4Tiqt6COk2T4E='; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>OSP Watch</title>
 <style>/* Plain office software: flat, square, dense, with visible gridlines. Today reads as a mail list with a
    reading pane, Jobs as a spreadsheet, and the running totals sit in a status bar at the foot of the window.
@@ -5053,9 +5053,9 @@ function vIT() {
     </p>`;
 }
 
-/* tour.js: a guided walk through the demo. Each stop shows one screen and points at one thing on it. */
+/* tour.js: a guided walk through the demo. Each stop shows one screen and points at one thing on it.
+   It starts only from "Take the tour" in the top bar, never by itself. */
 
-const TOUR_SEEN_KEY = 'osp-watch-tour-v1';
 const TOUR = [
   {
     view: 'today',
@@ -5199,7 +5199,6 @@ function endTour() {
   if (tourStop < 0) return;
   tourStop = -1;
   for (const id of ['#tourblock', '#tourhole', '#tourpop']) $(id).remove();
-  store.set(TOUR_SEEN_KEY, '1');
   if (modeBeforeTour !== MODE) setMode(modeBeforeTour);
   else show('today');
 }
@@ -5232,11 +5231,6 @@ document.addEventListener(
   },
   true,
 );
-
-/* The tour starts by itself on a first visit to the demo, on a screen wide enough to hold it. */
-function offerTour() {
-  if (MODE === 'demo' && innerWidth >= 760 && !store.get(TOUR_SEEN_KEY)) setTimeout(() => showStop(0), 400);
-}
 
 /* main.js: the keyboard, the banner buttons, and start-up. Inlined last, once every screen is defined. */
 
@@ -5292,7 +5286,6 @@ setInterval(rollOverToToday, 60 * 1000);
 
 render();
 startSharing();
-offerTour();
 if (USAGE_ENDPOINT) startUsage();
 </script>
 </body>
