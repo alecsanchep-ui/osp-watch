@@ -4589,7 +4589,6 @@ $('#btour').onclick = () => tourGo(0);
   try {
     seen = !!localStorage.getItem(TOURKEY);
   } catch (e) {}
-  if (!seen && MODE === 'demo' && innerWidth >= 760 && !navigator.webdriver && !matchMedia('print').matches)
-    setTimeout(() => tourGo(0), 400);
+  if (!seen && MODE === 'demo' && innerWidth >= 760 && !matchMedia('print').matches) setTimeout(() => tourGo(0), 400);
 }
 </script></body></html>
