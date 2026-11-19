@@ -127,6 +127,7 @@ textarea{width:100%;resize:vertical;font-family:var(--body)}
 .tl li.done:before{color:#fff;background:var(--accent)}.tl li.now:before{color:#fff;background:var(--ink)}
 .tl li.now{font-weight:700}
 .tl.log li:before{content:"•";background:none;color:var(--accent)}
+.tl.setup{margin:0;border:0}.tl.setup li{padding:9px 14px 9px 0}.tl.setup li.todo{color:var(--ink)}.tl.setup li:before{content:counter(op);counter-increment:none}.tl.setup{counter-reset:op 0}.tl.setup li{counter-increment:op 1}.tl.setup li.done:before{content:"✓";background:var(--green)}
 .kv{display:grid;grid-template-columns:130px 1fr;gap:4px 10px;font-size:14.5px;margin-bottom:14px}
 .kv div:nth-child(odd){color:var(--mute)}
 .box{border:1px solid var(--line);border-radius:2px;padding:10px 12px;margin-top:12px}
@@ -139,14 +140,16 @@ textarea{width:100%;resize:vertical;font-family:var(--body)}
 .steps span:last-child{border-right:0}
 .steps span.on{background:var(--accent);color:#fff}
 .spark{display:block}
+.bar{display:inline-block;vertical-align:middle;width:120px;height:9px;border:1px solid var(--line);background:#fff}.bar i{display:block;height:100%;background:var(--red)}
 .grp td{background:#f6f7f7;font:700 14px var(--din);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--line);border-top:1px solid var(--line)}
 .grp td .small{font-family:var(--body);letter-spacing:0;text-transform:none}
 .ok{color:var(--green);font-weight:600}.bad{color:var(--red);font-weight:600}
 .legend{display:flex;gap:18px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--mute);margin:0 0 6px}
 .legend .strip{width:60px}
+body.drag:after{content:"Drop the file to import it";position:fixed;inset:14px;border:3px dashed var(--accent);background:rgba(227,233,247,.92);display:grid;place-items:center;font:700 26px var(--din);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);z-index:50;pointer-events:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @media (max-width:900px){nav{width:58px}nav .lbl,nav .foot{display:none}.grid2{grid-template-columns:1fr}main{padding:14px}.tb .opt{display:none}.tb .name{width:auto}.tiles{grid-auto-flow:row}.tile{flex-direction:row-reverse;justify-content:space-between;align-items:center;border-right:0;border-top:0;border-bottom:1px solid var(--line);padding:6px 14px}.tile:last-child{border-bottom:0}.tile .l{min-height:0}.tile .n{font-size:22px}.banner{flex-wrap:wrap;row-gap:4px}.banner .sp{display:none}}
-@media print{.banner,nav,.tb .grow{display:none}main{overflow:visible;background:#fff}}
+@media print{.banner,nav,.tb .grow,.toast,.panel,.scrim,.head .btn,.legend{display:none!important}html,body{height:auto}body,.app{display:block;background:#fff}main{overflow:visible;background:#fff;padding:12px 0}.card,.tiles{break-inside:avoid}th{position:static}.tile.static{cursor:default}}
 </style></head><body>
 <div class="banner"><b id="bmode">Early version · demo data (fictional shop)</b><span id="bnote">Illustrative: fictional shop, not from any interviewee. Nothing is sent from this page: it drafts, you send from your own mailbox.</span><span class="sp"></span><button id="bswitch" type="button">Use my own jobs</button><button id="reset" type="button">Reset demo</button></div>
 <header class="tb"><div class="name"><div class="logo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="square"><path d="M2 12h4l3-8 6 16 3-8h4"/></svg></div><b>OSP Watch</b></div>
@@ -258,6 +261,9 @@ function draftFor(j,s,T,sign){
  }
  return {subject:sub,body:hi+b+sg}
 }
+function xlDate(n){n=Math.floor(+n);return n>20000&&n<80000?S(n-25569):null} /* Excel day serial -> yyyy-mm-dd */
+function expByProc(J,T){const g={};for(const x of ledger(J,T)){const p=g[x.proc]=g[x.proc]||{proc:x.proc,n:0,fees:0,met:0,missed:0,open:0,n_missed:0};p.n++;p.fees+=x.fee;p[x.res]+=x.fee;if(x.res==='missed')p.n_missed++}
+ return Object.values(g).sort((a,b)=>b.missed-a.missed||b.fees-a.fees)}
 function mergeState(a,b){ /* a = this computer, b = the shared file. Jobs and events only ever add; removals are remembered. */
  const out=Object.assign({},b,a),rm=new Set([...(a.removed||[]),...(b.removed||[])]),byId={};
  for(const j of (b.added||[]).concat(a.added||[]))if(!rm.has(j.id)&&!byId[j.id])byId[j.id]=j;
@@ -353,6 +359,15 @@ function route(j,s){let at=-1;SEQ.forEach((m,i)=>{if(j.ev.some(e=>e.m===m))at=i}
  const back=j.ev.some(e=>e.m==='back'),f=Math.max(0,Math.min(1,(D(T)-D(j.sent))/Math.max(1,D(s.due)-D(j.sent)))),behind=!back&&f*7>at+2.5;
  return '<div class="rt" title="'+(back?'Received back':(at<0?'Nothing reported yet':'Last reported: '+MS[SEQ[at]].toLowerCase())+'. '+Math.round(f*100)+'% of the time is used.')+'"><span class="d">'+fmt(j.sent)+'</span><span class="strip'+(back?' done':behind?' behind':'')+'">'+SEQ.map((m,i)=>'<i'+(back||i<=at?' class="f"':'')+'></i>').join('')+(back?'':'<b style="left:'+Math.round(f*100)+'%"></b>')+'</span><span class="d'+(!back&&T>s.due?' bad':'')+'">'+fmt(s.due)+'</span></div>'}
 const LEGEND='<p class="legend"><span>Reading the strip:</span><span class="rt"><span class="strip"><i class="f"></i><i class="f"></i><i></i><i></i></span></span><span>filled = steps the processor has reported, from delivered to shipped back</span><span>▼ = today, between the date sent and the date due</span><span class="bad">red ▼ = time is running ahead of the work</span></p>';
+function setupCard(J){if(MODE!=='live'||st.setupDone)return '';
+ const steps=[[!!st.shop,'Name your shop','It signs the emails.','<button type="button" class="btn sm" data-v="set">Open Setup</button>'],
+  [J.length>0,'Bring in the jobs you have out now','Drag your Excel file onto this page, or add one by hand.','<button type="button" class="btn sm" data-v="imp">Import</button> <button type="button" class="btn sm" data-addjob>Add a job</button>'],
+  [J.some(j=>!isOpen(j)),'Add past jobs with the date they came back','Optional. Gives real turn times and missed expedites on day one.','<button type="button" class="btn sm" data-v="imp">Import history</button>'],
+  [Object.keys(st.contacts).length>0,'Send your first check','Open a job on the list below and use Draft email. The processor\'s address is remembered.',''],
+  [!!fh,'Share it with the office','Optional. One file on your shared drive so everyone sees the same jobs.','<button type="button" class="btn sm" data-v="set">Open Setup</button>']];
+ const done=steps.filter(s=>s[0]).length;
+ return '<div class="card"><h2>Getting set up <span>· '+done+' of '+steps.length+' done</span><span style="flex:1"></span><a href="#" id="setupx" class="small">Hide this</a></h2><ul class="tl setup">'+steps.map(s=>'<li class="'+(s[0]?'done':'todo')+'"><div><b>'+s[1]+'</b><span class="sub">'+s[2]+'</span></div><div>'+(s[0]?'<span class="ok">Done</span>':s[3])+'</div></li>').join('')+'</ul></div>'}
+document.addEventListener('click',e=>{if(e.target.id==='setupx'){e.preventDefault();st.setupDone=true;save();render()}});
 /* ---------- Today ---------- */
 function vToday(J){
  const rows=J.filter(j=>j.open).map(j=>[j,statusOf(j,T)]).filter(([,s])=>s.action).sort((a,b)=>ORDER.indexOf(a[1].k)-ORDER.indexOf(b[1].k)||(a[1].due<b[1].due?-1:1));
@@ -362,7 +377,7 @@ function vToday(J){
  const handled=Object.keys(st.handled).map(id=>[job(id),st.handled[id]]).filter(x=>x[0]);
  const body=shown.map(([j,s])=>'<tr class="click tag-'+ST[s.k][1]+'" data-job="'+esc(j.id)+'"><td><span class="job">'+jn(j)+'</span><span class="sub">'+esc(j.po||'')+'</span></td><td>'+esc(j.proc)+'<span class="sub">'+esc(j.process)+(j.qty?' · '+j.qty+' pcs':'')+'</span></td><td>'+route(j,s)+'</td><td>'+chip(s.k)+(s.asked?'<span class="asked">Asked '+hm(s.asked.t)+'</span>':'')+'<span class="sub why">'+esc(reason(j,s))+'</span></td><td class="n">'+(s.k==='chk'?(trackUrl(j)?'<a class="btn sm" target="_blank" rel="noopener" href="'+trackUrl(j)+'" data-stop>Track</a> ':'')+'<button type="button" class="btn sm" data-deliv="'+esc(j.id)+'">Mark delivered</button> ':'')+'<button type="button" class="btn pri sm" data-draft="'+esc(j.id)+'">Draft email</button></td></tr>').join('');
  return '<div class="head"><div><h1>Today</h1><p>'+fmtW(T)+' · '+(rows.length?rows.length+' job'+(rows.length===1?' needs':'s need')+' a word with a processor this morning.':J.length?'Nothing needs a word with a processor. All '+J.filter(isOpen).length+' open jobs were checked against today\'s date.':'No jobs yet.')+'</p></div></div>'+
-  (!J.length?'<div class="card"><div class="empty"><p><b>Start with the jobs you have out right now.</b></p><p>Import the list you already keep, or add one job by hand. Everything stays in this browser.</p><p><button type="button" class="btn pri" data-v="imp">Import my list</button> <button type="button" class="btn" data-addjob>Add a job</button></p></div></div>':'')+
+  setupCard(J)+
   '<div class="tiles">'+tiles+'</div>'+
   '<div class="card"><h2>Action list'+(sel?' <span>· '+sel[1]+' · <a href="#" data-tf="">show all</a></span>':' <span>· most urgent first</span>')+'</h2>'+
   (shown.length?'<table><thead><tr><th>Job</th><th>Processor</th><th>Sent · progress · due back</th><th>Status</th><th></th></tr></thead><tbody>'+body+'</tbody></table>':'<div class="empty">All clear in this group.</div>')+'</div>'+
@@ -498,6 +513,8 @@ function vExp(J){
  '<div class="tile static"><div class="n" style="color:var(--red)">'+money(sum('missed'))+'</div><div class="l">Paid for a date that was missed</div><div class="s">'+cnt('missed')+' jobs · credit request drafted for each</div></div>'+
  (cnt('open')?'<div class="tile static"><div class="n" style="color:var(--amber)">'+money(sum('open'))+'</div><div class="l">Still open</div><div class="s">'+cnt('open')+' job'+(cnt('open')===1?'':'s')+'</div></div>':'')+'</div>'+
  (!L.length?'<div class="card"><div class="empty">No expedites '+(expAll?'on file':'this month')+'. When you pay one, open the job and add the fee and the date it bought.</div></div>':
+ (()=>{const E=expByProc(J,T);return E.length>1||(E[0]&&E[0].n>1)?'<div class="card"><h2>By processor <span>· every expedite on file · worst first</span></h2><table><thead><tr><th>Processor</th><th class="n">Expedites</th><th class="n">Fees paid</th><th class="n">Date met</th><th class="n">Date missed</th><th class="n">Missed</th><th>Share of fees that missed</th></tr></thead><tbody>'+
+  E.map(p=>{const pct=p.fees?Math.round(100*p.missed/p.fees):0;return '<tr><td><b>'+esc(p.proc)+'</b></td><td class="n">'+p.n+'</td><td class="n">'+money(p.fees)+'</td><td class="n">'+money(p.met)+'</td><td class="n'+(p.missed?' bad':'')+'">'+money(p.missed)+'</td><td class="n">'+p.n_missed+' of '+p.n+'</td><td><div class="bar"><i style="width:'+pct+'%"></i></div> <span class="small">'+pct+'%</span></td></tr>'}).join('')+'</tbody></table></div>':''})()+
  '<div class="card"><h2>Ledger <span>· '+period+', newest first</span></h2><table><thead><tr><th>Job</th><th>Processor</th><th class="n">Fee</th><th>Paid</th><th>Bought the date</th><th>Back at shop</th><th>Result</th><th>Credit</th></tr></thead><tbody>'+
  L.map(x=>'<tr class="click" data-job="'+esc(x.id)+'"><td><span class="job">'+esc(x.jn)+'</span><span class="sub">'+(x.qty?x.qty+' pcs':'')+'</span></td><td>'+esc(x.proc)+'<span class="sub">'+esc(x.process)+'</span></td><td class="n">'+money(x.fee)+'</td><td>'+fmt(x.bought)+'</td><td>'+fmt(x.by)+'</td><td>'+(x.back?fmt(x.back):'<span class="muted">not back</span>')+'</td><td>'+resChip(x)+'</td><td>'+
   (x.res==='missed'?(st.credit[x.id]==='credited'?'<span class="ok">Credited</span>':'<button type="button" class="btn sm'+(st.credit[x.id]?'':' pri')+'" data-credit="'+esc(x.id)+'">'+(st.credit[x.id]?'Requested · view':'Credit request')+'</button>'):'<span class="muted">—</span>')+'</td></tr>').join('')+
@@ -522,26 +539,55 @@ function vProcs(J){
 /* ---------- Import ---------- */
 const FIELDS=[['job','Job number',/job|w\.?o\.?|work.?order|order/i],['po','PO number',/\bpo\b|p\.o\.|purchase/i],['proc','Processor',/vendor|processor|supplier|sub/i],['process','Process',/process|\bop|finish|spec|service|desc/i],['qty','Qty',/qty|quant|pcs/i],['back','Date received back',/rec|return|came|actual|date in/i],['due','Due back',/due|promis|req|expect/i],['sent','Date sent',/sent|ship.*out|out|date/i],['carrier','Carrier',/carrier|via|ship ?via/i],['trk','Tracking',/track/i],['fee','Expedite fee',/exp.*(\$|fee|cost)|rush.*\$/i],['by','Expedite date',/exp.*(by|date)|rush.*by/i]];
 const SAMPLE='Job,Vendor,Op,Qty,Shipped out,Ship via,Tracking #,Promised back,Expedite $,Expedite by\n2626,Anodize House A,"Anodize, Type II",36,11/23/2026,Shop driver,,11/30/2026,,\n2627,Plating House C,Electroless nickel,12,11/23/2026,FedEx Ground,DEMO-FDX-8812,12/3/2026,,\n2628,Heat Treat House D,Vacuum heat treat,40,11/23/2026,Shop driver,,11/30/2026,250,11/27/2026\n2629,NDT Lab F,Penetrant inspection,18,11/23/2026,Shop driver,,11/27/2026,,\n2630,Grinding House G,Centerless grind,75,11/23/2026,UPS Ground,DEMO-UPS-6620,11/30/2026,,';
+async function inflate(u8){const ds=new DecompressionStream('deflate-raw'),w=ds.writable.getWriter();w.write(u8);w.close();return new Uint8Array(await new Response(ds.readable).arrayBuffer())}
+async function unzip(buf){const dv=new DataView(buf),u8=new Uint8Array(buf),out={},td=new TextDecoder();let e=buf.byteLength-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;if(e<0)throw new Error('not a zip');
+ let p=dv.getUint32(e+16,true);const n=dv.getUint16(e+10,true);
+ for(let i=0;i<n;i++){if(dv.getUint32(p,true)!==0x02014b50)break;const method=dv.getUint16(p+10,true),csize=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true),name=td.decode(u8.subarray(p+46,p+46+nl));
+  out[name]={method,csize,lo};p+=46+nl+xl+cl}
+ return {names:Object.keys(out),read:async name=>{const f=out[name];if(!f)return null;const nl=dv.getUint16(f.lo+26,true),xl=dv.getUint16(f.lo+28,true),d=u8.subarray(f.lo+30+nl+xl,f.lo+30+nl+xl+f.csize);return td.decode(f.method===0?d:await inflate(d))}}}
+const xmlText=s=>s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(m,c)=>String.fromCharCode(c)).replace(/&amp;/g,'&');
+async function readXlsx(buf){const z=await unzip(buf),sst=[],ss=await z.read('xl/sharedStrings.xml');
+ if(ss)for(const m of ss.matchAll(/<si>([\s\S]*?)<\/si>/g))sst.push(xmlText([...m[1].matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(x=>x[1]).join('')));
+ const dateStyle=[],st=await z.read('xl/styles.xml');if(st){const custom={};for(const m of st.matchAll(/<numFmt [^>]*numFmtId="(\d+)"[^>]*formatCode="([^"]*)"/g))custom[m[1]]=m[2];
+  const xfs=(st.match(/<cellXfs[\s\S]*?<\/cellXfs>/)||[''])[0];for(const m of xfs.matchAll(/<xf [^>]*numFmtId="(\d+)"/g)){const id=+m[1],fc=custom[id]||'';dateStyle.push((id>=14&&id<=22)||(id>=45&&id<=47)||/[dy]/i.test(fc.replace(/"[^"]*"|\[[^\]]*\]/g,'')))}}
+ const sheet=z.names.filter(n=>/^xl\/worksheets\/sheet\d+\.xml$/.test(n)).sort((a,b)=>parseInt(a.match(/\d+/)[0])-parseInt(b.match(/\d+/)[0]))[0],xml=await z.read(sheet),rows=[];
+ for(const rm of xml.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)){const r=[];
+  for(const c of rm[1].matchAll(/<c ([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)){const a=c[1],ref=(a.match(/r="([A-Z]+)\d+"/)||[])[1],ty=(a.match(/t="(\w+)"/)||[])[1],si=+(a.match(/s="(\d+)"/)||[0,0])[1],body=c[2]||'';
+   let col=r.length;if(ref){col=0;for(const ch of ref)col=col*26+ch.charCodeAt(0)-64;col--}
+   let v=(body.match(/<v>([\s\S]*?)<\/v>/)||[])[1];if(ty==='s')v=sst[+v];else if(ty==='inlineStr')v=xmlText([...body.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(x=>x[1]).join(''));
+   else if(v!=null){v=xmlText(v);if(dateStyle[si]&&!ty){const d=xlDate(v);if(d)v=d}}
+   while(r.length<col)r.push('');r[col]=v==null?'':String(v)}
+  if(r.some(x=>String(x).trim()))rows.push(r)}
+ const w=Math.max(0,...rows.map(r=>r.length));return rows.map(r=>{while(r.length<w)r.push('');return r})}
+function loadFile(f){if(!f)return;const done=rows=>{if(!rows||rows.length<2){toast('That file has no rows to read.');return}imp={text:'',rows,map:guess(rows[0]),name:f.name};st.view='imp';render();toast(f.name+': '+(rows.length-1)+' rows. Check the columns.')};
+ if(/\.xlsx$/i.test(f.name))f.arrayBuffer().then(readXlsx).then(done).catch(()=>toast('That Excel file could not be read. Save it as CSV and try again.'));
+ else if(/\.xls$/i.test(f.name))toast('Old .xls files are not supported. In Excel: Save As, Excel Workbook (.xlsx) or CSV.');
+ else{const fr=new FileReader();fr.onload=()=>{let txt=String(fr.result);if(txt.includes('\t'))txt=txt.split(/\r?\n/).map(l=>l.split('\t').map(c=>/[",]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c).join(',')).join('\n');done(parseCSV(txt))};fr.readAsText(f)}}
+let dragN=0;
+document.addEventListener('dragenter',e=>{if(e.dataTransfer&&[...e.dataTransfer.types].includes('Files')){dragN++;document.body.classList.add('drag')}});
+document.addEventListener('dragleave',()=>{if(--dragN<=0){dragN=0;document.body.classList.remove('drag')}});
+document.addEventListener('dragover',e=>{if(e.dataTransfer&&[...e.dataTransfer.types].includes('Files'))e.preventDefault()});
+document.addEventListener('drop',e=>{if(!e.dataTransfer||!e.dataTransfer.files.length)return;e.preventDefault();dragN=0;document.body.classList.remove('drag');loadFile(e.dataTransfer.files[0])});
 function parseCSV(t){const rows=[];let r=[],f='',q=false;for(let i=0;i<t.length;i++){const c=t[i];
  if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
  else if(c==='"')q=true;else if(c===','){r.push(f);f=''}else if(c==='\n'||c==='\r'){if(c==='\r'&&t[i+1]==='\n')i++;r.push(f);f='';if(r.some(x=>x.trim()))rows.push(r);r=[]}else f+=c}
  r.push(f);if(r.some(x=>x.trim()))rows.push(r);return rows}
-function pdate(s){s=(s||'').trim().split(' ')[0];let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+function pdate(s){s=(s||'').trim().split(/[ T]/)[0];if(/^\d{5}(\.\d+)?$/.test(s))return xlDate(s);let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
  m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0')}return null}
 function guess(hdr){const used=new Set(),map={};for(const [k,,re] of FIELDS){const i=hdr.findIndex((h,ix)=>!used.has(ix)&&re.test(h));if(i>=0){map[k]=i;used.add(i)}}return map}
 function vImport(){
  const step=imp&&imp.rows?2:1;
- let h='<div class="head"><div><h1>Import</h1><p>Start from the spreadsheet you already keep for outside processing. CSV or Excel export; ERP connections later.</p></div></div>'+
+ let h='<div class="head"><div><h1>Import</h1><p>Start from the spreadsheet you already keep for outside processing. Excel or CSV export; ERP connections later.</p></div></div>'+
  '<div class="steps"><span class="'+(step===1?'on':'')+'">1 · Paste or choose a file</span><span class="'+(step===2?'on':'')+'">2 · Match your columns</span><span>3 · Jobs appear on Today</span></div>'+
  (step===1?'<p class="small" style="margin:-4px 0 12px">One row per job sent out. Needed: job number, processor, date sent, due back. Helpful: process, qty, PO, carrier and tracking, expedite fee and date. Past jobs with a <b>date received back</b> give you real turn times from day one. Leave part numbers, drawings and customer names out; the watch does not use them.</p>':'');
  if(step===1)return h+'<div class="card"><div class="pad"><textarea id="csv" rows="9" placeholder="Paste rows copied from Excel or Google Sheets, or a CSV file\'s text. First row = column names.">'+(imp&&imp.text?esc(imp.text):'')+'</textarea>'+
-  '<div style="display:flex;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap"><button type="button" class="btn pri" id="inext">Next: match columns</button><label class="btn">Choose CSV file<input type="file" id="ifile" accept=".csv,text/csv,text/plain" hidden></label><button type="button" class="btn" id="idemo">Load demo data</button>'+
-  '<span class="small">From Excel: File › Save As › CSV. Nothing leaves this page.</span></div></div></div>';
+  '<div style="display:flex;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap"><button type="button" class="btn pri" id="inext">Next: match columns</button><label class="btn">Choose an Excel or CSV file<input type="file" id="ifile" accept=".xlsx,.csv,.txt,text/csv,text/plain" hidden></label><button type="button" class="btn" id="idemo">Load demo data</button>'+
+  '<span class="small">Or drag the file anywhere onto this page. Excel (.xlsx) and CSV both work. Nothing leaves this page.</span></div></div></div>';
  const hdr=imp.rows[0],body=imp.rows.slice(1),opts=i=>'<option value="">— not in my sheet —</option>'+hdr.map((c,ix)=>'<option value="'+ix+'"'+(imp.map[i]===ix?' selected':'')+'>'+esc(c)+'</option>').join('');
  return h+'<div class="grid2"><div class="card"><h2>Your columns <span>· we guessed; fix any that are wrong</span></h2><table><tbody>'+
  FIELDS.map(([k,l])=>'<tr><td>'+l+(['job','proc','sent','due'].includes(k)?' <span class="small">needed</span>':'')+'</td><td><select data-map="'+k+'">'+opts(k)+'</select></td></tr>').join('')+'</tbody></table></div>'+
- '<div class="card"><h2>Preview <span>· '+body.length+' rows</span></h2><table><thead><tr><th>Job</th><th>Processor</th><th>Sent</th><th>Due back</th></tr></thead><tbody>'+
- body.slice(0,6).map(r=>{const g=k=>imp.map[k]!=null?esc(r[imp.map[k]]||''):'<span class="muted">—</span>';return '<tr><td>'+g('job')+'</td><td>'+g('proc')+'</td><td>'+g('sent')+'</td><td>'+g('due')+'</td></tr>'}).join('')+'</tbody></table>'+
+ '<div class="card"><h2>Preview <span>· '+body.length+' rows'+(imp.name?' from '+esc(imp.name):'')+'</span></h2><table><thead><tr><th>Job</th><th>Processor</th><th>Sent</th><th>Due back</th></tr></thead><tbody>'+
+ body.slice(0,6).map(r=>{const g=k=>imp.map[k]!=null?esc(r[imp.map[k]]||''):'<span class="muted">—</span>',gd=k=>{if(imp.map[k]==null)return '<span class="muted">—</span>';const v=r[imp.map[k]]||'',d=pdate(v);return d?fmt(d)+', '+d.slice(0,4):(v?'<span class="bad" title="Not read as a date">'+esc(v)+'</span>':'')};return '<tr><td>'+g('job')+'</td><td>'+g('proc')+'</td><td>'+gd('sent')+'</td><td>'+gd('due')+'</td></tr>'}).join('')+'</tbody></table>'+
  '<div class="pad" style="display:flex;gap:10px"><button type="button" class="btn pri" id="igo">Add '+body.length+' jobs</button><button type="button" class="btn" id="iback">Back</button></div></div></div>'}
 document.addEventListener('click',e=>{const t=e.target;
  if(t.id==='idemo'){imp={text:SAMPLE};render();toast('Demo spreadsheet loaded. Click Next.')}
@@ -556,7 +602,7 @@ document.addEventListener('click',e=>{const t=e.target;
    st.added.push(makeJob(o));ok++;if(o.back)hist++}
   if(ok)st.lastImport=T+' '+now();save();imp=null;st.view=ok-hist?'today':'procs';jf={proc:'',process:'',status:'',q:'',closed:false};render();toast(ok+' jobs added'+(hist?' ('+hist+' already back, now in the turn-time history)':'')+(skip?', '+skip+' skipped (missing or impossible date, or already on file)':'')+'.')}});
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.map){imp.map[t.dataset.map]=t.value===''?null:+t.value;render()}
- if(t.id==='ifile'&&t.files[0]){const fr=new FileReader();fr.onload=()=>{imp={text:String(fr.result)};render();toast('File loaded. Click Next.')};fr.readAsText(t.files[0])}});
+ if(t.id==='ifile'&&t.files[0])loadFile(t.files[0])});
 
 /* ---------- Monthly summary ---------- */
 function vSum(J){
