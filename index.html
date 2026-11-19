@@ -148,11 +148,20 @@ textarea{width:100%;resize:vertical;font-family:var(--body)}
 body.drag:after{content:"Drop the file to import it";position:fixed;inset:14px;border:3px dashed var(--accent);background:rgba(227,233,247,.92);display:grid;place-items:center;font:700 26px var(--din);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);z-index:50;pointer-events:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @media (max-width:900px){nav{width:58px}nav .lbl,nav .foot{display:none}.grid2{grid-template-columns:1fr}main{padding:14px}.tb .opt{display:none}.tb .name{width:auto}.tiles{grid-auto-flow:row}.tile{flex-direction:row-reverse;justify-content:space-between;align-items:center;border-right:0;border-top:0;border-bottom:1px solid var(--line);padding:6px 14px}.tile:last-child{border-bottom:0}.tile .l{min-height:0}.tile .n{font-size:22px}.banner{flex-wrap:wrap;row-gap:4px}.banner .sp{display:none}}
+.tourblock{position:fixed;inset:0;z-index:9000}
+.tourhole{position:fixed;z-index:9001;border:2px solid var(--amber-bg);border-radius:2px;box-shadow:0 0 0 200vmax rgba(20,23,26,.55);pointer-events:none}
+.tourpop{position:fixed;z-index:9002;width:340px;max-width:calc(100vw - 24px);background:var(--sheet);border:2px solid var(--ink);border-top:8px solid var(--amber-bg);border-radius:2px;padding:12px 14px 12px;box-shadow:4px 4px 0 rgba(20,23,26,.35)}
+.tourpop .tn{font:600 11px var(--din);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.tourpop h3{margin:4px 0 6px;font-size:17px}
+.tourpop p{margin:0 0 12px;font-size:14.5px;line-height:1.45}
+.tourpop .ta{display:flex;gap:8px;align-items:center}
+.tourpop .skip{background:none;border:0;padding:0;color:var(--mute);text-decoration:underline;cursor:pointer;font-size:13px}
+@media print{.tourblock,.tourhole,.tourpop{display:none!important}}
 .psheet{display:none}
 @media print{.scr{display:none}.psheet{display:block!important;font-size:11px;color:#000}.psheet .ph{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #000;padding-bottom:4px;margin-bottom:8px}.psheet .ph b{font-size:15px;text-transform:uppercase;letter-spacing:.06em}.psheet .pg{break-inside:avoid;margin-bottom:10px}.psheet h3{margin:0 0 2px;font-size:12px}.psheet h3 span{font-weight:400;margin-left:8px}.psheet .pg{padding-bottom:1px}.psheet table{width:100%;border-collapse:collapse;table-layout:fixed}.psheet th:nth-child(1){width:8%}.psheet th:nth-child(2){width:13%}.psheet th:nth-child(3),.psheet th:nth-child(4){width:7%}.psheet td:nth-child(3),.psheet td:nth-child(4){white-space:nowrap}.psheet th:nth-child(5){width:36%}.psheet th:nth-child(6){width:21%}.psheet th:nth-child(7){width:8%}.psheet td{height:30px}.psheet th,.psheet td{border:1px solid #000!important;white-space:normal;overflow-wrap:break-word;padding:3px 5px;text-align:left;vertical-align:top;font-size:10.5px;background:none;color:#000}.psheet th{font-size:9px;text-transform:uppercase}.psheet .pf{margin-top:6px;font-size:9.5px}}
 @media print{.banner,nav,.tb .grow,.toast,.panel,.scrim,.head .btn,.legend{display:none!important}html,body{height:auto}body,.app{display:block;background:#fff}main{overflow:visible;background:#fff;padding:12px 0}.card,.tiles{break-inside:avoid}th{position:static}.tile.static{cursor:default}}
 </style></head><body>
-<div class="banner"><b id="bmode">Early version · demo data (fictional shop)</b><span id="bnote">Illustrative: fictional shop, not from any interviewee. Nothing is sent from this page: it drafts, you send from your own mailbox.</span><span class="sp"></span><button id="bswitch" type="button">Use my own jobs</button><button id="reset" type="button">Reset demo</button></div>
+<div class="banner"><b id="bmode">Early version · demo data (fictional shop)</b><span id="bnote">Illustrative: fictional shop, not from any interviewee. Nothing is sent from this page: it drafts, you send from your own mailbox.</span><span class="sp"></span><button id="btour" type="button">Take the tour</button><button id="bswitch" type="button">Use my own jobs</button><button id="reset" type="button">Reset demo</button></div>
 <header class="tb"><div class="name"><div class="logo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="square"><path d="M2 12h4l3-8 6 16 3-8h4"/></svg></div><b>OSP Watch</b></div>
  <div><label>Shop</label><span id="shopname">Example Shop</span></div><div><label>Date</label><span id="clock"></span></div>
  <div class="opt"><label>Out at processors</label><span id="tb_open"></span></div><div class="hot" id="tb_hot"><label>Need a word today</label><span id="tb_acts"></span></div><div class="opt"><label>Expedites this month</label><span id="tb_exp"></span></div><div class="opt" id="tb_impc"><label>Last import</label><span id="tb_imp"></span></div><div class="opt" id="tb_filec" hidden><label>Shared file</label><span id="tb_file"></span></div><div class="grow"></div></header>
@@ -716,4 +725,37 @@ document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey||/INPU
 document.addEventListener('click',e=>{if(e.target.closest('[data-v],[data-tf]'))kb=-1});
 $('#reset').onclick=()=>{if(MODE==='live'){backup();return}try{localStorage.removeItem(KEYS.demo)}catch(e){}st=blank();todayFilter='';expAll=false;imp=null;jf={proc:'',process:'',status:'',q:'',closed:false};closePanel();render();toast('Demo reset to this morning.')};
 render();
+
+/* ---------- tour: nine stops through the demo ---------- */
+const TOURKEY='osp-watch-tour-v1';let tourI=-1,tourPrev=null;
+const TOUR=[
+ {v:'today',sel:'#view .tiles',t:'Start here each morning',x:'These are the open jobs that need a word with a processor today, counted by reason. Jobs that are on track stay off this list.'},
+ {v:'today',sel:'#view tr.click[data-job]',t:'Each job says why it is here',x:'Delivered but nobody confirmed receipt. Halfway through the turn. Due in two days with no ship notice. The strip shows the last step the processor reported.'},
+ {v:'today',sel:'#panel',pre:()=>{const b=$('#view [data-draft]');if(b)openDraft(b.dataset.draft)},t:'The email is already written',x:'It asks for a physical step, such as "is it racked?", not "are we on track?". Edit it, then open it in your own mailbox. Nothing is sent from this page. When they answer, paste the reply here and the step is picked out for you.'},
+ {v:'jobs',sel:'#view table',t:'Everything that is out',x:'Every open job at every processor, with where it stands between sent and due. Filter by processor or status, or search a job number.'},
+ {v:'exp',sel:'#view .tiles',t:'What the rush fees bought',x:'Every expedite fee, the date it paid for, and whether that date was met. A missed one gets a drafted credit request.'},
+ {v:'procs',sel:'#view .card:not([hidden])',t:'Real turn times for your next quote',x:'What each processor quotes against what they actually took, built from jobs marked received back. The blue figure is the lead time to quote with.'},
+ {v:'imp',sel:'#view .card',t:'Getting your jobs in',x:'Paste rows from Excel, or drag in a spreadsheet or an ERP export. It needs four columns: job, processor, date sent, due back. Part numbers and customer names are not read or stored.'},
+ {v:'sum',sel:'#view .card',t:'The month in your own numbers',x:'What was caught early, what expedites cost, and what was missed. Print it for the monthly meeting.'},
+ {v:'today',sel:'#bswitch',t:'Try it on your own jobs',x:'This switches to empty screens on today\'s date. Your jobs stay in this browser, or in one file on your shared drive if the office wants to share them. Come back to this demo any time.'}];
+function tourPlace(){const s=TOUR[tourI];if(!s)return;const el=document.querySelector(s.sel),hole=$('#tourhole'),pop=$('#tourpop'),vw=innerWidth,vh=innerHeight,ph=pop.offsetHeight,pw=pop.offsetWidth;
+ if(!el){hole.style.cssText='left:50%;top:50%;width:0;height:0;border:0';pop.style.left=(vw-pw)/2+'px';pop.style.top=(vh-ph)/2+'px';return}
+ const r=el.getBoundingClientRect(),p=6,L=Math.max(4,r.left-p),Tp=Math.max(4,r.top-p),W=Math.min(vw-4,r.right+p)-L,H=Math.min(vh-4,r.bottom+p)-Tp;
+ hole.style.cssText='left:'+L+'px;top:'+Tp+'px;width:'+W+'px;height:'+H+'px';
+ let x,y;if(Tp+H+12+ph<=vh){x=L;y=Tp+H+12}else if(Tp-12-ph>=0){x=L;y=Tp-12-ph}else if(L-12-pw>=0){x=L-12-pw;y=Tp+24}else if(L+W+12+pw<=vw){x=L+W+12;y=Tp+24}else{x=vw-pw-16;y=vh-ph-16}
+ pop.style.left=Math.max(12,Math.min(x,vw-pw-12))+'px';pop.style.top=Math.max(12,Math.min(y,vh-ph-12))+'px'}
+function tourGo(i){if(i<0)return;if(i>=TOUR.length){tourEnd();return}
+ if(tourI<0){tourPrev={mode:MODE,view:st.view};if(MODE!=='demo')setMode('demo');
+  document.body.insertAdjacentHTML('beforeend','<div class="tourblock" id="tourblock"></div><div class="tourhole" id="tourhole"></div><div class="tourpop" id="tourpop" role="dialog" aria-modal="true" aria-label="Tour"></div>')}
+ tourI=i;const s=TOUR[i];closePanel();todayFilter='';st.view=s.v;render();if(s.pre)s.pre();
+ $('#tourpop').innerHTML='<div class="tn">Stop '+(i+1)+' of '+TOUR.length+'</div><h3>'+s.t+'</h3><p>'+s.x+'</p><div class="ta"><button type="button" class="skip" data-tour="end">'+(i===TOUR.length-1?'Close':'Skip the tour')+'</button><span style="flex:1"></span>'+(i?'<button type="button" class="btn sm" data-tour="back">Back</button>':'')+'<button type="button" class="btn pri sm" data-tour="next">'+(i===TOUR.length-1?'Done':'Next')+'</button></div>';
+ const el=document.querySelector(s.sel);if(el&&el.id!=='panel'&&el.scrollIntoView)el.scrollIntoView({block:el.offsetHeight>innerHeight*.55?'start':'center'});
+ tourPlace();setTimeout(tourPlace,180);const n=$('#tourpop [data-tour="next"]');if(n)n.focus()}
+function tourEnd(){if(tourI<0)return;tourI=-1;['tourblock','tourhole','tourpop'].forEach(id=>{const e=$('#'+id);if(e)e.remove()});try{localStorage.setItem(TOURKEY,'1')}catch(e){}
+ closePanel();if(tourPrev&&tourPrev.mode!==MODE)setMode(tourPrev.mode);else{st.view='today';render()}tourPrev=null}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-tour]');if(b){const a=b.dataset.tour;a==='end'?tourEnd():tourGo(tourI+(a==='back'?-1:1))}});
+document.addEventListener('keydown',e=>{if(tourI<0)return;e.stopImmediatePropagation();if(e.key==='Escape')tourEnd();else if(e.key==='ArrowRight')tourGo(tourI+1);else if(e.key==='ArrowLeft')tourGo(tourI-1)},true);
+addEventListener('resize',()=>{if(tourI>=0)tourPlace()});
+$('#btour').onclick=()=>tourGo(0);
+{let seen=true;try{seen=!!localStorage.getItem(TOURKEY)}catch(e){}if(!seen&&MODE==='demo'&&!navigator.webdriver&&!matchMedia('print').matches)setTimeout(()=>tourGo(0),400)}
 </script></body></html>
