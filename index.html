@@ -1,5 +1,4 @@
 <!doctype html>
-<!-- OSP Watch, early version. The demo shop and its processors are fictional. -->
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
@@ -288,6 +287,22 @@ function parseReply(txt,T){const s=' '+String(txt||'').toLowerCase().replace(/[�
  const tk=String(txt||'').match(/\b(1Z[0-9A-Z]{16}|\d{12}|\d{15}|\d{20,22})\b/i);
  return {m,date:f.length?f[f.length-1]:null,trk:tk?tk[1].toUpperCase():''}}
 function mailto(to,d){return 'mailto:'+to+'?subject='+encodeURIComponent(d.subject)+'&body='+encodeURIComponent(d.body)}
+const FIELDS=[['job','Job number',/^(?!.*(date|due|qty|quant)).*(job|\bw\.?o\b|work.?order|order)/i],['po','PO number',/\bpo\b|p\.o\.|purchase/i],['proc','Processor',/vendor|processor|supplier|sub/i],['process','Process',/process|\bop(er|\b)|finish|spec|service|desc/i],['qty','Qty',/qty|quant|pcs/i],['back','Date received back',/rec|return|came|actual|date in/i],['due','Due back',/due|promis|req|expect/i],['sent','Date sent',/sent|ship.*out|out|date/i],['carrier','Carrier',/carrier|via|ship ?via/i],['trk','Tracking',/track/i],['fee','Expedite fee',/exp.*(\$|fee|cost)|rush.*\$/i],['by','Expedite date',/exp.*(by|date)|rush.*by/i]];
+function pdate(s){s=(s||'').trim().split(/[ T]/)[0];if(/^\d{5}(\.\d+)?$/.test(s))return xlDate(s);let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+ m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0')}return null}
+function guess(hdr){const used=new Set(),map={};for(const [k,,re] of FIELDS){const i=hdr.findIndex((h,ix)=>!used.has(ix)&&re.test(h));if(i>=0){map[k]=i;used.add(i)}}return map}
+function planImport(rows,map,J,T){ /* what a sheet would do: new jobs, jobs on file that the sheet now shows back, and due dates the sheet has changed since the job was entered */
+ const g=(r,k)=>map[k]!=null?String(r[map[k]]==null?'':r[map[k]]).trim():'',key=(a,b,c,d)=>[a,b,c||'Outside process',d].join('|');
+ const have=new Map(J.map(j=>[key(j.jn||j.id,j.proc,j.process,j.sent),j])),out={add:[],close:[],move:[],skip:0,same:0};
+ for(const r of rows.slice(1)){const sent=pdate(g(r,'sent')),due=pdate(g(r,'due')),b=pdate(g(r,'back'));
+  const o={job:g(r,'job'),po:g(r,'po'),proc:g(r,'proc'),process:g(r,'process'),qty:parseInt(g(r,'qty').replace(/,/g,''))||0,carrier:g(r,'carrier'),trk:g(r,'trk'),sent,due,back:b&&sent&&b>=sent&&b<=T?b:null,fee:parseFloat(g(r,'fee').replace(/[$,]/g,''))||0,by:pdate(g(r,'by'))};
+  if(!o.job||!o.proc||!sent||!due||due<sent||sent>addD(T,1)){out.skip++;continue}
+  const k=key(o.job,o.proc,o.process,sent),j=have.get(k);have.set(k,null);
+  if(j===undefined)out.add.push(o);
+  else if(j&&j.open&&!j.ev.some(e=>e.m==='back')&&o.back)out.close.push({id:j.id,back:o.back});
+  else if(j&&j.open&&!j.ev.some(e=>e.m==='back')&&due!==j.due&&due!==effDue(j))out.move.push({id:j.id,from:effDue(j),to:due});
+  else out.same++}
+ return out}
 /*END CALC*/
 
 const ST={xmiss:['Expedite missed','red'],late:['Past due','red'],xrisk:['Expedite at risk','amber'],dnc:['Delivered, not confirmed','violet'],chk:['No delivery logged','violet'],
@@ -542,7 +557,6 @@ function vProcs(J){
  '<p class="small">"Use in next quote" is the turn the processor made on 4 of every 5 jobs (80th percentile) of the jobs on file. Red figures ran past the quote. Expedited jobs are left out, so a rush does not make a processor look faster than it is. Trend compares the oldest jobs with the newest; the dashed line is the quote.</p>'}
 
 /* ---------- Import ---------- */
-const FIELDS=[['job','Job number',/job|w\.?o\.?|work.?order|order/i],['po','PO number',/\bpo\b|p\.o\.|purchase/i],['proc','Processor',/vendor|processor|supplier|sub/i],['process','Process',/process|\bop|finish|spec|service|desc/i],['qty','Qty',/qty|quant|pcs/i],['back','Date received back',/rec|return|came|actual|date in/i],['due','Due back',/due|promis|req|expect/i],['sent','Date sent',/sent|ship.*out|out|date/i],['carrier','Carrier',/carrier|via|ship ?via/i],['trk','Tracking',/track/i],['fee','Expedite fee',/exp.*(\$|fee|cost)|rush.*\$/i],['by','Expedite date',/exp.*(by|date)|rush.*by/i]];
 const SAMPLE='Job,Vendor,Op,Qty,Shipped out,Ship via,Tracking #,Promised back,Expedite $,Expedite by\n2626,Anodize House A,"Anodize, Type II",36,11/23/2026,Shop driver,,11/30/2026,,\n2627,Plating House C,Electroless nickel,12,11/23/2026,FedEx Ground,DEMO-FDX-8812,12/3/2026,,\n2628,Heat Treat House D,Vacuum heat treat,40,11/23/2026,Shop driver,,11/30/2026,250,11/27/2026\n2629,NDT Lab F,Penetrant inspection,18,11/23/2026,Shop driver,,11/27/2026,,\n2630,Grinding House G,Centerless grind,75,11/23/2026,UPS Ground,DEMO-UPS-6620,11/30/2026,,';
 async function inflate(u8){const ds=new DecompressionStream('deflate-raw'),w=ds.writable.getWriter();w.write(u8);w.close();return new Uint8Array(await new Response(ds.readable).arrayBuffer())}
 async function unzip(buf){const dv=new DataView(buf),u8=new Uint8Array(buf),out={},td=new TextDecoder();let e=buf.byteLength-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;if(e<0)throw new Error('not a zip');
@@ -577,35 +591,35 @@ function parseCSV(t){const rows=[];let r=[],f='',q=false;for(let i=0;i<t.length;
  if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
  else if(c==='"')q=true;else if(c===','){r.push(f);f=''}else if(c==='\n'||c==='\r'){if(c==='\r'&&t[i+1]==='\n')i++;r.push(f);f='';if(r.some(x=>x.trim()))rows.push(r);r=[]}else f+=c}
  r.push(f);if(r.some(x=>x.trim()))rows.push(r);return rows}
-function pdate(s){s=(s||'').trim().split(/[ T]/)[0];if(/^\d{5}(\.\d+)?$/.test(s))return xlDate(s);let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
- m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0')}return null}
-function guess(hdr){const used=new Set(),map={};for(const [k,,re] of FIELDS){const i=hdr.findIndex((h,ix)=>!used.has(ix)&&re.test(h));if(i>=0){map[k]=i;used.add(i)}}return map}
 function vImport(){
  const step=imp&&imp.rows?2:1;
- let h='<div class="head"><div><h1>Import</h1><p>Start from the spreadsheet you already keep for outside processing. Excel or CSV export; ERP connections later.</p></div></div>'+
+ let h='<div class="head"><div><h1>Import</h1><p>Start from the spreadsheet you already keep for outside processing, or a file exported from your ERP. Load a fresh export any time: jobs already on file are updated, not doubled. ERP connections later.</p></div></div>'+
  '<div class="steps"><span class="'+(step===1?'on':'')+'">1 · Paste or choose a file</span><span class="'+(step===2?'on':'')+'">2 · Match your columns</span><span>3 · Jobs appear on Today</span></div>'+
  (step===1?'<p class="small" style="margin:-4px 0 12px">One row per job sent out. Needed: job number, processor, date sent, due back. Helpful: process, qty, PO, carrier and tracking, expedite fee and date. Past jobs with a <b>date received back</b> give you real turn times from day one. Leave part numbers, drawings and customer names out; the watch does not use them.</p>':'');
  if(step===1)return h+'<div class="card"><div class="pad"><textarea id="csv" rows="9" placeholder="Paste rows copied from Excel or Google Sheets, or a CSV file\'s text. First row = column names.">'+(imp&&imp.text?esc(imp.text):'')+'</textarea>'+
   '<div style="display:flex;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap"><button type="button" class="btn pri" id="inext">Next: match columns</button><label class="btn">Choose an Excel or CSV file<input type="file" id="ifile" accept=".xlsx,.csv,.txt,text/csv,text/plain" hidden></label><button type="button" class="btn" id="idemo">Load demo data</button>'+
   '<span class="small">Or drag the file anywhere onto this page. Excel (.xlsx) and CSV both work. Nothing leaves this page.</span></div></div></div>';
  const hdr=imp.rows[0],body=imp.rows.slice(1),opts=i=>'<option value="">— not in my sheet —</option>'+hdr.map((c,ix)=>'<option value="'+ix+'"'+(imp.map[i]===ix?' selected':'')+'>'+esc(c)+'</option>').join('');
+ const ready=['job','proc','sent','due'].every(k=>imp.map[k]!=null),P=ready?planImport(imp.rows,imp.map,jobs(),T):null,usedC=new Set(Object.values(imp.map).filter(v=>v!=null)),ign=hdr.filter((c,ix)=>!usedC.has(ix)&&String(c).trim());
+ const n=(k,w)=>k+' '+w+(k===1?'':'s'),planLine=!P?'Match the four needed columns to see what this sheet will do.':[n(P.add.length,'new job'),P.close.length?n(P.close.length,'job')+' on file now shown as back':'',P.move.length?n(P.move.length,'due date')+' changed in the sheet':'',P.same?P.same+' already on file, unchanged':'',P.skip?n(P.skip,'row')+' skipped (missing or impossible date)':''].filter(Boolean).join(' · ')+'.';
+ const goLabel=!P?'Add jobs':P.add.length&&!(P.close.length+P.move.length)?'Add '+n(P.add.length,'job'):P.add.length?'Add '+P.add.length+' and update '+(P.close.length+P.move.length):P.close.length+P.move.length?'Update '+n(P.close.length+P.move.length,'job'):'Nothing new';
  return h+'<div class="grid2"><div class="card"><h2>Your columns <span>· we guessed; fix any that are wrong</span></h2><table><tbody>'+
  FIELDS.map(([k,l])=>'<tr><td>'+l+(['job','proc','sent','due'].includes(k)?' <span class="small">needed</span>':'')+'</td><td><select data-map="'+k+'">'+opts(k)+'</select></td></tr>').join('')+'</tbody></table></div>'+
  '<div class="card"><h2>Preview <span>· '+body.length+' rows'+(imp.name?' from '+esc(imp.name):'')+'</span></h2><table><thead><tr><th>Job</th><th>Processor</th><th>Sent</th><th>Due back</th></tr></thead><tbody>'+
  body.slice(0,6).map(r=>{const g=k=>imp.map[k]!=null?esc(r[imp.map[k]]||''):'<span class="muted">—</span>',gd=k=>{if(imp.map[k]==null)return '<span class="muted">—</span>';const v=r[imp.map[k]]||'',d=pdate(v);return d?fmt(d)+', '+d.slice(0,4):(v?'<span class="bad" title="Not read as a date">'+esc(v)+'</span>':'')};return '<tr><td>'+g('job')+'</td><td>'+g('proc')+'</td><td>'+gd('sent')+'</td><td>'+gd('due')+'</td></tr>'}).join('')+'</tbody></table>'+
- '<div class="pad" style="display:flex;gap:10px"><button type="button" class="btn pri" id="igo">Add '+body.length+' jobs</button><button type="button" class="btn" id="iback">Back</button></div></div></div>'}
+ '<div class="pad"><p class="small" style="margin:0 0 10px">'+planLine+'</p>'+(ign.length?'<p class="small" style="margin:0 0 10px"><b>Not read, not stored:</b> '+ign.map(esc).join(', ')+'.</p>':'')+'<div style="display:flex;gap:10px"><button type="button" class="btn pri" id="igo">'+goLabel+'</button><button type="button" class="btn" id="iback">Back</button></div></div></div></div>'}
 document.addEventListener('click',e=>{const t=e.target;
  if(t.id==='idemo'){imp={text:SAMPLE};render();toast('Demo spreadsheet loaded. Click Next.')}
  if(t.id==='inext'){let txt=$('#csv').value;if(txt.includes('\t'))txt=txt.split(/\r?\n/).map(l=>l.split('\t').map(c=>/[",]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c).join(',')).join('\n');const rows=parseCSV(txt);if(rows.length<2){toast('Paste a header row and at least one job.');return}imp={text:$('#csv').value,rows,map:guess(rows[0])};render()}
  if(t.id==='iback'){imp={text:imp.text};render()}
  if(t.id==='igo'){const need=['job','proc','sent','due'].filter(k=>imp.map[k]==null);if(need.length){toast('Match these first: '+need.map(k=>FIELDS.find(f=>f[0]===k)[1]).join(', '));return}
-  const seen=new Set(jobs().map(j=>[j.jn||j.id,j.proc,j.process,j.sent].join('|')));let ok=0,skip=0,hist=0;
-  for(const r of imp.rows.slice(1)){const g=k=>imp.map[k]!=null?(r[imp.map[k]]||'').trim():'';const sent=pdate(g('sent')),due=pdate(g('due')),back=pdate(g('back'));
-   const o={job:g('job'),po:g('po'),proc:g('proc'),process:g('process'),qty:parseInt(g('qty').replace(/,/g,''))||0,carrier:g('carrier'),trk:g('trk'),sent,due,back:back&&sent&&back>=sent&&back<=T?back:null,fee:parseFloat(g('fee').replace(/[$,]/g,''))||0,by:pdate(g('by'))};
-   const key=[o.job,o.proc,o.process||'Outside process',sent].join('|');
-   if(!o.job||!o.proc||!sent||!due||due<sent||sent>addD(T,1)||seen.has(key)){skip++;continue}seen.add(key);
-   st.added.push(makeJob(o));ok++;if(o.back)hist++}
-  if(ok)st.lastImport=T+' '+now();save();imp=null;st.view=ok-hist?'today':'procs';jf={proc:'',process:'',status:'',q:'',closed:false};render();toast(ok+' jobs added'+(hist?' ('+hist+' already back, now in the turn-time history)':'')+(skip?', '+skip+' skipped (missing or impossible date, or already on file)':'')+'.')}});
+  const P=planImport(imp.rows,imp.map,jobs(),T),hist=P.add.filter(o=>o.back).length,ok=P.add.length,ch=P.close.length+P.move.length;
+  if(!ok&&!ch){toast('Nothing new in this sheet'+(P.skip?': '+P.skip+' rows skipped (missing or impossible date)':': every job is already on file')+'.');return}
+  snap();for(const o of P.add)st.added.push(makeJob(o));
+  for(const c of P.close)(st.ev[c.id]=st.ev[c.id]||[]).push({m:'back',d:c.back,t:'',src:'sheet'});
+  for(const m of P.move)(st.ev[m.id]=st.ev[m.id]||[]).push({m:'newdate',d:T,t:now(),to:m.to,src:'sheet'});
+  st.lastImport=T+' '+now();save();imp=null;st.view=ok-hist||ch?'today':'procs';jf={proc:'',process:'',status:'',q:'',closed:false};render();
+  toast([ok?ok+' job'+(ok===1?'':'s')+' added'+(hist?' ('+hist+' already back, now in the turn-time history)':''):'',P.close.length?P.close.length+' marked received back':'',P.move.length?P.move.length+' due date'+(P.move.length===1?'':'s')+' changed':'',P.skip?P.skip+' skipped (missing or impossible date)':''].filter(Boolean).join(', ')+'.',true)}});
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.map){imp.map[t.dataset.map]=t.value===''?null:+t.value;render()}
  if(t.id==='ifile'&&t.files[0])loadFile(t.files[0])});
 
