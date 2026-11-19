@@ -4746,11 +4746,11 @@ function vIT() {
       '</tbody></table></div>';
   return (
     '<div class="head"><div><h1>For your IT</h1><p>What this page stores, where, and what leaves the computer. Written so each line can be checked, not taken on trust.</p></div><span class="sp"></span><button type="button" class="btn" onclick="window.print()">Print</button></div>' +
-    '<div class="card"><div class="pad"><p style="margin:0"><b>Read this first.</b> OSP Watch is an early version built by a four-student senior project team at Cal Poly. Nobody has audited it and it holds no certification of any kind. This sheet describes what the page does so you can decide where, or whether, it belongs in your own inventory. Version of this page: <b>2026-11-18</b>.</p></div></div>' +
+    '<div class="card"><div class="pad"><p style="margin:0"><b>Read this first.</b> OSP Watch is an early version built by a four-student senior project team at Cal Poly. Nobody has audited it and it holds no certification of any kind. This sheet describes what the page does so you can decide where, or whether, it belongs in your own inventory. Version of this page: <b>2026-11-19</b>.</p></div></div>' +
     card('What it is', '', [
       row(
         'One file',
-        'A single HTML page. No server of ours, no account, no login, no installer, no browser extension.',
+        'A single HTML page. No server of ours, no installer, no browser extension. The page itself has no user accounts. Where a sign-in is used, it sits in front of the page and is run by Cloudflare, not by the page.',
       ),
       row(
         'Third-party code',
@@ -4762,7 +4762,7 @@ function vIT() {
       ),
       row(
         'Where the page comes from',
-        'Either the hosted copy (GitHub Pages, which sees an ordinary web request for the page and never any job data), or a copy saved to your own drive and opened from there. A saved copy works without internet and never changes until you replace it. The hosted copy changes when the team updates it.',
+        "One of three. (1) Your shop's address behind a sign-in, served by Cloudflare. (2) The public demo copy on GitHub Pages. (3) A copy saved to your own drive and opened from there, which works without internet and never changes until you replace it. The hosted copies change when the team updates them. Whichever is used, the host sees an ordinary web request for the page and never any job data.",
       ),
     ]) +
     card('What it stores', 'only what a user types or imports', [
@@ -4810,7 +4810,11 @@ function vIT() {
       row('Printing and downloads', 'The call sheet, the monthly summary, backups and exports.'),
     ]) +
     card('Common questions', '', [
-      row('Does a vendor hold our data?', 'No. Nothing is sent to the team or to any service.'),
+      row('Does a vendor hold our data?', 'No. Nothing about your jobs is sent to the team or to any service.'),
+      row(
+        'Who can see that we signed in?',
+        'On the signed-in address only: Cloudflare checks the email address by sending it a one-time code, and it and the student team can see the email address and time of each sign-in. The current plan keeps that record for 24 hours. It contains nothing about jobs.',
+      ),
       row(
         'Does it sign in to Microsoft 365?',
         'No. It asks for no permissions in your tenant and needs no app registration or admin consent.',
