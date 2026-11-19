@@ -266,7 +266,7 @@ function expByProc(J,T){const g={};for(const x of ledger(J,T)){const p=g[x.proc]
  return Object.values(g).sort((a,b)=>b.missed-a.missed||b.fees-a.fees)}
 function mergeState(a,b){ /* a = this computer, b = the shared file. Jobs and events only ever add; removals are remembered. */
  const out=Object.assign({},b,a),rm=new Set([...(a.removed||[]),...(b.removed||[])]),byId={};
- for(const j of (b.added||[]).concat(a.added||[]))if(!rm.has(j.id)&&!byId[j.id])byId[j.id]=j;
+ for(const j of (b.added||[]).concat(a.added||[]))if(!rm.has(j.id)&&(!byId[j.id]||(j.upd||0)>(byId[j.id].upd||0)))byId[j.id]=j;
  out.added=Object.values(byId);out.removed=[...rm];
  const ev={};for(const s of [b.ev||{},a.ev||{}])for(const id in s){if(rm.has(id))continue;const L=ev[id]=ev[id]||[],seen=new Set(L.map(e=>JSON.stringify(e)));
   for(const e of s[id]){const k=JSON.stringify(e);if(!seen.has(k)){seen.add(k);L.push(e)}}L.sort((x,y)=>(x.d+(x.t||''))<(y.d+(y.t||''))?-1:(x.d+(x.t||''))>(y.d+(y.t||''))?1:0)}
@@ -450,7 +450,7 @@ function openJob(id){
  '<b>Routing</b><ul class="tl">'+tl+'</ul>'+(notes?'<b>Activity</b><ul class="tl log">'+notes+'</ul>':'')+
  (L?'<div class="box"><b>Expedite</b><div class="kv" style="margin:6px 0 0"><div>Fee</div><div>'+money(L.fee)+', paid '+fmtW(L.bought)+'</div><div>Bought the date</div><div>'+fmtW(L.by)+'</div><div>Result</div><div>'+resChip(L)+'</div></div></div>':'')+
  (isOpen(j)&&!j.exp?'<div class="box" id="xbox"><b>Paid an expedite on this job?</b><div class="pick" style="border:0;padding:0;margin:0;background:none"><div class="row"><input type="text" id="xfee" placeholder="Fee, $" style="width:90px"><span class="small">to be back by</span><input type="date" id="xby"><button type="button" class="btn sm" id="xadd">Add expedite</button></div></div></div>':'')+
- (mine?'<p class="small" style="margin-top:14px"><a href="#" id="jrm">Remove this job</a> (entered by mistake)</p>':'')+
+ (mine?'<p class="small" style="margin-top:14px"><a href="#" id="jed">Edit this job</a> (fix a date, quantity or processor) · <a href="#" id="jrm">Remove it</a></p>':'')+
  '</div><div class="foot">'+(s.action?'<button type="button" class="btn pri" data-draft="'+esc(j.id)+'">Draft email</button>':'')+
  (isOpen(j)&&!last(j,['delivered'])&&!j.ev.some(e=>PROC_M.includes(e.m))?'<button type="button" class="btn" id="jdel">Mark delivered</button>':'')+
  (isOpen(j)&&s.k!=='shipped'?'<button type="button" class="btn" id="jupd">Log processor update</button>':'')+
@@ -460,6 +460,7 @@ function openJob(id){
  const ju=$('#jupd');if(ju)ju.onclick=()=>{openDraft(id);$('#pick').hidden=false};
  const jb=$('#jback');if(jb)jb.onclick=()=>{const was=statusOf(job(id),T);snap();addEv(id,{m:'back'});if(was.action)st.handled[id]='Received back (was: '+ST[was.k][0].toLowerCase()+')';save();closePanel();render();toast('Job '+(j.jn||id)+' received back. Its turn time joins the processor history.',true)};
  const xa=$('#xadd');if(xa)xa.onclick=()=>{const fee=parseFloat(($('#xfee').value||'').replace(/[$,]/g,'')),by=$('#xby').value;if(!(fee>0)||!by){toast('Enter the fee and the date it was to be back by.');return}snap();st.exp[id]={fee,bought:T,by};save();closePanel();render();toast('Expedite logged: '+money(fee)+' for '+fmt(by)+'.',true)};
+ const je=$('#jed');if(je)je.onclick=e=>{e.preventDefault();openAdd(st.added.find(a=>a.id===id))};
  const rm=$('#jrm');if(rm)rm.onclick=e=>{e.preventDefault();snap();st.removed.push(id);st.added=st.added.filter(a=>a.id!==id);delete st.ev[id];delete st.exp[id];delete st.handled[id];save();closePanel();render();toast('Job '+(j.jn||id)+' removed.',true)};
 }
 
@@ -470,9 +471,9 @@ function makeJob(o){const have=new Set(jobs().map(j=>j.id));let id=o.job,n=2;whi
  if(o.back)ev.push({m:'back',d:o.back});
  const j={id,po:o.po||'',proc:o.proc,process:o.process||'Outside process',q:Math.max(1,D(o.due)-D(o.sent)),qty:o.qty||0,sent:o.sent,due:o.due,carrier,trk:o.trk||'',ev,open:!o.back,exp:o.fee>0&&o.by?{fee:o.fee,bought:o.sent,by:o.by}:null};
  if(id!==o.job)j.jn=o.job;return j}
-function openAdd(){const J=jobs(),u=k=>[...new Set(J.map(j=>j[k]).filter(Boolean))].sort().map(v=>'<option value="'+esc(v)+'">').join('');
+function openAdd(ed){const J=jobs(),u=k=>[...new Set(J.map(j=>j[k]).filter(Boolean))].sort().map(v=>'<option value="'+esc(v)+'">').join('');
  const f=(l,h)=>'<div class="field"><label>'+l+'</label>'+h+'</div>';
- openPanel('<header><div><h3>Add a job</h3><div class="small">A job you sent out, or are sending today.</div></div><button class="x" type="button" data-close aria-label="Close">×</button></header><div class="body">'+
+ openPanel('<header><div><h3>'+(ed?'Edit job '+esc(ed.jn||ed.id):'Add a job')+'</h3><div class="small">'+(ed?'Fix a date, a quantity or the processor. What the processor has told you is kept.':'A job you sent out, or are sending today.')+'</div></div><button class="x" type="button" data-close aria-label="Close">×</button></header><div class="body">'+
  '<div class="grid2" style="gap:10px">'+f('Job number','<input type="text" id="aj_job">')+f('PO (optional)','<input type="text" id="aj_po">')+'</div>'+
  f('Processor','<input type="text" id="aj_proc" list="dl_proc"><datalist id="dl_proc">'+u('proc')+'</datalist>')+
  f('Process','<input type="text" id="aj_process" list="dl_process" placeholder="Anodize, heat treat, chem film…"><datalist id="dl_process">'+u('process')+'</datalist>')+
@@ -480,10 +481,14 @@ function openAdd(){const J=jobs(),u=k=>[...new Set(J.map(j=>j[k]).filter(Boolean
  f('Tracking number (if shipped)','<input type="text" id="aj_trk">')+
  '<div class="grid2" style="gap:10px">'+f('Date sent','<input type="date" id="aj_sent" value="'+T+'" style="width:100%">')+f('Due back','<input type="date" id="aj_due" style="width:100%">')+'</div>'+
  '<div class="grid2" style="gap:10px">'+f('Expedite fee, $ (if any)','<input type="text" id="aj_fee">')+f('Expedited to be back by','<input type="date" id="aj_by" style="width:100%">')+'</div>'+
- '</div><div class="foot"><span style="flex:1"></span><button type="button" class="btn" data-close>Cancel</button><button type="button" class="btn pri" id="aj_go">Add job</button></div>');
+ '</div><div class="foot"><span style="flex:1"></span><button type="button" class="btn" data-close>Cancel</button><button type="button" class="btn pri" id="aj_go">'+(ed?'Save changes':'Add job')+'</button></div>');
+ if(ed){const sv=(k,v)=>{$('#aj_'+k).value=v==null?'':v};sv('job',ed.jn||ed.id);sv('po',ed.po);sv('proc',ed.proc);sv('process',ed.process);sv('qty',ed.qty||'');sv('trk',ed.trk);sv('sent',ed.sent);sv('due',ed.due);const c=$('#aj_carrier');if(![...c.options].some(o=>o.value===ed.carrier)){const o=document.createElement('option');o.textContent=ed.carrier;c.appendChild(o)}c.value=ed.carrier;if(ed.exp&&!st.exp[ed.id]){sv('fee',ed.exp.fee);sv('by',ed.exp.by)}$('#aj_job').disabled=true}
  $('#aj_go').onclick=()=>{const v=k=>$('#aj_'+k).value.trim(),o={job:v('job'),po:v('po'),proc:v('proc'),process:v('process'),qty:parseInt(v('qty'))||0,carrier:v('carrier'),trk:v('trk'),sent:v('sent'),due:v('due'),fee:parseFloat(v('fee').replace(/[$,]/g,''))||0,by:v('by')};
   if(!o.job||!o.proc||!o.sent||!o.due){toast('Job number, processor, date sent and due back are needed.');return}
   if(o.due<o.sent){toast('Due back is before the date sent.');return}
+  if(ed){snap();const a=st.added.find(x=>x.id===ed.id);if(!a)return;const was=a.sent;Object.assign(a,{po:o.po,proc:o.proc,process:o.process||'Outside process',qty:o.qty,carrier:o.carrier,trk:o.trk,sent:o.sent,due:o.due,q:Math.max(1,D(o.due)-D(o.sent)),upd:Date.now()});
+   a.ev.forEach(e=>{if((e.m==='sent'||e.m==='delivered')&&e.d===was&&!e.t)e.d=o.sent});if(OWN.test(o.carrier)&&o.sent<=T&&!a.ev.some(e=>e.m==='delivered'))a.ev.push({m:'delivered',d:o.sent});
+   if(!st.exp[ed.id])a.exp=o.fee>0&&o.by?{fee:o.fee,bought:(a.exp&&a.exp.bought)||o.sent,by:o.by}:null;save();closePanel();render();toast('Job '+(ed.jn||ed.id)+' updated.',true);return}
   st.added.push(makeJob(o));save();closePanel();st.view='jobs';render();toast('Job '+o.job+' added.')}}
 
 /* ---------- Jobs ---------- */
@@ -660,6 +665,8 @@ function vSetup(J){const live=MODE==='live',A=st.assume,mine=st.added.length;
  '<div class="card"><h2>Chasing-time estimate</h2><div class="pad"><div class="kv" style="grid-template-columns:1fr auto;align-items:center">'+
  '<div>Status calls per job, without the watch</div><div>'+inp('calls_per_job',A.calls_per_job,70)+'</div><div>Minutes per call</div><div>'+inp('min_per_call',A.min_per_call,70)+'</div><div>Minutes per drafted email</div><div>'+inp('min_per_email',A.min_per_email,70)+'</div></div>'+
  '<div class="small">Used only for the "chasing time" line on the Monthly summary. Put in what is true for your shop.</div></div></div></div>'+
+ (()=>{const ps=[...new Set(J.map(j=>j.proc))].sort();return live&&ps.length?'<div class="card"><h2>Processor contacts <span>· where each check is sent</span></h2><table><thead><tr><th>Processor</th><th>Email for status checks</th><th class="n">Open jobs</th></tr></thead><tbody>'+
+  ps.map(p=>'<tr><td><b>'+esc(p)+'</b></td><td><input type="text" data-contact="'+esc(p)+'" value="'+esc(st.contacts[p]||'')+'" placeholder="name@processor.com" style="width:320px"></td><td class="n">'+J.filter(j=>isOpen(j)&&j.proc===p).length+'</td></tr>').join('')+'</tbody></table></div>':''})()+
  (live?'<div class="card"><h2>Share with the office <span>· one file on your shared drive, no server</span></h2><div class="pad">'+
   (!FS?'<p>Sharing between computers needs <b>Chrome or Edge</b>. In this browser the watch still works for one person; use the backup file to move jobs.</p>'
   :fh?'<p><b>'+esc(fh.name)+'</b> '+(fileOK?'<span class="ok">connected</span>':'<span class="bad">not saving</span>')+'<br><span class="small">'+esc(fileNote)+'</span></p><p class="small">Everyone who connects this same file sees the same jobs. Changes are picked up within about 15 seconds, and two people working at once are merged, not overwritten.</p><p style="display:flex;gap:10px;flex-wrap:wrap">'+(fileOK?'':'<button type="button" class="btn pri" id="frec">Reconnect</button>')+'<button type="button" class="btn" id="fdrop">Disconnect</button></p>'
@@ -673,7 +680,8 @@ function exportCSV(){const q=v=>{v=v==null?'':String(v);return /[",\n]/.test(v)?
  const rows=[['Job','PO','Processor','Process','Qty','Date sent','Carrier','Tracking','Due back','Current due','Status','Delivered','Processor confirmed','Received back','Expedite fee','Expedite by','Expedite result']];
  for(const j of jobs()){const s=statusOf(j,T),L=j.exp?ledger([j],T)[0]:null;rows.push([j.jn||j.id,j.po,j.proc,j.process,j.qty||'',j.sent,j.carrier,j.trk,j.due,s.due,ST[s.k][0],d(j,'delivered'),d(j,'proc'),d(j,'back'),L?L.fee:'',L?L.by:'',L?L.res:''])}
  dl('osp-watch-jobs-'+T+'.csv',rows.map(r=>r.map(q).join(',')).join('\r\n'),'text/csv');toast('Jobs exported.')}
-document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.set){const k=t.dataset.set;if(k in st.assume){const n=parseFloat(t.value);if(n>=0)st.assume[k]=n}else st[k]=t.value.trim();save();render()}
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.contact!=null){const v=t.value.trim();if(v)st.contacts[t.dataset.contact]=v;else delete st.contacts[t.dataset.contact];save();toast('Saved.');return}
+ if(t.dataset&&t.dataset.set){const k=t.dataset.set;if(k in st.assume){const n=parseFloat(t.value);if(n>=0)st.assume[k]=n}else st[k]=t.value.trim();save();render()}
  if(t.id==='rs'&&t.files[0]){const fr=new FileReader();fr.onload=()=>{try{const o=JSON.parse(String(fr.result)),s=o&&o.state;if(!s||!Array.isArray(s.added))throw 0;st=Object.assign(blank(),s);st.hday=T;st.view='today';save();render();toast('Backup restored: '+st.added.length+' jobs.')}catch(x){toast('That file is not an OSP Watch backup.')}};fr.readAsText(t.files[0])}});
 document.addEventListener('click',e=>{const id=e.target.id;
  if(id==='tomode'||id==='bswitch'){setMode(MODE==='live'?'demo':'live');if(MODE==='live'&&!st.shop){st.view='set';render()}toast(MODE==='live'?'Your own jobs. Today is '+fmtW(T)+'.':'Back in the demo shop.')}
