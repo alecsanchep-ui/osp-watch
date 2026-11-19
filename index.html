@@ -369,8 +369,9 @@ function reason(j,s){const dl=last(j,['delivered']),la=s.lastAns,x=j.exp;
 const ICON={today:'<path d="M3 12h4l3-7 4 14 3-7h4"/>',jobs:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h8"/>',
  exp:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1.2 1.1-2 2.5-2s2.5.8 2.5 2-1.1 1.8-2.5 2.2-2.5 1-2.5 2.3 1.1 2 2.5 2 2.5-.8 2.5-2"/>',
  procs:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',imp:'<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>',sum:'<path d="M4 4h16v16H4zM8 15l3-3 2 2 4-5"/>'};
+ICON.it='<path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>';
 ICON.set='<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>';
-const VIEWS=[['today','Today',vToday,'today'],['jobs','Jobs at processors',vJobs,'jobs'],['exp','Expedites',vExp,'exp'],['procs','Processors',vProcs,'procs'],['imp','Import',vImport,'imp'],['sum','Monthly summary',vSum,'sum'],['set','Setup',vSetup,'set']];
+const VIEWS=[['today','Today',vToday,'today'],['jobs','Jobs at processors',vJobs,'jobs'],['exp','Expedites',vExp,'exp'],['procs','Processors',vProcs,'procs'],['imp','Import',vImport,'imp'],['sum','Monthly summary',vSum,'sum'],['set','Setup',vSetup,'set'],['it','For your IT',vIT,'it']];
 function render(){
  const J=jobs(),open=J.filter(isOpen),acts=open.filter(j=>statusOf(j,T).action).length,missed=ledger(J,T).filter(x=>x.res==='missed'&&!st.credit[x.id]).length;
  const badge={today:acts?'<span class="badge">'+acts+'</span>':'',jobs:'<span class="badge n">'+open.length+'</span>',exp:missed?'<span class="badge">'+missed+'</span>':''};
@@ -732,6 +733,40 @@ document.addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey||/INPU
 document.addEventListener('click',e=>{if(e.target.closest('[data-v],[data-tf]'))kb=-1});
 $('#reset').onclick=()=>{if(MODE==='live'){backup();return}try{localStorage.removeItem(KEYS.demo)}catch(e){}st=blank();todayFilter='';expAll=false;imp=null;jf={proc:'',process:'',status:'',q:'',closed:false};closePanel();render();toast('Demo reset to this morning.')};
 render();
+
+/* ---------- For your IT: what this page does, stated so it can be checked ---------- */
+function vIT(){
+ const row=(a,b)=>'<tr><td style="width:28%;vertical-align:top;white-space:normal"><b>'+a+'</b></td><td style="white-space:normal;line-height:1.45">'+b+'</td></tr>',card=(h,sub,rows)=>'<div class="card"><h2>'+h+(sub?' <span>· '+sub+'</span>':'')+'</h2><table><tbody>'+rows.join('')+'</tbody></table></div>';
+ return '<div class="head"><div><h1>For your IT</h1><p>What this page stores, where, and what leaves the computer. Written so each line can be checked, not taken on trust.</p></div><span class="sp"></span><button type="button" class="btn" onclick="window.print()">Print</button></div>'+
+ '<div class="card"><div class="pad"><p style="margin:0"><b>Read this first.</b> OSP Watch is an early version built by a four-student senior project team at Cal Poly. Nobody has audited it and it holds no certification of any kind. This sheet describes what the page does so you can decide where, or whether, it belongs in your own inventory. Version of this page: <b>2026-11-18</b>.</p></div></div>'+
+ card('What it is','',[
+  row('One file','A single HTML page. No server of ours, no account, no login, no installer, no browser extension.'),
+  row('Third-party code','None. No libraries, no fonts, no analytics, nothing loaded from another site. View Source shows everything that runs.'),
+  row('Network','The page carries a Content-Security-Policy that tells the browser to refuse every connection (<code>default-src \'none\'; connect-src \'none\'</code>). To check: open developer tools, Network tab, use the page; no requests appear after the page itself loads.'),
+  row('Where the page comes from','Either the hosted copy (GitHub Pages, which sees an ordinary web request for the page and never any job data), or a copy saved to your own drive and opened from there. A saved copy works without internet and never changes until you replace it. The hosted copy changes when the team updates it.')])+
+ card('What it stores','only what a user types or imports',[
+  row('Per job','Job number, PO number, processor name, process name, quantity, date sent, date due, carrier, tracking number, expedite fee and date, and the dated steps a user logs (delivered, received, shipped, new date).'),
+  row('Per shop','Shop name, the name that signs emails, one contact email per processor, and three numbers for a time estimate.'),
+  row('Not stored','A pasted processor reply is read on screen to pick out a step and a date, then discarded. On import, columns that are not matched are never read into storage; the import screen lists them.'),
+  row('What not to enter','Part numbers, drawings, specifications, program names and customer names. The page does not need them. Its fields are free text, so it cannot stop someone typing them; that has to be a rule for the user.')])+
+ card('Where it is stored','',[
+  row('This browser','The browser\'s local storage for this page (keys beginning <code>osp-watch-</code>), on this computer, in this browser profile. Plain text, not encrypted by the page. Protected by whatever protects the computer and the user\'s login.'),
+  row('Shared file (optional)','If the office turns on sharing in Setup, one JSON file in a folder you choose on your own drive. Chrome or Edge only. The browser asks the user for permission to that one file. Plain text; protected by your drive\'s own permissions.'),
+  row('Backups and exports','Files the user downloads on purpose: a JSON backup and a CSV of jobs. They go wherever the user saves them.'),
+  row('The team','The student team has no copy of any of it and no way to reach it.')])+
+ card('What leaves the computer','three things, each started by the user',[
+  row('Drafted emails','"Open in Outlook" hands the draft to the computer\'s own mail program through a mailto link. The message is sent from the user\'s mailbox like any other. The page never connects to a mailbox.'),
+  row('Carrier tracking','The "Track" link opens the UPS or FedEx website in a new tab with that tracking number in the address.'),
+  row('Printing and downloads','The call sheet, the monthly summary, backups and exports.')])+
+ card('Common questions','',[
+  row('Does a vendor hold our data?','No. Nothing is sent to the team or to any service.'),
+  row('Does it sign in to Microsoft 365?','No. It asks for no permissions in your tenant and needs no app registration or admin consent.'),
+  row('Does it use AI?','No AI service. The reply reader is a fixed set of rules inside the page.'),
+  row('Who can see the jobs?','Anyone who can use this browser profile, or open the shared file. The page has no user accounts of its own.'),
+  row('Is there an audit log?','Each logged step carries its date and time. It does not record which person logged it.'),
+  row('How do we remove it?','Setup, "Erase my jobs", then clear this site\'s data in the browser. Delete the shared file and any backups. Nothing remains elsewhere.'),
+  row('What if we want replies read automatically?','That would mean connecting to a mailbox, which this version does not do. It would need your admin\'s approval and a setup inside your own tenant. Ask the team before assuming it exists.')])+
+ '<p class="small">If a line on this sheet turns out to be wrong, tell the team member who set this up with you; it will be corrected and the version date will change.</p>'}
 
 /* ---------- tour: nine stops through the demo ---------- */
 const TOURKEY='osp-watch-tour-v1';let tourI=-1,tourPrev=null;
