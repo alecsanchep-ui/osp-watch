@@ -5,32 +5,34 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>OSP Watch</title>
 <style>
-/* Look: the shop traveler. Surface-plate gray, white sheets, layout-fluid blue ink, tag colors only for trouble. */
+/* Look: the office software these users already live in. Today reads like a mail inbox with a reading pane,
+   Jobs like a spreadsheet. Neutral grays, one blue accent, colour only where a job is in trouble. */
 :root {
-  --plate: #d5d9d8;
+  --plate: #f5f5f5;
   --sheet: #fff;
-  --ink: #14171a;
-  --mute: #525b63;
-  --faint: #7c858d;
-  --line: #aeb5b9;
-  --hair: #dfe3e4;
-  --bg: #eceeed;
-  --accent: #1f3f94;
-  --accent-bg: #e3e9f7;
-  --red: #b3261e;
-  --red-bg: #fae4e1;
-  --amber: #6b4700;
-  --amber-bg: #ffe08a;
-  --amber-line: #c99700;
-  --blue: #1f3f94;
-  --blue-bg: #e3e9f7;
-  --green: #1e6b3f;
-  --green-bg: #e2f1e8;
-  --gray: #525b63;
-  --gray-bg: #eceeed;
-  --din: Bahnschrift, 'DIN Alternate', 'Roboto Condensed', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
-  --body: Bahnschrift, 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
-  --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono', Consolas, Menlo, monospace;
+  --ink: #242424;
+  --mute: #616161;
+  --faint: #8a8a8a;
+  --line: #d1d1d1;
+  --hair: #ebebeb;
+  --bg: #fafafa;
+  --accent: #0f6cbd;
+  --accent-bg: #ebf3fc;
+  --red: #c50f1f;
+  --red-bg: #fdf3f4;
+  --amber: #835c00;
+  --amber-bg: #fff4ce;
+  --amber-line: #f2c661;
+  --blue: #0f6cbd;
+  --blue-bg: #ebf3fc;
+  --green: #107c10;
+  --green-bg: #f1faf1;
+  --gray: #616161;
+  --gray-bg: #f0f0f0;
+  --ui: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --din: var(--ui);
+  --body: var(--ui);
+  --mono: var(--ui);
 }
 * {
   box-sizing: border-box;
@@ -43,7 +45,8 @@ body {
 body {
   background: var(--plate);
   color: var(--ink);
-  font: 15.5px/1.45 var(--body);
+  font: 14px/1.45 var(--body);
+  font-variant-numeric: tabular-nums;
   display: flex;
   flex-direction: column;
 }
@@ -75,8 +78,6 @@ a {
   color: #ffe08a;
   white-space: nowrap;
   font-family: var(--din);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   font-size: 12.5px;
 }
 .banner .sp {
@@ -85,7 +86,7 @@ a {
 .banner button {
   background: transparent;
   border: 1px solid #59626a;
-  border-radius: 2px;
+  border-radius: 4px;
   padding: 2px 10px;
   cursor: pointer;
   color: #e8ecee;
@@ -122,13 +123,11 @@ a {
 }
 .tb .name b {
   font: 700 19px/1 var(--din);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 .logo {
   width: 26px;
   height: 26px;
-  border-radius: 2px;
+  border-radius: 4px;
   background: var(--accent);
   display: grid;
   place-items: center;
@@ -138,8 +137,6 @@ a {
   display: block;
   white-space: nowrap;
   font: 600 10.5px/1.2 var(--din);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
   color: var(--mute);
 }
 .tb span {
@@ -190,8 +187,6 @@ nav button {
   text-align: left;
   color: var(--ink);
   font: 600 14px var(--din);
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
 }
 nav button:hover {
   background: #c8cdcc;
@@ -210,7 +205,7 @@ nav .badge {
   background: var(--red);
   color: #fff;
   font: 700 12px/20px var(--mono);
-  border-radius: 2px;
+  border-radius: 4px;
   padding: 0 6px;
 }
 nav .badge.n {
@@ -229,7 +224,7 @@ nav .foot {
 nav .foot kbd {
   font: 600 11px var(--mono);
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: 4px;
   padding: 0 4px;
   background: var(--sheet);
 }
@@ -248,8 +243,6 @@ main {
 .head h1 {
   font: 700 26px/1.1 var(--din);
   margin: 0;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
 }
 .head p {
   margin: 3px 0 0;
@@ -266,7 +259,7 @@ main {
   margin-bottom: 14px;
   background: var(--sheet);
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: 6px;
   overflow: hidden;
 }
 .tile {
@@ -296,8 +289,6 @@ main {
 }
 .tile .l {
   font: 600 11.5px/1.25 var(--din);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--mute);
   min-height: 29px;
 }
@@ -329,26 +320,25 @@ main {
 }
 .card {
   background: var(--sheet);
-  border: 1px solid var(--line);
-  border-radius: 3px;
+  border: 0;
+  border-radius: 8px;
+  box-shadow:
+    0 0 2px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.14);
   margin-bottom: 14px;
   overflow-x: auto;
 }
 .card h2 {
-  font: 700 14px var(--din);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font: 600 14px var(--ui);
   margin: 0;
-  padding: 9px 14px;
-  border-bottom: 1px solid var(--line);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--hair);
   display: flex;
   gap: 10px;
   align-items: baseline;
-  background: #f6f7f7;
 }
 .card h2 span {
   font: 400 13px var(--body);
-  letter-spacing: 0;
   text-transform: none;
   color: var(--mute);
 }
@@ -360,17 +350,15 @@ table {
   width: 100%;
 }
 th {
-  font: 600 11px var(--din);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  font: 600 12px var(--ui);
   color: var(--mute);
   text-align: left;
-  padding: 7px 12px;
-  border-bottom: 1px solid var(--line);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--hair);
   white-space: nowrap;
   position: sticky;
   top: 0;
-  background: #f6f7f7;
+  background: var(--sheet);
 }
 td {
   padding: 9px 12px;
@@ -389,13 +377,13 @@ tr.click {
   cursor: pointer;
 }
 tr.click:hover td {
-  background: #f4f6fb;
+  background: #f5f5f5;
 }
 tr.kb td {
   background: var(--accent-bg);
 }
 tr[class*='tag-'] td:first-child {
-  border-left: 5px solid transparent;
+  border-left: 3px solid transparent;
 }
 tr.tag-red td:first-child {
   border-left-color: var(--red);
@@ -422,8 +410,7 @@ th.n,
   font-size: 14.5px;
 }
 .job {
-  font: 700 16.5px var(--mono);
-  letter-spacing: -0.01em;
+  font-weight: 600;
 }
 .sub {
   display: block;
@@ -433,12 +420,9 @@ th.n,
 /* status as a rubber stamp */
 .chip {
   display: inline-block;
-  font: 700 11.5px/1.5 var(--din);
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  border: 1.5px solid currentColor;
-  border-radius: 2px;
-  padding: 0 7px;
+  font: 600 12px/1.6 var(--ui);
+  border-radius: 10px;
+  padding: 0 8px;
   white-space: nowrap;
 }
 .t-red {
@@ -448,25 +432,22 @@ th.n,
 .t-amber {
   background: var(--amber-bg);
   color: var(--amber);
-  border-color: var(--amber-line);
 }
 .t-violet {
-  color: #7a4f00;
-  border-style: dashed;
-  background: #fff8e1;
+  background: var(--amber-bg);
+  color: var(--amber);
 }
 .t-blue {
   color: var(--accent);
   background: var(--accent-bg);
 }
 .t-green {
+  background: var(--green-bg);
   color: var(--green);
-  background: none;
 }
 .t-gray {
+  background: var(--gray-bg);
   color: var(--mute);
-  border-color: var(--line);
-  background: none;
 }
 /* route strip: steps the processor reported, and where today falls in the turn */
 .rt {
@@ -528,13 +509,11 @@ th.n,
 .btn {
   border: 1px solid var(--line);
   background: var(--sheet);
-  border-radius: 2px;
-  padding: 6px 12px;
+  border-radius: 4px;
+  padding: 5px 12px;
   cursor: pointer;
   white-space: nowrap;
-  font: 600 13px var(--din);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font: 400 13.5px var(--ui);
   text-decoration: none;
   color: var(--ink);
   display: inline-flex;
@@ -542,16 +521,17 @@ th.n,
   gap: 6px;
 }
 .btn:hover {
-  border-color: var(--ink);
+  background: #f5f5f5;
 }
 .btn.pri {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
+  font-weight: 600;
 }
 .btn.pri:hover {
-  background: #17307a;
-  border-color: #17307a;
+  background: #115ea3;
+  border-color: #115ea3;
 }
 .btn.sm {
   padding: 4px 9px;
@@ -577,7 +557,7 @@ input[type='text'],
 input[type='date'],
 textarea {
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: 4px;
   padding: 6px 9px;
   background: #fff;
 }
@@ -622,27 +602,27 @@ textarea {
   width: 520px;
   max-width: 100%;
   background: var(--sheet);
-  border-left: 2px solid var(--ink);
+  border-left: 1px solid var(--line);
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
   transform: translateX(105%);
-  transition: transform 0.14s;
+  visibility: hidden;
   display: flex;
   flex-direction: column;
 }
 .panel.on {
   transform: none;
+  visibility: visible;
 }
 .panel header {
-  padding: 14px 20px;
-  border-bottom: 2px solid var(--ink);
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--hair);
   display: flex;
   gap: 10px;
   align-items: flex-start;
 }
 .panel header h3 {
   margin: 0;
-  font: 700 21px/1.15 var(--din);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font: 600 18px/1.25 var(--ui);
 }
 .panel header .x {
   margin-left: auto;
@@ -660,17 +640,14 @@ textarea {
 }
 .panel .body > b {
   font: 700 12px var(--din);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
   color: var(--mute);
 }
 .panel .foot {
-  padding: 12px 20px;
-  border-top: 1px solid var(--line);
+  padding: 10px 20px;
+  border-top: 1px solid var(--hair);
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  background: #f6f7f7;
 }
 .field {
   margin-bottom: 10px;
@@ -680,8 +657,6 @@ textarea {
   font: 600 11px var(--din);
   color: var(--mute);
   margin-bottom: 3px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
 }
 .field input {
   width: 100%;
@@ -699,7 +674,7 @@ textarea {
 }
 .pick {
   border: 1.5px solid var(--accent);
-  border-radius: 3px;
+  border-radius: 6px;
   padding: 12px;
   margin-top: 12px;
   background: var(--accent-bg);
@@ -717,53 +692,52 @@ textarea {
   margin: 6px 0 14px;
   padding: 0;
   counter-reset: op;
-  border: 1px solid var(--line);
-  border-radius: 2px;
 }
 .tl li {
   counter-increment: op 10;
   display: grid;
-  grid-template-columns: 44px 1fr auto;
-  gap: 0 12px;
+  grid-template-columns: 28px 1fr auto;
+  gap: 0 8px;
   align-items: center;
-  padding: 6px 12px 6px 0;
-  border-bottom: 1px solid var(--hair);
+  padding: 5px 0;
 }
 .tl li:last-child {
   border-bottom: 0;
 }
 .tl li:before {
-  content: counter(op);
-  font: 600 12.5px var(--mono);
-  color: var(--faint);
-  text-align: center;
-  border-right: 1px solid var(--hair);
-  align-self: stretch;
-  display: grid;
-  place-items: center;
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  justify-self: center;
+  box-sizing: border-box;
 }
 .tl li .w {
   color: var(--mute);
-  font: 500 13px var(--mono);
+  font-size: 13px;
 }
 .tl li.todo {
   color: var(--faint);
 }
 .tl li.done:before {
-  color: #fff;
   background: var(--accent);
+  border-color: var(--accent);
 }
 .tl li.now:before {
-  color: #fff;
-  background: var(--ink);
+  background: var(--sheet);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
 }
 .tl li.now {
-  font-weight: 700;
+  font-weight: 600;
 }
 .tl.log li:before {
-  content: '•';
-  background: none;
-  color: var(--accent);
+  content: '';
+  width: 6px;
+  height: 6px;
+  border: 0;
+  background: var(--faint);
 }
 .tl.setup {
   margin: 0;
@@ -778,6 +752,13 @@ textarea {
 .tl.setup li:before {
   content: counter(op);
   counter-increment: none;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  font: 600 12px var(--ui);
+  color: var(--mute);
 }
 .tl.setup {
   counter-reset: op 0;
@@ -788,6 +769,8 @@ textarea {
 .tl.setup li.done:before {
   content: '✓';
   background: var(--green);
+  border-color: var(--green);
+  color: #fff;
 }
 .kv {
   display: grid;
@@ -801,7 +784,7 @@ textarea {
 }
 .box {
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: 4px;
   padding: 10px 12px;
   margin-top: 12px;
 }
@@ -813,7 +796,7 @@ textarea {
   background: var(--ink);
   color: #fff;
   padding: 9px 16px;
-  border-radius: 2px;
+  border-radius: 4px;
   font-size: 14.5px;
   opacity: 0;
   transition: all 0.15s;
@@ -829,11 +812,9 @@ textarea {
   margin-left: 14px;
   background: none;
   border: 1px solid #7c858d;
-  border-radius: 2px;
+  border-radius: 4px;
   color: #ffe08a;
   font: 600 12px var(--din);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   padding: 2px 9px;
   cursor: pointer;
 }
@@ -847,14 +828,12 @@ textarea {
   gap: 0;
   margin-bottom: 14px;
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: 4px;
   width: max-content;
   background: var(--sheet);
 }
 .steps span {
   font: 600 12px var(--din);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   padding: 5px 14px;
   color: var(--mute);
   border-right: 1px solid var(--line);
@@ -885,14 +864,11 @@ textarea {
 .grp td {
   background: #f6f7f7;
   font: 700 14px var(--din);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   border-bottom: 1px solid var(--line);
   border-top: 1px solid var(--line);
 }
 .grp td .small {
   font-family: var(--body);
-  letter-spacing: 0;
   text-transform: none;
 }
 .ok {
@@ -924,12 +900,319 @@ body.drag:after {
   display: grid;
   place-items: center;
   font: 700 26px var(--din);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--accent);
   z-index: 50;
   pointer-events: none;
 }
+/* ---------- office layer: message bar, top bar, folder pane ---------- */
+.banner {
+  font-size: 12.5px;
+  padding: 3px 16px;
+  background: var(--amber-bg);
+  color: var(--ink);
+  border-bottom: 1px solid var(--amber-line);
+}
+.banner b {
+  color: var(--ink);
+  font-size: 13px;
+}
+.banner button {
+  background: #fff;
+  color: var(--ink);
+  border-color: var(--line);
+}
+.banner button:hover {
+  background: #f5f5f5;
+}
+.tb {
+  background: var(--accent);
+  color: #fff;
+  border-bottom: 0;
+  align-items: center;
+  min-height: 48px;
+}
+.tb > div {
+  border-right: 0;
+  padding: 6px 14px;
+}
+.tb .name {
+  border-right: 0;
+}
+.tb .name b {
+  font: 600 16px/1 var(--ui);
+}
+.logo {
+  background: rgba(255, 255, 255, 0.18);
+}
+.tb .search {
+  flex: 1 0 260px;
+  max-width: 460px;
+}
+.tb .search input {
+  width: 100%;
+  border: 0;
+  border-radius: 4px;
+  padding: 7px 12px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font-size: 14px;
+}
+.tb .search input:focus {
+  background: #fff;
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+.tb label {
+  color: rgba(255, 255, 255, 0.78);
+  font: 400 11.5px/1.2 var(--ui);
+}
+.tb span {
+  font: 600 13.5px/1.3 var(--ui);
+}
+.tb .hot span,
+.tb .hot.zero span {
+  color: #fff;
+}
+nav {
+  background: var(--plate);
+  border-right: 1px solid var(--line);
+  padding: 8px 6px;
+}
+nav button {
+  border-left: 0;
+  border-radius: 4px;
+  padding: 7px 10px;
+  font: 400 14px var(--ui);
+  position: relative;
+}
+nav button:hover {
+  background: #ebebeb;
+}
+nav button[aria-current='page'] {
+  background: var(--accent-bg);
+  color: var(--ink);
+  font-weight: 600;
+}
+nav button[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+nav .badge,
+nav .badge.n {
+  background: none;
+  border: 0;
+  color: var(--accent);
+  font: 600 13px/20px var(--ui);
+  padding: 0;
+}
+nav .badge.n {
+  color: var(--mute);
+  font-weight: 400;
+}
+main {
+  padding: 16px 20px 32px;
+}
+.head h1 {
+  font: 600 20px/1.2 var(--ui);
+}
+
+/* ---------- Today as an inbox ---------- */
+.inbox .tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+  margin-bottom: 12px;
+}
+.inbox .tile {
+  flex-direction: row-reverse;
+  align-items: baseline;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 4px 12px;
+  background: #fff;
+}
+.inbox .tile:last-child {
+  border-right: 1px solid var(--line);
+}
+.inbox .tile:hover {
+  background: #f5f5f5;
+}
+.inbox .tile.on {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+.inbox .tile .n {
+  font: 600 13.5px/1.4 var(--ui);
+}
+.inbox .tile .l {
+  font: 400 13.5px/1.4 var(--ui);
+  color: var(--ink);
+  min-height: 0;
+}
+.inbox .tile.zero {
+  color: var(--faint);
+}
+.inbox .tile.zero .l {
+  color: var(--faint);
+}
+.msgs td {
+  white-space: normal;
+  padding: 10px 14px 10px 13px;
+}
+.m1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.from {
+  font-size: 15px;
+  font-weight: 600;
+}
+.when {
+  color: var(--mute);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+.m2 {
+  font-size: 13.5px;
+}
+.m3 {
+  margin-top: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  align-items: baseline;
+  color: var(--mute);
+  font-size: 13px;
+}
+.m3 .why {
+  flex: 1 1 220px;
+}
+.m2 .job {
+  font-size: inherit;
+}
+.msgs td {
+  position: relative;
+}
+/* row actions appear on the row you are pointing at or have selected, as in a mail list */
+.acts {
+  display: none;
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  gap: 6px;
+  padding-left: 16px;
+  background: linear-gradient(to right, transparent, #fff 16px);
+}
+.msgs tr:hover .acts,
+.msgs tr.sel .acts,
+.msgs tr.kb .acts {
+  display: flex;
+}
+.msgs tr.sel .acts {
+  background: linear-gradient(to right, transparent, var(--accent-bg) 16px);
+}
+tr.sel td,
+tr.sel:hover td {
+  background: var(--accent-bg);
+}
+
+/* the list pane is one white surface, edge to edge, like a mail list */
+body.pane main {
+  background: var(--sheet);
+  padding: 14px 0 24px;
+}
+body.pane .inbox > .head,
+body.pane .inbox > .tiles,
+body.pane .inbox > .small,
+body.pane .inbox > .legend {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+body.pane .inbox .card {
+  box-shadow: none;
+  border-radius: 0;
+  margin-bottom: 0;
+  border-top: 1px solid var(--hair);
+}
+
+/* the reading pane: the side panel, docked beside the list */
+body.pane .panel {
+  position: static;
+  transform: none;
+  flex: 0 0 44%;
+  min-width: 400px;
+  max-width: 660px;
+  border-left: 1px solid var(--line);
+  transition: none;
+}
+/* in the reading pane the actions sit under the title, where a mail program puts Reply and Forward */
+body.pane .panel {
+  box-shadow: none;
+  visibility: visible;
+}
+body.pane .panel .foot {
+  order: 1;
+  border-top: 0;
+  border-bottom: 1px solid var(--hair);
+}
+body.pane .panel .body {
+  order: 2;
+}
+body.pane .scrim {
+  display: none;
+}
+body.pane .panel:not(.on) {
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+body.pane .panel:not(.on) > * {
+  display: none;
+}
+body.pane .panel:not(.on)::before {
+  content: 'Select a job to read it';
+  color: var(--faint);
+}
+body.pane .panel .x {
+  display: none;
+}
+
+/* ---------- Jobs as a spreadsheet ---------- */
+.grid th[data-sort] {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.grid th[data-sort]:hover {
+  background: #f0f0f0;
+  color: var(--ink);
+}
+.grid th[aria-sort] {
+  color: var(--accent);
+}
+.grid td {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  white-space: nowrap;
+  border-right: 1px solid var(--hair);
+}
+.grid td:last-child {
+  border-right: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
@@ -993,7 +1276,7 @@ body.drag:after {
   position: fixed;
   z-index: 9001;
   border: 2px solid var(--amber-bg);
-  border-radius: 2px;
+  border-radius: 4px;
   box-shadow: 0 0 0 200vmax rgba(20, 23, 26, 0.55);
   pointer-events: none;
 }
@@ -1005,14 +1288,12 @@ body.drag:after {
   background: var(--sheet);
   border: 2px solid var(--ink);
   border-top: 8px solid var(--amber-bg);
-  border-radius: 2px;
+  border-radius: 4px;
   padding: 12px 14px 12px;
   box-shadow: 4px 4px 0 rgba(20, 23, 26, 0.35);
 }
 .tourpop .tn {
   font: 600 11px var(--din);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
   color: var(--mute);
 }
 .tourpop h3 {
@@ -1071,8 +1352,6 @@ body.drag:after {
   }
   .psheet .ph b {
     font-size: 15px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
   }
   .psheet .pg {
     break-inside: avoid;
@@ -1134,7 +1413,6 @@ body.drag:after {
   }
   .psheet th {
     font-size: 9px;
-    text-transform: uppercase;
   }
   .psheet .pf {
     margin-top: 6px;
@@ -1180,17 +1458,18 @@ body.drag:after {
 </style></head><body>
 <div class="banner"><b id="bmode">Early version · demo data (fictional shop)</b><span id="bnote">Illustrative: fictional shop, not from any interviewee. Nothing is sent from this page: it drafts, you send from your own mailbox.</span><span class="sp"></span><button id="btour" type="button">Take the tour</button><button id="bswitch" type="button">Use my own jobs</button><button id="reset" type="button">Reset demo</button></div>
 <header class="tb"><div class="name"><div class="logo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="square"><path d="M2 12h4l3-8 6 16 3-8h4"/></svg></div><b>OSP Watch</b></div>
+ <div class="search"><input type="search" id="gsearch" placeholder="Search jobs, POs, processors" aria-label="Search jobs"></div>
  <div><label>Shop</label><span id="shopname">Example Shop</span></div><div><label>Date</label><span id="clock"></span></div>
  <div class="opt"><label>Out at processors</label><span id="tb_open"></span></div><div class="hot" id="tb_hot"><label>Need a word today</label><span id="tb_acts"></span></div><div class="opt"><label>Expedites this month</label><span id="tb_exp"></span></div><div class="opt" id="tb_impc"><label>Last import</label><span id="tb_imp"></span></div><div class="opt" id="tb_filec" hidden><label>Shared file</label><span id="tb_file"></span></div><div class="grow"></div></header>
 <div class="app">
 <nav aria-label="Main">
  <div id="navlist"></div>
- <div class="foot" id="kbhint"><kbd>J</kbd> <kbd>K</kbd> move · <kbd>Enter</kbd> draft · <kbd>Esc</kbd> close</div>
+ <div class="foot" id="kbhint"><kbd>↑</kbd> <kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>Esc</kbd> close</div>
 </nav>
 <main id="view"></main>
+<aside class="panel" id="panel" aria-hidden="true"></aside>
 </div>
 <div class="scrim" id="scrim"></div>
-<aside class="panel" id="panel" aria-hidden="true"></aside>
 <div class="toast" id="toast" role="status"></div>
 <script>
 const DATA={"today":"2026-11-23","shop":"Example Shop","jobs":[{"proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":60,"sent":"2026-05-27","due":"2026-06-03","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-05-27"},{"m":"delivered","d":"2026-05-27","t":"15:07"},{"m":"back","d":"2026-06-04"}],"exp":null,"open":false,"id":"2401","po":"P-5101"},{"proc":"Paint House E","process":"Prime and paint","q":8,"qty":120,"sent":"2026-05-27","due":"2026-06-04","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-05-27"},{"m":"delivered","d":"2026-05-27","t":"13:39"},{"m":"back","d":"2026-06-05"}],"exp":null,"open":false,"id":"2402","po":"P-5102"},{"proc":"NDT Lab F","process":"Magnetic particle","q":3,"qty":80,"sent":"2026-05-27","due":"2026-05-30","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-05-27"},{"m":"delivered","d":"2026-05-27","t":"13:24"},{"m":"back","d":"2026-06-01"}],"exp":null,"open":false,"id":"2403","po":"P-5103"},{"proc":"Anodize House B","process":"Chem film","q":5,"qty":12,"sent":"2026-06-02","due":"2026-06-07","carrier":"UPS Ground","trk":"DEMO-UPS-5920","ev":[{"m":"sent","d":"2026-06-02"},{"m":"delivered","d":"2026-06-03","t":"11:30"},{"m":"back","d":"2026-06-08"}],"exp":null,"open":false,"id":"2404","po":"P-5104"},{"proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":12,"sent":"2026-06-04","due":"2026-06-14","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-06-04"},{"m":"delivered","d":"2026-06-04","t":"14:16"},{"m":"back","d":"2026-06-15"}],"exp":null,"open":false,"id":"2405","po":"P-5105"},{"proc":"Anodize House A","process":"Anodize, Type II","q":7,"qty":10,"sent":"2026-06-05","due":"2026-06-12","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-06-05"},{"m":"delivered","d":"2026-06-05","t":"10:28"},{"m":"back","d":"2026-06-11"}],"exp":null,"open":false,"id":"2406","po":"P-5106"},{"proc":"Plating House C","process":"Electroless nickel","q":10,"qty":30,"sent":"2026-06-08","due":"2026-06-18","carrier":"FedEx Ground","trk":"DEMO-FDX-5296","ev":[{"m":"sent","d":"2026-06-08"},{"m":"delivered","d":"2026-06-09","t":"12:40"},{"m":"back","d":"2026-06-18"}],"exp":null,"open":false,"id":"2407","po":"P-5107"},{"proc":"Paint House E","process":"Prime and paint","q":8,"qty":120,"sent":"2026-06-08","due":"2026-06-16","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-06-08"},{"m":"delivered","d":"2026-06-08","t":"11:14"},{"m":"back","d":"2026-06-18"}],"exp":null,"open":false,"id":"2408","po":"P-5108"},{"proc":"Heat Treat House D","process":"Stress relieve","q":4,"qty":80,"sent":"2026-06-09","due":"2026-06-13","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-06-09"},{"m":"delivered","d":"2026-06-09","t":"09:24"},{"m":"back","d":"2026-06-12"}],"exp":null,"open":false,"id":"2409","po":"P-5109"},{"proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":10,"sent":"2026-06-15","due":"2026-06-22","carrier":"UPS Ground","trk":"DEMO-UPS-5258","ev":[{"m":"sent","d":"2026-06-15"},{"m":"delivered","d":"2026-06-16","t":"13:38"},{"m":"back","d":"2026-06-22"}],"exp":null,"open":false,"id":"2410","po":"P-5110"},{"proc":"NDT Lab F","process":"Penetrant inspection","q":4,"qty":20,"sent":"2026-06-15","due":"2026-06-19","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-06-15"},{"m":"delivered","d":"2026-06-15","t":"13:46"},{"m":"back","d":"2026-06-19"}],"exp":null,"open":false,"id":"2411","po":"P-5111"},{"proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":40,"sent":"2026-06-15","due":"2026-06-22","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-06-15"},{"m":"delivered","d":"2026-06-15","t":"10:53"},{"m":"back","d":"2026-06-19"}],"exp":{"fee":250,"bought":"2026-06-15","by":"2026-06-19"},"open":false,"id":"2412","po":"P-5112"},{"proc":"Grinding House G","process":"Centerless grind","q":6,"qty":50,"sent":"2026-06-24","due":"2026-06-30","carrier":"UPS Ground","trk":"DEMO-UPS-2217","ev":[{"m":"sent","d":"2026-06-24"},{"m":"delivered","d":"2026-06-25","t":"13:56"},{"m":"back","d":"2026-06-29"}],"exp":null,"open":false,"id":"2413","po":"P-5113"},{"proc":"Grinding House G","process":"Centerless grind","q":6,"qty":40,"sent":"2026-06-25","due":"2026-07-01","carrier":"UPS Ground","trk":"DEMO-UPS-6855","ev":[{"m":"sent","d":"2026-06-25"},{"m":"delivered","d":"2026-06-26","t":"11:03"},{"m":"back","d":"2026-06-30"}],"exp":null,"open":false,"id":"2414","po":"P-5114"},{"proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":25,"sent":"2026-06-26","due":"2026-07-03","carrier":"UPS Ground","trk":"DEMO-UPS-2356","ev":[{"m":"sent","d":"2026-06-26"},{"m":"delivered","d":"2026-06-29","t":"13:42"},{"m":"back","d":"2026-07-06"}],"exp":null,"open":false,"id":"2415","po":"P-5115"},{"proc":"Plating House C","process":"Electroless nickel","q":10,"qty":24,"sent":"2026-06-29","due":"2026-07-09","carrier":"FedEx Ground","trk":"DEMO-FDX-6126","ev":[{"m":"sent","d":"2026-06-29"},{"m":"delivered","d":"2026-06-30","t":"11:33"},{"m":"back","d":"2026-07-09"}],"exp":null,"open":false,"id":"2416","po":"P-5116"},{"proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":6,"sent":"2026-07-02","due":"2026-07-09","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-07-02"},{"m":"delivered","d":"2026-07-02","t":"13:25"},{"m":"back","d":"2026-07-10"}],"exp":null,"open":false,"id":"2417","po":"P-5117"},{"proc":"Passivation House H","process":"Passivation","q":4,"qty":30,"sent":"2026-07-13","due":"2026-07-17","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-07-13"},{"m":"delivered","d":"2026-07-13","t":"09:25"},{"m":"back","d":"2026-07-17"}],"exp":null,"open":false,"id":"2418","po":"P-5118"},{"proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":24,"sent":"2026-07-13","due":"2026-07-20","carrier":"UPS Ground","trk":"DEMO-UPS-6844","ev":[{"m":"sent","d":"2026-07-13"},{"m":"delivered","d":"2026-07-14","t":"10:48"},{"m":"back","d":"2026-07-20"}],"exp":{"fee":400,"bought":"2026-07-13","by":"2026-07-17"},"open":false,"id":"2419","po":"P-5119"},{"proc":"NDT Lab F","process":"Magnetic particle","q":3,"qty":100,"sent":"2026-07-17","due":"2026-07-20","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-07-17"},{"m":"delivered","d":"2026-07-17","t":"09:52"},{"m":"back","d":"2026-07-20"}],"exp":null,"open":false,"id":"2420","po":"P-5120"},{"proc":"Paint House E","process":"Prime and paint","q":8,"qty":10,"sent":"2026-07-20","due":"2026-07-28","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-07-20"},{"m":"delivered","d":"2026-07-20","t":"10:58"},{"m":"back","d":"2026-07-30"}],"exp":null,"open":false,"id":"2421","po":"P-5121"},{"proc":"Heat Treat House D","process":"Stress relieve","q":4,"qty":10,"sent":"2026-07-21","due":"2026-07-25","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-07-21"},{"m":"delivered","d":"2026-07-21","t":"10:58"},{"m":"back","d":"2026-07-27","q":"rework","n":2}],"exp":null,"open":false,"id":"2422","po":"P-5122"},{"proc":"Plating House C","process":"Electroless nickel","q":10,"qty":16,"sent":"2026-07-23","due":"2026-08-02","carrier":"FedEx Ground","trk":"DEMO-FDX-5318","ev":[{"m":"sent","d":"2026-07-23"},{"m":"delivered","d":"2026-07-24","t":"11:24"},{"m":"back","d":"2026-08-03"}],"exp":null,"open":false,"id":"2423","po":"P-5123"},{"proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":30,"sent":"2026-07-24","due":"2026-08-03","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-07-24"},{"m":"delivered","d":"2026-07-24","t":"09:30"},{"m":"back","d":"2026-08-04"}],"exp":null,"open":false,"id":"2424","po":"P-5124"},{"proc":"NDT Lab F","process":"Magnetic particle","q":3,"qty":48,"sent":"2026-07-27","due":"2026-07-30","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-07-27"},{"m":"delivered","d":"2026-07-27","t":"14:56"},{"m":"back","d":"2026-07-29"}],"exp":null,"open":false,"id":"2425","po":"P-5125"},{"proc":"Anodize House B","process":"Chem film","q":5,"qty":16,"sent":"2026-07-30","due":"2026-08-04","carrier":"UPS Ground","trk":"DEMO-UPS-8019","ev":[{"m":"sent","d":"2026-07-30"},{"m":"delivered","d":"2026-07-31","t":"15:06"},{"m":"back","d":"2026-08-03"}],"exp":null,"open":false,"id":"2426","po":"P-5126"},{"proc":"Anodize House A","process":"Anodize, Type II","q":7,"qty":20,"sent":"2026-07-31","due":"2026-08-07","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-07-31"},{"m":"delivered","d":"2026-07-31","t":"13:14"},{"m":"back","d":"2026-08-06"}],"exp":null,"open":false,"id":"2427","po":"P-5127"},{"proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":50,"sent":"2026-08-03","due":"2026-08-10","carrier":"UPS Ground","trk":"DEMO-UPS-4078","ev":[{"m":"sent","d":"2026-08-03"},{"m":"delivered","d":"2026-08-04","t":"12:12"},{"m":"back","d":"2026-08-10"}],"exp":null,"open":false,"id":"2428","po":"P-5128"},{"proc":"Grinding House G","process":"Centerless grind","q":6,"qty":50,"sent":"2026-08-10","due":"2026-08-16","carrier":"UPS Ground","trk":"DEMO-UPS-4826","ev":[{"m":"sent","d":"2026-08-10"},{"m":"delivered","d":"2026-08-11","t":"13:52"},{"m":"back","d":"2026-08-17"}],"exp":null,"open":false,"id":"2429","po":"P-5129"},{"proc":"Plating House C","process":"Electroless nickel","q":10,"qty":80,"sent":"2026-08-10","due":"2026-08-20","carrier":"FedEx Ground","trk":"DEMO-FDX-3519","ev":[{"m":"sent","d":"2026-08-10"},{"m":"delivered","d":"2026-08-11","t":"13:48"},{"m":"back","d":"2026-08-17","q":"rework","n":20}],"exp":{"fee":500,"bought":"2026-08-10","by":"2026-08-17"},"open":false,"id":"2430","po":"P-5130"},{"proc":"NDT Lab F","process":"Penetrant inspection","q":4,"qty":25,"sent":"2026-08-13","due":"2026-08-17","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-08-13"},{"m":"delivered","d":"2026-08-13","t":"10:57"},{"m":"back","d":"2026-08-17"}],"exp":null,"open":false,"id":"2431","po":"P-5131"},{"proc":"Passivation House H","process":"Passivation","q":4,"qty":20,"sent":"2026-08-14","due":"2026-08-18","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-08-14"},{"m":"delivered","d":"2026-08-14","t":"09:00"},{"m":"back","d":"2026-08-18"}],"exp":null,"open":false,"id":"2432","po":"P-5132"},{"proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":48,"sent":"2026-08-17","due":"2026-08-24","carrier":"UPS Ground","trk":"DEMO-UPS-7083","ev":[{"m":"sent","d":"2026-08-17"},{"m":"delivered","d":"2026-08-18","t":"11:27"},{"m":"back","d":"2026-08-26"}],"exp":null,"open":false,"id":"2433","po":"P-5133"},{"proc":"Paint House E","process":"Prime and paint","q":8,"qty":25,"sent":"2026-08-20","due":"2026-08-28","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-08-20"},{"m":"delivered","d":"2026-08-20","t":"11:26"},{"m":"back","d":"2026-08-27"}],"exp":null,"open":false,"id":"2434","po":"P-5134"},{"proc":"Heat Treat House D","process":"Stress relieve","q":4,"qty":8,"sent":"2026-08-27","due":"2026-08-31","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-08-27"},{"m":"delivered","d":"2026-08-27","t":"11:43"},{"m":"back","d":"2026-08-31"}],"exp":null,"open":false,"id":"2435","po":"P-5135"},{"proc":"NDT Lab F","process":"Penetrant inspection","q":4,"qty":10,"sent":"2026-08-27","due":"2026-08-31","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-08-27"},{"m":"delivered","d":"2026-08-27","t":"12:11"},{"m":"back","d":"2026-08-31","q":"reject","n":2}],"exp":null,"open":false,"id":"2436","po":"P-5136"},{"proc":"Grinding House G","process":"Centerless grind","q":6,"qty":24,"sent":"2026-08-27","due":"2026-09-02","carrier":"UPS Ground","trk":"DEMO-UPS-3338","ev":[{"m":"sent","d":"2026-08-27"},{"m":"delivered","d":"2026-08-28","t":"16:19"},{"m":"back","d":"2026-09-02","q":"reject","n":24}],"exp":null,"open":false,"id":"2437","po":"P-5137"},{"proc":"Anodize House A","process":"Anodize, Type II","q":7,"qty":16,"sent":"2026-08-31","due":"2026-09-07","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-08-31"},{"m":"delivered","d":"2026-08-31","t":"10:58"},{"m":"back","d":"2026-09-07"}],"exp":null,"open":false,"id":"2438","po":"P-5138"},{"proc":"Anodize House B","process":"Chem film","q":5,"qty":8,"sent":"2026-09-01","due":"2026-09-06","carrier":"UPS Ground","trk":"DEMO-UPS-6129","ev":[{"m":"sent","d":"2026-09-01"},{"m":"delivered","d":"2026-09-02","t":"14:55"},{"m":"back","d":"2026-09-07"}],"exp":null,"open":false,"id":"2439","po":"P-5139"},{"proc":"NDT Lab F","process":"Magnetic particle","q":3,"qty":48,"sent":"2026-09-07","due":"2026-09-10","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-09-07"},{"m":"delivered","d":"2026-09-07","t":"14:57"},{"m":"back","d":"2026-09-09"}],"exp":null,"open":false,"id":"2440","po":"P-5140"},{"proc":"Plating House C","process":"Electroless nickel","q":10,"qty":8,"sent":"2026-09-09","due":"2026-09-19","carrier":"FedEx Ground","trk":"DEMO-FDX-7694","ev":[{"m":"sent","d":"2026-09-09"},{"m":"delivered","d":"2026-09-10","t":"16:17"},{"m":"back","d":"2026-09-21"}],"exp":null,"open":false,"id":"2441","po":"P-5141"},{"proc":"Paint House E","process":"Prime and paint","q":8,"qty":30,"sent":"2026-09-14","due":"2026-09-22","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-09-14"},{"m":"delivered","d":"2026-09-14","t":"13:29"},{"m":"back","d":"2026-09-22"}],"exp":{"fee":300,"bought":"2026-09-14","by":"2026-09-21"},"open":false,"id":"2442","po":"P-5142"},{"proc":"Passivation House H","process":"Passivation","q":4,"qty":16,"sent":"2026-09-15","due":"2026-09-19","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-09-15"},{"m":"delivered","d":"2026-09-15","t":"11:05"},{"m":"back","d":"2026-09-18","q":"rework","n":8}],"exp":null,"open":false,"id":"2443","po":"P-5143"},{"proc":"Anodize House B","process":"Chem film","q":5,"qty":120,"sent":"2026-09-16","due":"2026-09-21","carrier":"UPS Ground","trk":"DEMO-UPS-2134","ev":[{"m":"sent","d":"2026-09-16"},{"m":"delivered","d":"2026-09-17","t":"12:20"},{"m":"back","d":"2026-09-21"}],"exp":null,"open":false,"id":"2444","po":"P-5144"},{"proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":24,"sent":"2026-09-18","due":"2026-09-28","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-09-18"},{"m":"delivered","d":"2026-09-18","t":"11:16"},{"m":"back","d":"2026-09-28"}],"exp":null,"open":false,"id":"2445","po":"P-5145"},{"proc":"Heat Treat House D","process":"Stress relieve","q":4,"qty":100,"sent":"2026-09-21","due":"2026-09-25","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-09-21"},{"m":"delivered","d":"2026-09-21","t":"13:05"},{"m":"back","d":"2026-09-24"}],"exp":null,"open":false,"id":"2446","po":"P-5146"},{"proc":"Passivation House H","process":"Passivation","q":4,"qty":8,"sent":"2026-09-21","due":"2026-09-25","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-09-21"},{"m":"delivered","d":"2026-09-21","t":"09:11"},{"m":"back","d":"2026-09-25"}],"exp":null,"open":false,"id":"2447","po":"P-5147"},{"proc":"NDT Lab F","process":"Penetrant inspection","q":4,"qty":60,"sent":"2026-09-22","due":"2026-09-26","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-09-22"},{"m":"delivered","d":"2026-09-22","t":"09:16"},{"m":"back","d":"2026-09-28"}],"exp":null,"open":false,"id":"2448","po":"P-5148"},{"proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":30,"sent":"2026-09-23","due":"2026-09-30","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-09-23"},{"m":"delivered","d":"2026-09-23","t":"14:55"},{"m":"back","d":"2026-09-30","q":"rework","n":15}],"exp":null,"open":false,"id":"2449","po":"P-5149"},{"proc":"Anodize House B","process":"Chem film","q":5,"qty":50,"sent":"2026-10-05","due":"2026-10-10","carrier":"UPS Ground","trk":"DEMO-UPS-6844","ev":[{"m":"sent","d":"2026-10-05"},{"m":"delivered","d":"2026-10-06","t":"11:24"},{"m":"back","d":"2026-10-08","q":"rework","n":50}],"exp":{"fee":200,"bought":"2026-10-05","by":"2026-10-08"},"open":false,"id":"2450","po":"P-5150"},{"proc":"Anodize House A","process":"Anodize, Type II","q":7,"qty":40,"sent":"2026-10-12","due":"2026-10-19","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-10-12"},{"m":"delivered","d":"2026-10-12","t":"15:14"},{"m":"back","d":"2026-10-19"}],"exp":null,"open":false,"id":"2451","po":"P-5151"},{"proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":60,"sent":"2026-10-12","due":"2026-10-22","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-10-12"},{"m":"delivered","d":"2026-10-12","t":"09:05"},{"m":"back","d":"2026-10-26"}],"exp":null,"open":false,"id":"2452","po":"P-5152"},{"proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":120,"sent":"2026-10-12","due":"2026-10-19","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-10-12"},{"m":"delivered","d":"2026-10-12","t":"09:11"},{"m":"back","d":"2026-10-19"}],"exp":null,"open":false,"id":"2453","po":"P-5153"},{"proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":12,"sent":"2026-10-19","due":"2026-10-29","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-10-19"},{"m":"delivered","d":"2026-10-19","t":"15:28"},{"m":"back","d":"2026-10-26"}],"exp":{"fee":380,"bought":"2026-10-19","by":"2026-10-26"},"open":false,"id":"2454","po":"P-5154"},{"proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":12,"sent":"2026-11-02","due":"2026-11-12","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-02"},{"m":"delivered","d":"2026-11-02","t":"09:01"},{"m":"received","d":"2026-11-02"},{"m":"ask","d":"2026-11-09","what":"Midpoint check"},{"m":"in_process","d":"2026-11-09"},{"m":"newdate","d":"2026-11-09","to":"2026-11-13"},{"m":"shipped","d":"2026-11-13","trk":"Ready for pickup"},{"m":"back","d":"2026-11-13"}],"exp":null,"open":false,"id":"2455","po":"P-5155"},{"proc":"Plating House C","process":"Electroless nickel","q":10,"qty":25,"sent":"2026-11-02","due":"2026-11-12","carrier":"FedEx Ground","trk":"DEMO-FDX-1758","ev":[{"m":"sent","d":"2026-11-02"},{"m":"delivered","d":"2026-11-03","t":"11:38"},{"m":"received","d":"2026-11-03"},{"m":"ask","d":"2026-11-09","what":"Midpoint check"},{"m":"in_process","d":"2026-11-09"},{"m":"newdate","d":"2026-11-09","to":"2026-11-16"},{"m":"shipped","d":"2026-11-13","trk":"DEMO-FDX-7212"},{"m":"back","d":"2026-11-16"}],"exp":null,"open":false,"id":"2456","po":"P-5156"},{"proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":40,"sent":"2026-11-02","due":"2026-11-09","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-02"},{"m":"delivered","d":"2026-11-02","t":"11:22"},{"m":"received","d":"2026-11-02"},{"m":"ask","d":"2026-11-05","what":"Midpoint check"},{"m":"in_process","d":"2026-11-05"},{"m":"shipped","d":"2026-11-09","trk":"Ready for pickup"},{"m":"back","d":"2026-11-09"}],"exp":null,"open":false,"id":"2457","po":"P-5157"},{"proc":"Heat Treat House D","process":"Stress relieve","q":4,"qty":8,"sent":"2026-11-02","due":"2026-11-06","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-02"},{"m":"delivered","d":"2026-11-02","t":"13:23"},{"m":"received","d":"2026-11-02"},{"m":"ask","d":"2026-11-04","what":"Midpoint check"},{"m":"in_process","d":"2026-11-04"},{"m":"shipped","d":"2026-11-05","trk":"Ready for pickup"},{"m":"back","d":"2026-11-05"}],"exp":null,"open":false,"id":"2458","po":"P-5158"},{"proc":"Paint House E","process":"Prime and paint","q":8,"qty":48,"sent":"2026-11-02","due":"2026-11-10","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-02"},{"m":"delivered","d":"2026-11-02","t":"14:41"},{"m":"received","d":"2026-11-02"},{"m":"ask","d":"2026-11-06","what":"Midpoint check"},{"m":"in_process","d":"2026-11-06"},{"m":"newdate","d":"2026-11-06","to":"2026-11-11"},{"m":"shipped","d":"2026-11-11","trk":"Ready for pickup"},{"m":"back","d":"2026-11-11"}],"exp":null,"open":false,"id":"2459","po":"P-5159"},{"proc":"NDT Lab F","process":"Penetrant inspection","q":4,"qty":16,"sent":"2026-11-02","due":"2026-11-06","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-02"},{"m":"delivered","d":"2026-11-02","t":"15:55"},{"m":"ask","d":"2026-11-03","what":"Receipt check"},{"m":"received","d":"2026-11-03"},{"m":"ask","d":"2026-11-04","what":"Midpoint check"},{"m":"in_process","d":"2026-11-04"},{"m":"shipped","d":"2026-11-06","trk":"Ready for pickup"},{"m":"back","d":"2026-11-06"}],"exp":null,"open":false,"id":"2460","po":"P-5160"},{"proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":120,"sent":"2026-11-03","due":"2026-11-10","carrier":"UPS Ground","trk":"DEMO-UPS-3506","ev":[{"m":"sent","d":"2026-11-03"},{"m":"delivered","d":"2026-11-04","t":"14:52"},{"m":"received","d":"2026-11-04"},{"m":"ask","d":"2026-11-06","what":"Midpoint check"},{"m":"in_process","d":"2026-11-06"},{"m":"newdate","d":"2026-11-06","to":"2026-11-16"},{"m":"shipped","d":"2026-11-13","trk":"DEMO-UPS-7545"},{"m":"back","d":"2026-11-16"}],"exp":null,"open":false,"id":"2461","po":"P-5161"},{"proc":"Anodize House B","process":"Chem film","q":5,"qty":24,"sent":"2026-11-03","due":"2026-11-08","carrier":"UPS Ground","trk":"DEMO-UPS-8030","ev":[{"m":"sent","d":"2026-11-03"},{"m":"delivered","d":"2026-11-04","t":"12:41"},{"m":"received","d":"2026-11-04"},{"m":"ask","d":"2026-11-05","what":"Midpoint check"},{"m":"in_process","d":"2026-11-05"},{"m":"newdate","d":"2026-11-05","to":"2026-11-09"},{"m":"shipped","d":"2026-11-06","trk":"DEMO-UPS-7913"},{"m":"back","d":"2026-11-09"}],"exp":null,"open":false,"id":"2462","po":"P-5162"},{"proc":"Grinding House G","process":"Centerless grind","q":6,"qty":8,"sent":"2026-11-03","due":"2026-11-09","carrier":"UPS Ground","trk":"DEMO-UPS-2485","ev":[{"m":"sent","d":"2026-11-03"},{"m":"delivered","d":"2026-11-04","t":"15:39"},{"m":"ask","d":"2026-11-05","what":"Receipt check"},{"m":"received","d":"2026-11-05"},{"m":"ask","d":"2026-11-06","what":"Midpoint check"},{"m":"in_process","d":"2026-11-06"},{"m":"shipped","d":"2026-11-06","trk":"DEMO-UPS-2356"},{"m":"back","d":"2026-11-09"}],"exp":null,"open":false,"id":"2463","po":"P-5163"},{"proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":120,"sent":"2026-11-03","due":"2026-11-10","carrier":"UPS Ground","trk":"DEMO-UPS-9647","ev":[{"m":"sent","d":"2026-11-03"},{"m":"delivered","d":"2026-11-04","t":"14:18"},{"m":"received","d":"2026-11-04"},{"m":"ask","d":"2026-11-06","what":"Midpoint check"},{"m":"in_process","d":"2026-11-06"},{"m":"newdate","d":"2026-11-06","to":"2026-11-11"},{"m":"shipped","d":"2026-11-10","trk":"DEMO-UPS-7735"},{"m":"back","d":"2026-11-11"}],"exp":{"fee":450,"bought":"2026-11-03","by":"2026-11-09"},"open":false,"id":"2464","po":"P-5164"},{"proc":"Anodize House A","process":"Anodize, Type II","q":7,"qty":60,"sent":"2026-11-04","due":"2026-11-11","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-04"},{"m":"delivered","d":"2026-11-04","t":"12:31"},{"m":"received","d":"2026-11-04"},{"m":"ask","d":"2026-11-09","what":"Midpoint check"},{"m":"in_process","d":"2026-11-09"},{"m":"shipped","d":"2026-11-10","trk":"Ready for pickup"},{"m":"back","d":"2026-11-10"}],"exp":null,"open":false,"id":"2465","po":"P-5165"},{"proc":"NDT Lab F","process":"Magnetic particle","q":3,"qty":40,"sent":"2026-11-04","due":"2026-11-07","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-04"},{"m":"delivered","d":"2026-11-04","t":"12:53"},{"m":"received","d":"2026-11-04"},{"m":"ask","d":"2026-11-05","what":"Midpoint check"},{"m":"in_process","d":"2026-11-05"},{"m":"newdate","d":"2026-11-05","to":"2026-11-09"},{"m":"shipped","d":"2026-11-09","trk":"Ready for pickup"},{"m":"back","d":"2026-11-09"}],"exp":null,"open":false,"id":"2466","po":"P-5166"},{"proc":"Passivation House H","process":"Passivation","q":4,"qty":16,"sent":"2026-11-04","due":"2026-11-08","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-04"},{"m":"delivered","d":"2026-11-04","t":"10:20"},{"m":"received","d":"2026-11-04"},{"m":"ask","d":"2026-11-06","what":"Midpoint check"},{"m":"in_process","d":"2026-11-06"},{"m":"newdate","d":"2026-11-06","to":"2026-11-09"},{"m":"shipped","d":"2026-11-09","trk":"Ready for pickup"},{"m":"back","d":"2026-11-09"}],"exp":null,"open":false,"id":"2467","po":"P-5167"},{"proc":"Paint House E","process":"Prime and paint","q":8,"qty":8,"sent":"2026-11-09","due":"2026-11-17","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-09"},{"m":"delivered","d":"2026-11-09","t":"10:39"},{"m":"received","d":"2026-11-09"},{"m":"ask","d":"2026-11-13","what":"Midpoint check"},{"m":"in_process","d":"2026-11-13"},{"m":"shipped","d":"2026-11-16","trk":"Ready for pickup"},{"m":"back","d":"2026-11-16"}],"exp":{"fee":300,"bought":"2026-11-09","by":"2026-11-16"},"open":false,"id":"2468","po":"P-5168"},{"proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":48,"sent":"2026-11-12","due":"2026-11-19","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-12"},{"m":"delivered","d":"2026-11-12","t":"14:04"},{"m":"received","d":"2026-11-12"},{"m":"shipped","d":"2026-11-16","trk":"Ready for pickup"},{"m":"back","d":"2026-11-16"}],"exp":{"fee":250,"bought":"2026-11-12","by":"2026-11-16"},"open":false,"id":"2469","po":"P-5169"},{"id":"2601","po":"P-5301","proc":"Plating House C","process":"Electroless nickel","q":10,"qty":40,"sent":"2026-11-13","due":"2026-11-23","carrier":"FedEx Ground","trk":"DEMO-FDX-6479","ev":[{"m":"sent","d":"2026-11-13"},{"m":"delivered","d":"2026-11-16","t":"11:20"},{"m":"received","d":"2026-11-16"},{"m":"ask","d":"2026-11-18","what":"Midpoint check"},{"m":"in_process","d":"2026-11-18"}],"open":true,"exp":{"fee":520,"bought":"2026-11-13","by":"2026-11-20"}},{"id":"2602","po":"P-5302","proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":40,"sent":"2026-11-11","due":"2026-11-18","carrier":"UPS Ground","trk":"DEMO-UPS-3387","ev":[{"m":"sent","d":"2026-11-11"},{"m":"delivered","d":"2026-11-12","t":"10:05"},{"m":"received","d":"2026-11-12"},{"m":"ask","d":"2026-11-16","what":"Midpoint check"},{"m":"racked","d":"2026-11-16"}],"open":true,"exp":null},{"id":"2603","po":"P-5303","proc":"Paint House E","process":"Prime and paint","q":8,"qty":24,"sent":"2026-11-12","due":"2026-11-20","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-12"},{"m":"delivered","d":"2026-11-12","t":"13:30"},{"m":"received","d":"2026-11-12"},{"m":"ask","d":"2026-11-17","what":"Midpoint check"},{"m":"in_process","d":"2026-11-17"}],"open":true,"exp":null},{"id":"2604","po":"P-5304","proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":30,"sent":"2026-11-17","due":"2026-11-27","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-17"},{"m":"delivered","d":"2026-11-17","t":"09:40"},{"m":"received","d":"2026-11-17"},{"m":"ask","d":"2026-11-19","what":"Midpoint check"},{"m":"racked","d":"2026-11-19"}],"open":true,"exp":{"fee":380,"bought":"2026-11-17","by":"2026-11-24"}},{"id":"2605","po":"P-5305","proc":"Passivation House H","process":"Passivation","q":4,"qty":60,"sent":"2026-11-23","due":"2026-11-27","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-23"},{"m":"delivered","d":"2026-11-23","t":"09:12"}],"open":true,"exp":null},{"id":"2606","po":"P-5306","proc":"Anodize House B","process":"Chem film","q":5,"qty":40,"sent":"2026-11-19","due":"2026-11-24","carrier":"UPS Ground","trk":"DEMO-UPS-9815","ev":[{"m":"sent","d":"2026-11-19"},{"m":"delivered","d":"2026-11-20","t":"14:14"}],"open":true,"exp":null},{"id":"2607","po":"P-5307","proc":"Grinding House G","process":"Centerless grind","q":6,"qty":100,"sent":"2026-11-18","due":"2026-11-24","carrier":"UPS Ground","trk":"DEMO-UPS-2960","ev":[{"m":"sent","d":"2026-11-18"},{"m":"delivered","d":"2026-11-19","t":"11:40"}],"open":true,"exp":null},{"id":"2608","po":"P-5308","proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":16,"sent":"2026-11-18","due":"2026-11-25","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-18"},{"m":"delivered","d":"2026-11-18","t":"10:15"},{"m":"received","d":"2026-11-18"},{"m":"ask","d":"2026-11-20","what":"Midpoint check"},{"m":"in_process","d":"2026-11-20"}],"open":true,"exp":null},{"id":"2609","po":"P-5309","proc":"NDT Lab F","process":"Magnetic particle","q":3,"qty":12,"sent":"2026-11-20","due":"2026-11-23","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-20"},{"m":"delivered","d":"2026-11-20","t":"08:50"},{"m":"received","d":"2026-11-20"}],"open":true,"exp":null},{"id":"2610","po":"P-5310","proc":"Anodize House A","process":"Anodize, Type II","q":7,"qty":50,"sent":"2026-11-19","due":"2026-11-26","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-19"},{"m":"delivered","d":"2026-11-19","t":"10:30"},{"m":"received","d":"2026-11-19"}],"open":true,"exp":null},{"id":"2611","po":"P-5311","proc":"Plating House C","process":"Electroless nickel","q":10,"qty":20,"sent":"2026-11-17","due":"2026-11-27","carrier":"FedEx Ground","trk":"DEMO-FDX-9423","ev":[{"m":"sent","d":"2026-11-17"},{"m":"delivered","d":"2026-11-18","t":"15:05"},{"m":"received","d":"2026-11-18"}],"open":true,"exp":null},{"id":"2612","po":"P-5312","proc":"Paint House E","process":"Prime and paint","q":8,"qty":8,"sent":"2026-11-18","due":"2026-11-26","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-18"},{"m":"delivered","d":"2026-11-18","t":"11:00"},{"m":"received","d":"2026-11-18"}],"open":true,"exp":null},{"id":"2613","po":"P-5313","proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":25,"sent":"2026-11-20","due":"2026-11-27","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-20"},{"m":"delivered","d":"2026-11-20","t":"09:20"},{"m":"received","d":"2026-11-20"}],"open":true,"exp":null},{"id":"2614","po":"P-5314","proc":"Plating House C","process":"Electroless nickel","q":10,"qty":48,"sent":"2026-11-16","due":"2026-11-26","carrier":"FedEx Ground","trk":"DEMO-FDX-3531","ev":[{"m":"sent","d":"2026-11-16"},{"m":"delivered","d":"2026-11-17","t":"12:30"},{"m":"received","d":"2026-11-17"},{"m":"ask","d":"2026-11-23","what":"Midpoint check"},{"m":"in_process","d":"2026-11-23"}],"open":true,"exp":null},{"id":"2615","po":"P-5315","proc":"Plating House C","process":"Electroless nickel","q":10,"qty":10,"sent":"2026-11-20","due":"2026-11-30","carrier":"FedEx Ground","trk":"DEMO-FDX-3209","ev":[{"m":"sent","d":"2026-11-20"},{"m":"delivered","d":"2026-11-23","t":"10:45"},{"m":"received","d":"2026-11-23"}],"open":true,"exp":null},{"id":"2616","po":"P-5316","proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":20,"sent":"2026-11-20","due":"2026-11-30","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-20"},{"m":"delivered","d":"2026-11-20","t":"10:10"},{"m":"received","d":"2026-11-20"}],"open":true,"exp":null},{"id":"2617","po":"P-5317","proc":"NDT Lab F","process":"Penetrant inspection","q":4,"qty":80,"sent":"2026-11-23","due":"2026-11-27","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-23"},{"m":"delivered","d":"2026-11-23","t":"08:40"},{"m":"received","d":"2026-11-23"}],"open":true,"exp":null},{"id":"2618","po":"P-5318","proc":"Anodize House A","process":"Anodize, Type II","q":7,"qty":24,"sent":"2026-11-20","due":"2026-11-27","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-20"},{"m":"delivered","d":"2026-11-20","t":"14:00"},{"m":"received","d":"2026-11-20"}],"open":true,"exp":null},{"id":"2619","po":"P-5319","proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":30,"sent":"2026-11-13","due":"2026-11-20","carrier":"UPS Ground","trk":"DEMO-UPS-1083","ev":[{"m":"sent","d":"2026-11-13"},{"m":"delivered","d":"2026-11-16","t":"09:55"},{"m":"received","d":"2026-11-16"},{"m":"ask","d":"2026-11-17","what":"Midpoint check"},{"m":"racked","d":"2026-11-17"},{"m":"newdate","d":"2026-11-17","to":"2026-11-30"}],"open":true,"exp":null},{"id":"2620","po":"P-5320","proc":"Paint House E","process":"Prime and paint","q":8,"qty":12,"sent":"2026-11-12","due":"2026-11-20","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-12"},{"m":"delivered","d":"2026-11-12","t":"10:40"},{"m":"received","d":"2026-11-12"},{"m":"ask","d":"2026-11-16","what":"Midpoint check"},{"m":"in_process","d":"2026-11-16"},{"m":"newdate","d":"2026-11-16","to":"2026-12-01"}],"open":true,"exp":null},{"id":"2621","po":"P-5321","proc":"Grinding House G","process":"Centerless grind","q":6,"qty":50,"sent":"2026-11-16","due":"2026-11-22","carrier":"UPS Ground","trk":"DEMO-UPS-4994","ev":[{"m":"sent","d":"2026-11-16"},{"m":"delivered","d":"2026-11-17","t":"10:20"},{"m":"received","d":"2026-11-17"},{"m":"ask","d":"2026-11-19","what":"Midpoint check"},{"m":"in_process","d":"2026-11-19"},{"m":"shipped","d":"2026-11-20","trk":"DEMO-UPS-4471"}],"open":true,"exp":null},{"id":"2622","po":"P-5322","proc":"Passivation House H","process":"Passivation","q":4,"qty":40,"sent":"2026-11-17","due":"2026-11-21","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-17"},{"m":"delivered","d":"2026-11-17","t":"13:15"},{"m":"received","d":"2026-11-17"},{"m":"shipped","d":"2026-11-20","trk":"Courier ticket 2290"}],"open":true,"exp":null},{"id":"2623","po":"P-5323","proc":"Heat Treat House D","process":"Stress relieve","q":4,"qty":30,"sent":"2026-11-18","due":"2026-11-22","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-18"},{"m":"delivered","d":"2026-11-18","t":"09:30"},{"m":"received","d":"2026-11-18"},{"m":"ask","d":"2026-11-20","what":"Midpoint check"},{"m":"processed","d":"2026-11-20"},{"m":"shipped","d":"2026-11-20","trk":"Ready for our driver"}],"open":true,"exp":null},{"id":"2624","po":"P-5324","proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":20,"sent":"2026-11-23","due":"2026-11-30","carrier":"UPS Ground","trk":"DEMO-UPS-6690","ev":[{"m":"sent","d":"2026-11-23"}],"open":true,"exp":null},{"id":"2625","po":"P-5325","proc":"Plating House C","process":"Electroless nickel","q":10,"qty":16,"sent":"2026-11-23","due":"2026-12-03","carrier":"FedEx Ground","trk":"DEMO-FDX-7382","ev":[{"m":"sent","d":"2026-11-23"}],"open":true,"exp":null}],"assume":{"calls_per_job":2,"min_per_call":10,"min_per_email":3},"contacts":{"Anodize House A":"orders@anodize-house-a.example","Anodize House B":"orders@anodize-house-b.example","Grinding House G":"orders@grinding-house-g.example","Heat Treat House D":"orders@heat-treat-house-d.example","NDT Lab F":"orders@ndt-lab-f.example","Paint House E":"orders@paint-house-e.example","Passivation House H":"orders@passivation-house-h.example","Plating House C":"orders@plating-house-c.example"}};
@@ -2170,6 +2449,9 @@ function render() {
   const v = VIEWS.find((x) => x[0] === st.view) || VIEWS[0];
   $('#view').innerHTML = v[2](J);
   $('#view').scrollTop = 0;
+  document.body.classList.toggle('pane', paneFits());
+  markSel();
+  if (document.activeElement !== $('#gsearch')) $('#gsearch').value = st.view === 'jobs' ? jf.q : '';
   $('#clock').textContent = fmtW(T).toUpperCase() + ' ' + T.slice(0, 4);
   $('#tb_open').textContent = open.length;
   $('#tb_acts').textContent = acts;
@@ -2339,6 +2621,7 @@ function vToday(J) {
   const handled = Object.keys(st.handled)
     .map((id) => [job(id), st.handled[id]])
     .filter((x) => x[0]);
+  /* Each row reads like a message in an inbox: who (the processor), what (the job), why it is here. */
   const body = shown
     .map(
       ([j, s]) =>
@@ -2346,34 +2629,34 @@ function vToday(J) {
         ST[s.k][1] +
         '" data-job="' +
         esc(j.id) +
-        '"><td><span class="job">' +
-        jn(j) +
-        '</span><span class="sub">' +
-        esc(j.po || '') +
-        '</span></td><td>' +
+        '"><td><div class="m1"><b class="from">' +
         esc(j.proc) +
-        '<span class="sub">' +
+        '</b><span class="when">Due ' +
+        fmt(s.due) +
+        '</span></div><div class="m2">Job <span class="job">' +
+        jn(j) +
+        '</span>' +
+        (j.po ? ' · PO ' + esc(j.po) : '') +
+        ' · ' +
         esc(j.process) +
         (j.qty ? ' · ' + j.qty + ' pcs' : '') +
-        '</span></td><td>' +
-        route(j, s) +
-        '</td><td>' +
+        '</div><div class="m3">' +
         chip(s.k) +
         (s.asked ? '<span class="asked">Asked ' + hm(s.asked.t) + '</span>' : '') +
-        '<span class="sub why">' +
+        '<span class="why">' +
         esc(reason(j, s)) +
-        '</span></td><td class="n">' +
+        '</span></div><div class="acts">' +
         (s.k === 'chk'
           ? (trackUrl(j)
-              ? '<a class="btn sm" target="_blank" rel="noopener" href="' + trackUrl(j) + '" data-stop>Track</a> '
+              ? '<a class="btn sm" target="_blank" rel="noopener" href="' + trackUrl(j) + '" data-stop>Track</a>'
               : '') +
             '<button type="button" class="btn sm" data-deliv="' +
             esc(j.id) +
-            '">Mark delivered</button> '
+            '">Mark delivered</button>'
           : '') +
         '<button type="button" class="btn pri sm" data-draft="' +
         esc(j.id) +
-        '">Draft email</button></td></tr>',
+        '">Draft email</button></div></td></tr>',
     )
     .join('');
   const byP = {};
@@ -2428,7 +2711,7 @@ function vToday(J) {
       .join('') +
     '<p class="pf">Ask for a physical step (received, racked, in process, shipped), not "are we on track?". Log the answers in OSP Watch afterward.</p></div>';
   return (
-    '<div class="scr"><div class="head"><div><h1>Today</h1><p>' +
+    '<div class="scr inbox"><div class="head"><div><h1>Today</h1><p>' +
     fmtW(T) +
     ' · ' +
     (rows.length
@@ -2451,9 +2734,7 @@ function vToday(J) {
       : ' <span>· most urgent first</span>') +
     '</h2>' +
     (shown.length
-      ? '<table><thead><tr><th>Job</th><th>Processor</th><th>Sent · progress · due back</th><th>Status</th><th></th></tr></thead><tbody>' +
-        body +
-        '</tbody></table>'
+      ? '<table class="msgs"><tbody>' + body + '</tbody></table>'
       : '<div class="empty">All clear in this group.</div>') +
     '</div>' +
     (handled.length
@@ -2495,18 +2776,29 @@ document.addEventListener('click', (e) => {
 });
 
 /* ---------- panel ---------- */
+/* The side panel. On Today, on a wide screen, it is docked as a reading pane beside the list (body.pane),
+   the way a mail program shows the selected message; everywhere else it slides over the page. */
+let selJob = null;
+function markSel() {
+  document.querySelectorAll('#view tr[data-job]').forEach((r) => r.classList.toggle('sel', r.dataset.job === selJob));
+}
 function openPanel(html) {
   const p = $('#panel');
   p.innerHTML = html;
   p.classList.add('on');
   p.setAttribute('aria-hidden', 'false');
   $('#scrim').classList.add('on');
+  markSel();
 }
 function closePanel() {
+  selJob = null;
   $('#panel').classList.remove('on');
   $('#panel').setAttribute('aria-hidden', 'true');
   $('#scrim').classList.remove('on');
+  markSel();
 }
+const paneFits = () => st.view === 'today' && innerWidth >= 1100;
+addEventListener('resize', () => document.body.classList.toggle('pane', paneFits()));
 $('#scrim').onclick = closePanel;
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closePanel();
@@ -2516,6 +2808,7 @@ document.addEventListener('click', (e) => {
 });
 let cur = null;
 function openDraft(id, credit) {
+  selJob = id;
   const j = job(id),
     s = statusOf(j, T),
     d = draftFor(j, credit ? { k: 'credit' } : s, T, signText()),
@@ -2764,6 +3057,7 @@ function markDelivered(id) {
 
 /* ---------- job detail ---------- */
 function openJob(id) {
+  selJob = id;
   const j = job(id),
     s = statusOf(j, T),
     steps = ['sent', 'delivered', 'received', 'racked', 'in_process', 'processed', 'inspected', 'shipped', 'back'];
@@ -3141,6 +3435,31 @@ function openAdd(ed) {
 }
 
 /* ---------- Jobs ---------- */
+/* Jobs is the spreadsheet view: one line per job, click a column heading to sort, click again to reverse. */
+let jsort = { k: '', dir: 1 };
+const SORTS = {
+  job: (j) => j.jn || j.id,
+  po: (j) => j.po || '',
+  proc: (j) => j.proc,
+  process: (j) => j.process,
+  qty: (j) => j.qty || 0,
+  sent: (j) => j.sent,
+  due: (j, s) => s.due,
+  status: (j, s) => ORDER.indexOf(s.k),
+  upd: (j) => j.ev[j.ev.length - 1].d,
+};
+document.addEventListener('click', (e) => {
+  const h = e.target.closest('th[data-sort]');
+  if (!h) return;
+  jsort = { k: h.dataset.sort, dir: jsort.k === h.dataset.sort ? -jsort.dir : 1 };
+  render();
+});
+$('#gsearch').addEventListener('input', (e) => {
+  /* the search box in the top bar always searches Jobs */
+  jf.q = e.target.value;
+  st.view = 'jobs';
+  render();
+});
 function vJobs(J) {
   const base = J.filter((j) => (jf.closed ? !isOpen(j) : isOpen(j))),
     uniq = (k) => [...new Set(J.map((j) => j[k]))].sort();
@@ -3160,6 +3479,26 @@ function vJobs(J) {
           : -1
         : ORDER.indexOf(a[1].k) - ORDER.indexOf(b[1].k) || (a[1].due < b[1].due ? -1 : 1),
     );
+  if (jsort.k) {
+    const val = SORTS[jsort.k];
+    list.sort((a, b) => {
+      const x = val(a[0], a[1]),
+        y = val(b[0], b[1]);
+      return (
+        (typeof x === 'number' ? x - y : String(x).localeCompare(String(y), undefined, { numeric: true })) * jsort.dir
+      );
+    });
+  }
+  const th = (k, label, cls) =>
+    '<th data-sort="' +
+    k +
+    '"' +
+    (cls ? ' class="' + cls + '"' : '') +
+    (jsort.k === k ? ' aria-sort="' + (jsort.dir > 0 ? 'ascending' : 'descending') + '"' : '') +
+    '>' +
+    label +
+    (jsort.k === k ? (jsort.dir > 0 ? ' ▲' : ' ▼') : '') +
+    '</th>';
   const opt = (k, vals, cur, all) =>
     '<select data-jf="' +
     k +
@@ -3183,7 +3522,7 @@ function vJobs(J) {
   return (
     '<div class="head"><div><h1>Jobs at processors</h1><p>' +
     J.filter(isOpen).length +
-    ' open jobs out for outside processing. Click a job for its timeline.</p></div><span class="sp"></span><button type="button" class="btn pri" data-addjob>Add a job</button></div>' +
+    ' open jobs out for outside processing. Click a column heading to sort, or a job for its timeline.</p></div><span class="sp"></span><button type="button" class="btn pri" data-addjob>Add a job</button></div>' +
     '<div class="card"><div class="filters"><input type="text" data-jf="q" placeholder="Search job or PO" value="' +
     esc(jf.q) +
     '" style="width:180px">' +
@@ -3194,7 +3533,17 @@ function vJobs(J) {
     (jf.closed ? ' checked' : '') +
     '> Show closed</label></div>' +
     (list.length
-      ? '<table><thead><tr><th>Job</th><th>Processor</th><th>Sent · progress · due back</th><th>Status</th><th>Last update</th></tr></thead><tbody>' +
+      ? '<table class="grid"><thead><tr>' +
+        th('job', 'Job') +
+        th('po', 'PO') +
+        th('proc', 'Processor') +
+        th('process', 'Process') +
+        th('qty', 'Qty', 'n') +
+        th('sent', 'Sent') +
+        th('due', 'Due back') +
+        th('status', 'Status') +
+        th('upd', 'Last update') +
+        '</tr></thead><tbody>' +
         list
           .map(([j, s]) => {
             const le = j.ev[j.ev.length - 1];
@@ -3205,19 +3554,24 @@ function vJobs(J) {
               esc(j.id) +
               '"><td><span class="job">' +
               jn(j) +
-              '</span><span class="sub">' +
+              '</span></td><td>' +
               esc(j.po || '') +
-              '</span></td><td>' +
+              '</td><td>' +
               esc(j.proc) +
-              '<span class="sub">' +
+              '</td><td>' +
               esc(j.process) +
-              (j.qty ? ' · ' + j.qty + ' pcs' : '') +
-              '</span></td><td>' +
-              route(j, s) +
+              '</td><td class="n">' +
+              (j.qty || '') +
+              '</td><td>' +
+              fmt(j.sent) +
+              '</td><td' +
+              (isOpen(j) && s.due < T ? ' class="bad"' : '') +
+              '>' +
+              fmt(s.due) +
               '</td><td>' +
               chip(s.k) +
               (j.exp ? ' <span class="chip t-gray" title="An expedite was paid on this job">Exp</span>' : '') +
-              '</td><td class="small" style="white-space:normal">' +
+              '</td><td class="small">' +
               (le.m === 'ask' ? 'Asked: ' + esc(le.what || '') : MS[le.m]) +
               ', ' +
               fmt(le.d) +
@@ -4434,16 +4788,21 @@ document.addEventListener('keydown', (e) => {
     e.ctrlKey ||
     e.altKey ||
     /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '') ||
-    $('#panel').classList.contains('on')
+    ($('#panel').classList.contains('on') && !document.body.classList.contains('pane'))
   )
     return;
   const rows = [...document.querySelectorAll('#view tr.click[data-job]')];
   if (!rows.length) return;
-  const k = e.key.toLowerCase();
-  if (k === 'j' || k === 'k') {
-    kb = Math.max(0, Math.min(rows.length - 1, kb + (k === 'j' ? 1 : -1)));
+  const k = e.key.toLowerCase(),
+    down = k === 'j' || k === 'arrowdown',
+    up = k === 'k' || k === 'arrowup';
+  if (down || up) {
+    if (selJob) kb = rows.findIndex((r) => r.dataset.job === selJob);
+    kb = Math.max(0, Math.min(rows.length - 1, kb + (down ? 1 : -1)));
     rows.forEach((r, i) => r.classList.toggle('kb', i === kb));
     rows[kb].scrollIntoView({ block: 'nearest' });
+    if (document.body.classList.contains('pane'))
+      openJob(rows[kb].dataset.job); /* reading pane follows the selection */
     e.preventDefault();
   } else if (k === 'enter' && rows[kb]) {
     const id = rows[kb].dataset.job,
