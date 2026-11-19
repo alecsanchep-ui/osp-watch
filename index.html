@@ -9,7 +9,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser runs only the one script and one stylesheet below, identified by hash. connect-src lists
      every address the page may send to: 'none' unless this build carries the optional usage signal. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-srfWK+suzHLydHB3/s5aHf0uIFjjCObOR3sgdQgf1vE='; style-src 'sha256-yJeGjVpZrb00E98idbNnnHhvEVtBvpqcK/1sgvBIx5c='; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-L1gZkUROpvXVlH+IR/ex9/Y4YTFM0JzNcNO+idPbuAI='; style-src 'sha256-QxgsXtp5epP8j+O8pLvjTmVFBpntKS4Tiqt6COk2T4E='; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>OSP Watch</title>
 <style>/* Plain office software: flat, square, dense, with visible gridlines. Today reads as a mail list with a
    reading pane, Jobs as a spreadsheet, and the running totals sit in a status bar at the foot of the window.
@@ -232,6 +232,9 @@ tbody tr:last-child td {
 }
 .t-gray {
   color: var(--mute);
+}
+.chip.extra {
+  margin-left: 10px;
 }
 .empty {
   padding: 24px;
@@ -563,15 +566,12 @@ tr.sel:hover td {
 .inbox .card {
   border-top: 0;
 }
-.inbox .card h2 {
+.inbox .card.list h2 {
   display: none;
 }
 .inbox .card + .card {
   margin-top: 12px;
   border-top: 1px solid var(--line);
-}
-.inbox .card + .card h2 {
-  display: flex;
 }
 /* Fixed column widths, so the list always fits its pane and long text wraps inside its own column. */
 .msgs {
@@ -749,12 +749,14 @@ tr.sel:hover td {
   gap: 0 6px;
   padding: 3px 0;
 }
+/* Round marks: a square here reads as a box to tick. */
 .tl li::before {
   content: '';
   justify-self: center;
   width: 8px;
   height: 8px;
   border: 1px solid #a6a6a6;
+  border-radius: 50%;
 }
 .tl .w {
   color: var(--mute);
@@ -829,7 +831,7 @@ body.pane .panel .closer {
 body.pane .panel {
   position: static;
   display: flex;
-  flex: 0 0 44%;
+  flex: 0 0 38%;
   min-width: 380px;
   max-width: 640px;
   box-shadow: none;
@@ -857,7 +859,7 @@ body.pane .panel:not(.on) > * {
   display: none;
 }
 body.pane .panel:not(.on)::before {
-  content: 'Select a job to read it';
+  content: 'Select a job to see it here';
   color: var(--mute);
 }
 
@@ -919,9 +921,9 @@ body.drag::after {
 }
 
 /* For your IT: a topic and what is true of it. */
-.facts table,
+.card.facts,
 .facts + .small {
-  max-width: 820px;
+  max-width: 860px;
 }
 .facts th {
   position: static;
@@ -942,14 +944,13 @@ body.drag::after {
 .toast {
   position: fixed;
   bottom: 34px;
-  left: 50%;
+  left: 196px;
   z-index: 60;
   padding: 7px 14px;
   background: #323130;
   color: #fff;
   opacity: 0;
   pointer-events: none;
-  transform: translateX(-50%);
   transition: opacity 0.15s;
 }
 .toast.on {
@@ -1372,10 +1373,12 @@ function ledger(J, T) {
     .sort((a, b) => -byText((x) => x.bought)(a, b));
 }
 
-/** Expedite fees per processor, the most money missed first. */
-function expByProc(J, T) {
+/** Expedite fees per processor, the most money missed first. `since` limits it to expedites bought on or
+    after that date. */
+function expByProc(J, T, since) {
   const g = Object.create(null);
   for (const x of ledger(J, T)) {
+    if (since && x.bought < since) continue;
     const p = (g[x.proc] = g[x.proc] || { proc: x.proc, n: 0, fees: 0, met: 0, missed: 0, open: 0, n_missed: 0 });
     p.n++;
     p.fees += x.fee;
@@ -1575,13 +1578,19 @@ function relDay(s, T) {
 /* ---------- drafts ---------- */
 
 const DEFAULT_SIGN = 'Purchasing, Example Shop';
+/* $250 and $250.50, never $250.5. */
+const usd = (n) =>
+  '$' +
+  Number(n).toLocaleString('en-US', Number.isInteger(+n) ? {} : { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const MASKED_PROCESS = /plat|nickel|anodi[sz]|chem|film|coat|paint|prim|passivat/i;
 const letter = (proc, text, sign) => `Hi ${proc} team,\n\n${text}\n\nThank you,\n${sign || DEFAULT_SIGN}`;
 
 /* Each draft asks for a physical step or a date, never "are we on track?", because a step can be checked. */
 function draftText(j, s, T) {
   const id = j.jn || j.id;
-  const ref = j.po ? ` (PO ${j.po})` : '';
+  /* A processor files the work under our PO number, not our job number, so the PO leads when there is one. */
+  const ref = j.po ? `PO ${j.po} (our job ${id})` : `job ${id}`;
+  const tag = ref[0].toUpperCase() + ref.slice(1);
   const what = j.qty ? `${j.qty} pcs` : 'parts';
   const proc = j.process ? `, ${j.process}` : '';
   const exp = j.exp;
@@ -1597,39 +1606,39 @@ function draftText(j, s, T) {
       const at = d.t ? ` at ${fmtTime(d.t)}` : '';
       const when = d.d !== T ? relDay(d.d, T) + at : d.t && +d.t.slice(0, 2) < 12 ? 'this morning' + at : 'today' + at;
       return {
-        subject: `Job ${id}: did our ${what} arrive?`,
-        text: `Can you confirm you received our ${what} for job ${id}${ref} that ${who} ${when}? A quick reply with the date you logged them in is all we need.`,
+        subject: `${tag}: did our ${what} arrive?`,
+        text: `Can you confirm you received our ${what} for ${ref} that ${who} ${when}? A quick reply with the date you logged them in is all we need.`,
       };
     }
     case 'chk': {
       const by = j.carrier ? ` by ${j.carrier}` : '';
       const trk = j.trk ? ` (tracking ${j.trk})` : '';
       return {
-        subject: `Job ${id}: did our ${what} arrive?`,
-        text: `We sent ${what} for job ${id}${ref} to you on ${fmtDay(j.sent)}${by}${trk}. Can you confirm you have them, and the date you logged them in?`,
+        subject: `${tag}: did our ${what} arrive?`,
+        text: `We sent ${what} for ${ref} to you on ${fmtDay(j.sent)}${by}${trk}. Can you confirm you have them, and the date you logged them in?`,
       };
     }
     case 'due2':
       return {
-        subject: `Job ${id}: has it shipped?`,
-        text: `Job ${id} (${what}${proc})${ref} is due back ${relDay(s.due, T)}. Has it shipped? If it has, could you send the tracking number; if not, which step is it at and what day will it ship?`,
+        subject: `${tag}: has it shipped?`,
+        text: `${tag} (${what}${proc}) is due back ${relDay(s.due, T)}. Has it shipped? If it has, could you send the tracking number; if not, which step is it at and what day will it ship?`,
       };
     case 'late':
       return {
-        subject: `Job ${id}: past due, what day will it ship?`,
-        text: `Job ${id} (${what}${proc})${ref} was due back ${fmtDay(s.due)} and we have not received it or a ship notice. Which step is it at now, and what day will it ship? If something on our side is holding it up, let us know and we will sort it out.`,
+        subject: `${tag}: past due, what day will it ship?`,
+        text: `${tag} (${what}${proc}) was due back ${fmtDay(s.due)} and we have not received it or a ship notice. Which step is it at now, and what day will it ship? If something on our side is holding it up, let us know and we will sort it out.`,
       };
     case 'xmiss':
       return {
-        subject: `Job ${id}: expedite date passed, what day will it ship?`,
-        text: `We paid a $${exp.fee} expedite on ${fmtDay(exp.bought)} for job ${id} (${what}${proc})${ref} to be back by ${fmtDay(exp.by)}, and we have not received it or a ship notice. Which step is it at now, and what day will it ship?`,
+        subject: `${tag}: expedite date passed, what day will it ship?`,
+        text: `We paid a ${usd(exp.fee)} expedite on ${fmtDay(exp.bought)} for ${ref} (${what}${proc}) to be back by ${fmtDay(exp.by)}, and we have not received it or a ship notice. Which step is it at now, and what day will it ship?`,
       };
     case 'xrisk': {
       const a = s.lastAns;
       const lastUpdate = a ? ` Your last update was "${STEP_LABEL[a.m].toLowerCase()}" on ${fmtDay(a.d)}.` : '';
       return {
-        subject: `Job ${id}: expedite due ${fmtDay(exp.by)}`,
-        text: `We paid a $${exp.fee} expedite on ${fmtDay(exp.bought)} for job ${id} (${what}${proc}) to be back by ${fmtDay(exp.by)}.${lastUpdate} Is it on track to ship in time? If not, please tell us today so we can plan around it.`,
+        subject: `${tag}: expedite due ${fmtDay(exp.by)}`,
+        text: `We paid a ${usd(exp.fee)} expedite on ${fmtDay(exp.bought)} for ${ref} (${what}${proc}) to be back by ${fmtDay(exp.by)}.${lastUpdate} Is it on track to ship in time? If not, please tell us today so we can plan around it.`,
       };
     }
     default: {
@@ -1641,8 +1650,8 @@ function draftText(j, s, T) {
         ? 'received, masked or racked, in process, processed, or in inspection'
         : 'received, in process, finished, or in inspection';
       return {
-        subject: `Job ${id}: which step is it at?`,
-        text: `Our ${what} for job ${id}${ref}${process}${reached} are due back ${fmtDay(s.due)}. Which step are they at right now: ${steps}?`,
+        subject: `${tag}: which step is it at?`,
+        text: `Our ${what} for ${ref}${process}${reached} are due back ${fmtDay(s.due)}. Which step are they at right now: ${steps}?`,
       };
     }
   }
@@ -1656,10 +1665,10 @@ function draftFor(j, s, T, sign) {
 
 /** One email covering every job at one processor that needs a word today. items = [[job, status], ...]. */
 function draftForProc(items, T, sign) {
-  const ids = items.map(([j]) => j.jn || j.id);
+  const ids = items.map(([j]) => (j.po ? `PO ${j.po} / job ${j.jn || j.id}` : `job ${j.jn || j.id}`));
   const lines = items.map(([j, s], i) => `${i + 1}. ${draftText(j, s, T).text}`);
   return {
-    subject: `${items.length} jobs: quick status check (${ids.join(', ')})`,
+    subject: `${items.length} jobs: quick status check (${ids.join('; ')})`,
     body: letter(
       items[0][0].proc,
       `We have ${items.length} jobs with you that need a quick word today.\n\n${lines.join('\n\n')}`,
@@ -1671,7 +1680,8 @@ function draftForProc(items, T, sign) {
 /** The credit request for an expedite whose date was missed. */
 function creditDraft(j, T, sign) {
   const id = j.jn || j.id;
-  const ref = j.po ? ` (PO ${j.po})` : '';
+  const ref = j.po ? `PO ${j.po} (our job ${id})` : `job ${id}`;
+  const tag = ref[0].toUpperCase() + ref.slice(1);
   const what = j.qty ? `${j.qty} pcs` : 'parts';
   const proc = j.process ? `, ${j.process}` : '';
   const { fee, bought, by } = j.exp;
@@ -1684,10 +1694,10 @@ function creditDraft(j, T, sign) {
       : 'As of today it has not shipped.';
   const stillOut = back || shipped ? '' : ' Could you also tell us which step it is at and what day it will ship?';
   return {
-    subject: `Job ${id}: expedite credit request`,
+    subject: `${tag}: expedite credit request`,
     body: letter(
       j.proc,
-      `On ${fmtDay(bought)} we paid a $${fee} expedite for job ${id} (${what}${proc})${ref} to be back by ${fmtDay(by)}. ${outcome} The expedited date was missed. Would you be able to credit the $${fee} expedite charge?${stillOut}`,
+      `On ${fmtDay(bought)} we paid a ${usd(fee)} expedite for ${ref} (${what}${proc}) to be back by ${fmtDay(by)}. ${outcome} The expedited date was missed. Would you be able to credit the ${usd(fee)} expedite charge?${stillOut}`,
       sign,
     ),
   };
@@ -1892,16 +1902,12 @@ function planImport(rows, map, J, T) {
     const repeat = seen.has(key);
     seen.add(key);
     const stillOut = j && j.open && !isBack(j);
+    /* The sheet moves a due date only when it differs from the date the job was entered with. A sheet that
+       still shows the original date does not undo a newer date logged in the tool. */
+    const moved = stillOut && due !== j.due && due !== effDue(j);
     if (!j && !repeat) plan.add.push(row);
     else if (stillOut && !repeat && row.back) plan.close.push({ id: j.id, back: row.back });
-    /* The sheet moves a due date only when it differs from the date the job was entered with. A sheet that
-       still shows the original date does not undo a newer date logged in the tool. */ else if (
-      stillOut &&
-      !repeat &&
-      due !== j.due &&
-      due !== effDue(j)
-    )
-      plan.move.push({ id: j.id, from: effDue(j), to: due });
+    else if (moved && !repeat) plan.move.push({ id: j.id, from: effDue(j), to: due });
     else plan.same++;
   }
   return plan;
@@ -1909,8 +1915,9 @@ function planImport(rows, map, J, T) {
 
 /* ---------- two people, one shared file ---------- */
 
-/** Merge this computer's state (mine) with the shared file's (theirs). Both sides reach the same result
-    whoever merges first, and merging again changes nothing.
+/** Merge this computer's state (mine) with the shared file's (theirs). Merging again changes nothing, and
+    both sides reach the same result whoever merges first, with one exception: two different jobs given the
+    same number on two computers before either synced are taken for one job, and one of them is kept.
 
     Jobs are matched by id and the copy edited last wins. Events and expedites only ever add, a credit only
     moves forward (requested, then credited), and a removed job stays removed on every computer. Settings and
@@ -1971,8 +1978,8 @@ function mergeState(mine, theirs) {
 
 /* ---------- delimited text ---------- */
 
-/** Rows of cells from comma- or tab-separated text. Quoted cells may hold the delimiter, quotes and newlines.
-    Blank lines are dropped. */
+/** Rows of cells from comma- or tab-separated text. A cell that starts with a quote may hold the delimiter,
+    quotes and newlines; a quote anywhere else is an ordinary character (2" bracket). Blank lines are dropped. */
 function parseDelimited(text, delimiter) {
   const rows = [];
   let row = [];
@@ -1992,7 +1999,7 @@ function parseDelimited(text, delimiter) {
         cell += '"';
         i++;
       } else quoted = false;
-    } else if (c === '"') quoted = true;
+    } else if (c === '"' && cell === '') quoted = true;
     else if (c === delimiter) {
       row.push(cell);
       cell = '';
@@ -2335,6 +2342,8 @@ function cleanJob(j) {
     open: !!j.open,
     exp: cleanExpedite(j.exp),
   };
+  /* Every job has at least the day it was sent; screens rely on a latest event. */
+  if (!out.ev.length) out.ev = [{ m: 'sent', d: out.sent }];
   if (j.jn) out.jn = cleanText(j.jn, 60);
   if (j.pre) out.pre = true;
   if (Number(j.upd) > 0) out.upd = Number(j.upd);
@@ -2469,7 +2478,7 @@ function settingsChanged() {
 
 /* ---------- reading the state ---------- */
 
-/** Every job, with what was logged here folded in. Screens read this, never st.added. */
+/** Every job, with what was logged here folded in. */
 function jobs() {
   const all = MODE === 'demo' ? DATA.jobs.concat(st.added) : st.added;
   return all.map((j) => {
@@ -2511,7 +2520,7 @@ function reason(j, s) {
     case 'chk':
       return `Sent ${relDay(j.sent, T)}${j.carrier ? ` by ${j.carrier}` : ''}. No delivery logged. Check the tracking, then mark it delivered, or ask the processor.`;
     case 'mid':
-      return `Halfway through a${/^(8|11|18)/.test(j.q) ? 'n' : ''} ${j.q}-day turn. ${heard}`;
+      return `Halfway through a${/^(8\d*|11|18)$/.test(j.q) ? 'n' : ''} ${j.q}-day turn. ${heard}`;
     case 'due2':
       return `Due back ${relDay(s.due, T)}. No ship notice. ${heard}`;
     case 'late':
@@ -2586,11 +2595,9 @@ function render() {
   const open = J.filter(isOpen);
   const needWord = open.filter((j) => statusOf(j, T).action).length;
   const expedites = ledger(J, T);
-  const uncredited = expedites.filter((x) => x.res === 'missed' && x.back && !st.credit[x.id]).length;
   const badges = {
     today: needWord ? html`<span class="badge">${needWord}</span>` : '',
     jobs: html`<span class="badge n">${open.length}</span>`,
-    exp: uncredited ? html`<span class="badge">${uncredited}</span>` : '',
   };
   const screen = SCREENS.find((s) => s.id === st.view) || SCREENS[0];
 
@@ -2626,7 +2633,7 @@ function render() {
   const live = MODE === 'live';
   $('#bmode').textContent = live ? 'Early version · your own jobs' : DEMO_BANNER;
   $('#bnote').textContent = live
-    ? 'Saved in this browser, and in your shared file if you connect one in Setup. Nothing is uploaded; emails go from your own mailbox.'
+    ? `Saved in this browser, and in your shared file if you connect one in Setup. ${USAGE_ENDPOINT && usageSetting().on ? 'Your jobs are not uploaded; usage counts are on (Setup).' : 'Nothing is uploaded.'} Emails go from your own mailbox.`
     : DEMO_NOTE;
   $('#bswitch').textContent = live ? 'See the demo' : 'Use my own jobs';
   $('#reset').textContent = live ? 'Download backup' : 'Reset demo';
@@ -2840,7 +2847,7 @@ function vToday(J) {
         ${todayTab('', 'All', rows.length)}
         ${TODAY_GROUPS.map((g) => todayTab(g.id, g.label, rows.filter(([, s]) => g.kinds.includes(s.k)).length))}
       </div>`}
-      <div class="card">
+      <div class="card list">
         <h2>Action list</h2>
         ${shown.length
           ? html`<table class="msgs">
@@ -2856,7 +2863,13 @@ function vToday(J) {
                 ${shown.map(todayRow)}
               </tbody>
             </table>`
-          : html`<div class="empty">${rows.length ? 'Nothing in this group.' : 'Nothing to follow up today.'}</div>`}
+          : html`<div class="empty">
+              ${rows.length
+                ? 'Nothing in this group.'
+                : J.length
+                  ? 'Nothing to follow up today.'
+                  : 'No jobs yet. Use the steps above to bring in what you have out.'}
+            </div>`}
       </div>
       ${handled.length > 0 &&
       html`<div class="card">
@@ -2955,10 +2968,10 @@ function sameProcessorToday(j) {
     .filter(([g, s]) => s.action && (g.id === j.id || !s.asked));
 }
 
-function replyPicker() {
-  return html`<div class="pick" id="pick" hidden>
+function replyPicker(open) {
+  return html`<div class="pick" id="pick" ${!open && 'hidden'}>
     <b>What did they say?</b>
-    <span class="small">Click the step they confirmed, or paste their reply and it is picked out for you.</span>
+    <span class="small">Paste their reply and it is read for you, or fill in below. Then click the step.</span>
     <textarea
       id="rp"
       rows="3"
@@ -2967,26 +2980,27 @@ function replyPicker() {
     ></textarea>
     <div class="small" id="rpn" hidden></div>
     <div class="row">
-      ${PROC_STEPS.map(
-        (m) =>
-          html`<button type="button" class="btn sm" data-step="${m}">
-            ${m === 'received' ? 'Received' : STEP_LABEL[m]}
-          </button>`,
-      )}
-    </div>
-    <div class="row">
       <input
         type="text"
         id="trk"
         class="grow"
         aria-label="Tracking number"
-        placeholder="Tracking number (if shipped)"
+        placeholder="Tracking number (if they shipped)"
       />
     </div>
     <div class="row">
-      <label class="small" for="nd">Gave a new date:</label>
+      <label class="small" for="nd">New date, if they gave one:</label>
       <input type="date" id="nd" min="${T}" />
-      <button type="button" class="btn sm" data-step="newdate">Save new date</button>
+      <button type="button" class="btn sm" data-step="newdate">Log new date only</button>
+    </div>
+    <div class="row">
+      <span class="small">Where it is now:</span>
+      ${PROC_STEPS.map(
+        (m) =>
+          html`<button type="button" class="btn sm" data-step="${m}">
+            ${m === 'received' ? 'They received it' : STEP_LABEL[m]}
+          </button>`,
+      )}
     </div>
   </div>`;
 }
@@ -3001,16 +3015,19 @@ function openDraft(id, { credit = false, showReply = false } = {}) {
   openPanel(
     { kind: 'draft', id, credit, proc: j.proc, group, sendTo: [id], logged: false },
     html`${panelHeader(
-        `${credit ? 'Credit request' : 'Draft email'} · Job ${jobNo(j)}`,
+        `${credit ? 'Credit request' : showReply ? 'Log update' : 'Draft email'} · Job ${jobNo(j)}`,
         `${j.proc} · ${j.process}${j.qty > 0 ? ` · ${j.qty} pcs` : ''}`,
         credit ? html`<span class="chip t-red">Expedite missed</span>` : chip(s.k),
       )}
       ${group.length > 1 &&
       html`<div class="note inset" id="grpnote">
         <b>${j.proc} has ${group.length} jobs on today's list.</b>
-        <button type="button" class="btn sm" id="dgrp">One email for all ${group.length}</button>
+        <button type="button" class="btn sm" id="dgrp">
+          One email for ${group.length === 2 ? 'both jobs' : `all ${group.length}`}
+        </button>
       </div>`}
       <div class="body">
+        ${showReply && replyPicker(true)}
         <div class="field">
           <label for="dto">To</label>
           <input
@@ -3026,11 +3043,11 @@ function openDraft(id, { credit = false, showReply = false } = {}) {
         <div class="field">
           <label for="dbody">Message</label><textarea id="dbody" rows="11">${draft.body}</textarea>
         </div>
-        <div class="note">
+        <div class="note" id="dnote">
           Edit anything. It goes from your own mailbox, so the processor sees a normal email from you. Nothing is sent
           from here.
         </div>
-        ${!credit && replyPicker()}
+        ${!credit && !showReply && replyPicker(false)}
       </div>
       <div class="foot">
         <a class="btn pri" id="dmail" href="#">Open in Outlook</a>
@@ -3040,10 +3057,9 @@ function openDraft(id, { credit = false, showReply = false } = {}) {
           ? html`<button type="button" class="btn" id="dcred">
               ${creditState === 'requested' ? 'Mark credit received' : 'Mark credit requested'}
             </button>`
-          : html`<button type="button" class="btn" id="dans">Log their answer</button>`}
+          : !showReply && html`<button type="button" class="btn" id="dans">Log their answer</button>`}
       </div>`,
   );
-  if (showReply) $('#pick').hidden = false;
   refreshMailLink();
 }
 
@@ -3084,6 +3100,9 @@ function markAsked(how) {
     for (const id of panel.sendTo) logEvent(id, { m: 'ask', what: how });
   }
   render();
+  /* The page cannot know the email was sent, so it says what it recorded and what to do next. */
+  if (!panel.credit)
+    $('#dnote').textContent = `Marked as asked at ${fmtTime(now())}. When they answer, click "Log their answer".`;
 }
 
 async function copyText(text) {
@@ -3109,7 +3128,7 @@ on('click', '#dcopy', async () => {
 });
 on('click', '#dmail', () => {
   markAsked('Opened in Outlook');
-  toast('Opening your mail app with the draft filled in.');
+  toast('Opening your mail program with the draft filled in.');
 });
 
 on('click', '#dcred', () => {
@@ -3170,6 +3189,8 @@ on('click', '#panel [data-step]', (el) => {
   noteHandled(id, before, said);
   closePanel();
   render();
+  /* Back to the job, so the step, the tracking number and the new date can be seen on its timeline. */
+  openJob(id);
   toast(`Job ${jobNo(j)} updated: ${said.toLowerCase()}`, true);
 });
 
@@ -3217,7 +3238,7 @@ function routeStep(j, step, index, lastReported) {
     ? html`<a target="_blank" rel="noopener noreferrer" href="${trackUrl(j)}">${j.trk}</a>`
     : j.trk;
   let detail = '';
-  if (!e) detail = index < lastReported ? ' · not reported' : '';
+  if (!e) detail = index < lastReported ? 'not reported' : '';
   else if (step === 'sent') detail = html` · ${j.carrier} ${tracking}`;
   else if (step === 'delivered') detail = ` · ${j.carrier}${e.t ? `, ${fmtTime(e.t)}` : ''}`;
   else if (step === 'shipped' && e.trk) detail = ` · ${e.trk}`;
@@ -3410,8 +3431,10 @@ function newJob(o) {
      number as typed is kept in jn for display. A removed id is never reused, because the removal is still
      on record for every computer sharing the file. */
   const taken = new Set([...jobs().map((j) => j.id), ...st.removed]);
-  let id = o.job;
-  for (let n = 2; taken.has(id); n++) id = `${o.job} #${n}`;
+  /* Kept short enough that the suffix still fits the length a saved id is held to. */
+  const base = String(o.job).slice(0, 50);
+  let id = base;
+  for (let n = 2; taken.has(id); n++) id = `${base} #${n}`;
 
   const carrier = o.carrier || 'Shop driver';
   const ev = [{ m: 'sent', d: o.sent }];
@@ -3433,7 +3456,7 @@ function newJob(o) {
     open: !o.back,
     exp: o.fee > 0 && o.by ? { fee: o.fee, bought: o.sent, by: o.by } : null,
   };
-  if (id !== o.job) j.jn = o.job;
+  if (id !== base) j.jn = base;
   /* Sent two or more days before the shop started: asking whether it arrived would be noise (see statusOf). */
   if (MODE === 'live' && !o.back && o.sent <= addDays(st.started, -2)) j.pre = true;
   return j;
@@ -3461,12 +3484,12 @@ function openJobForm(editing) {
       )}
       <div class="body">
         <div class="grid2">
-          ${field('job', 'Job number', text('job', editing ? jobNo(editing) : '', editing && 'disabled'))}
+          ${field('job', 'Job number (required)', text('job', editing ? jobNo(editing) : '', editing && 'disabled'))}
           ${field('po', 'PO (optional)', text('po', e.po || ''))}
         </div>
         ${field(
           'proc',
-          'Processor',
+          'Processor (required)',
           html`<input type="text" id="aj_proc" list="dl_proc" value="${e.proc || ''}" />
             <datalist id="dl_proc">${known('proc').map((v) => html`<option value="${v}"></option>`)}</datalist>`,
         )}
@@ -3486,7 +3509,7 @@ function openJobForm(editing) {
           ${field('qty', 'Qty', text('qty', e.qty || '', trusted('inputmode="numeric"')))}
           ${field(
             'carrier',
-            'Sent by',
+            'Carrier',
             html`<select id="aj_carrier">
               ${carriers.map((c) => html`<option ${c === e.carrier && 'selected'}>${c}</option>`)}
             </select>`,
@@ -3494,8 +3517,8 @@ function openJobForm(editing) {
         </div>
         ${field('trk', 'Tracking number (if shipped)', text('trk', e.trk || ''))}
         <div class="grid2">
-          ${field('sent', 'Date sent', html`<input type="date" id="aj_sent" value="${e.sent || T}" />`)}
-          ${field('due', 'Due back', html`<input type="date" id="aj_due" value="${e.due || ''}" />`)}
+          ${field('sent', 'Date sent (required)', html`<input type="date" id="aj_sent" value="${e.sent || T}" />`)}
+          ${field('due', 'Due back (required)', html`<input type="date" id="aj_due" value="${e.due || ''}" />`)}
         </div>
         <div class="grid2">
           ${field('fee', 'Expedite fee, $ (if any)', text('fee', exp.fee || '', trusted('inputmode="decimal"')))}
@@ -3614,7 +3637,10 @@ function jobRow([j, s]) {
     <td>${fmtDate(j.sent)}</td>
     <td class="${overdue ? 'bad' : ''}">${fmtDate(s.due)}</td>
     <td>
-      ${chip(s.k)} ${j.exp && html`<span class="chip t-gray" title="An expedite was paid on this job">Expedite</span>`}
+      ${chip(s.k)}
+      ${j.exp &&
+      !['xmiss', 'xrisk'].includes(s.k) &&
+      html`<span class="chip t-gray extra" title="An expedite was paid on this job">Expedite</span>`}
     </td>
     <td class="small">
       ${latest.m === 'ask' ? `Asked: ${latest.what || ''}` : STEP_LABEL[latest.m]}, ${fmtDate(latest.d)}
@@ -3723,12 +3749,12 @@ function creditCell(x) {
   </button>`;
 }
 
-function byProcessorCard(J) {
-  const rows = expByProc(J, T);
+function byProcessorCard(J, since, period) {
+  const rows = expByProc(J, T, since);
   /* One processor with one expedite is already the whole ledger. */
   if (rows.length < 2 && !(rows[0] && rows[0].n > 1)) return '';
   return html`<div class="card">
-    <h2>By processor <span>· every expedite on file · worst first</span></h2>
+    <h2>By processor <span>· ${period} · worst first</span></h2>
     <table>
       <thead>
         <tr>
@@ -3802,7 +3828,7 @@ function vExp(J) {
       ${count('open') > 0 && tile(fees('open'), 'Still open', plural(count('open'), 'job'))}
     </div>
     ${L.length
-      ? html`${byProcessorCard(J)}
+      ? html`${byProcessorCard(J, showAllExpedites ? '' : monthStart, period)}
           <div class="card">
             <h2>Ledger <span>· ${period}, newest first</span></h2>
             <table>
@@ -3907,23 +3933,20 @@ function scorecard(J) {
     </table>
     <div class="pad small">
       Received is every job received back. On time means back at the shop by the original due date. Days late is the
-      median of the late jobs. Rework and rejected are what you logged when the job came back. ${shopName()}, as of
-      ${fmtDay(T)}, ${T.slice(0, 4)}.
+      median of the late jobs. Rework and rejected are what you logged when the job came back. A working aid, not the
+      quality record: figures are as entered here and unverified. ${shopName()}, as of ${fmtDay(T)}, ${T.slice(0, 4)}.
+      Version 2026-11-19.
     </div>
   </div>`;
 }
 
 function processorRows(name, processes) {
   const back = processes.reduce((a, p) => a + p.n, 0);
-  const onTime = processes.reduce((a, p) => a + p.ontime * p.n, 0) / back;
   const out = processes.reduce((a, p) => a + p.open, 0);
   return html`<tr class="grp">
       <td colspan="7">
         ${name}
-        <span class="small">
-          · ${plural(back, 'job')} back${MODE === 'demo' && ' in 6 months'} · ${Math.round(onTime * 100)}% on time ·
-          ${out} open now
-        </span>
+        <span class="small"> · ${plural(back, 'job')} in these turn times · ${out} open now</span>
       </td>
     </tr>
     ${processes.map(
@@ -3988,7 +4011,8 @@ function vProcs(J) {
     <p class="small">
       "Use in next quote" is the turn the processor made on 4 of every 5 jobs (80th percentile) of the jobs on file. Red
       figures ran past the quote. Expedited jobs are left out, so a rush does not make a processor look faster than it
-      is. Trend compares the oldest jobs with the newest.
+      is, which is why the counts here can be lower than on the scorecard. Trend compares the oldest jobs with the
+      newest.
     </p>`;
 }
 
@@ -4195,8 +4219,12 @@ function applyImport() {
     );
 
   snap();
-  const added = plan.add.map(newJob);
-  st.added.push(...added);
+  /* One at a time: two rows with the same job number must each see the other's id as taken. */
+  const added = [];
+  for (const row of plan.add) {
+    added.push(newJob(row));
+    st.added.push(added[added.length - 1]);
+  }
   for (const { id, back } of plan.close) (st.ev[id] = st.ev[id] || []).push({ m: 'back', d: back });
   for (const { id, to } of plan.move) (st.ev[id] = st.ev[id] || []).push({ m: 'newdate', d: T, t: now(), to });
   st.lastImport = `${T} ${now()}`;
@@ -4216,7 +4244,8 @@ function applyImport() {
       plan.close.length && `${plan.close.length} marked received back`,
       plan.move.length && `${plural(plan.move.length, 'due date')} changed`,
       plan.skip && `${plan.skip} skipped (missing or impossible date)`,
-      alreadyOut && `${alreadyOut} were already out, so they are picked up at the midpoint, not asked about receipt`,
+      alreadyOut &&
+        `${alreadyOut} ${alreadyOut === 1 ? 'was' : 'were'} already out, so they are picked up at the midpoint, not asked about receipt`,
     ]
       .filter(Boolean)
       .join(', ') + '.',
@@ -4381,8 +4410,8 @@ function vSum(J) {
 
    Every write stamps the file with a new revision id. A browser that sees the id it wrote last knows the
    file has not changed and skips the merge. Two browsers writing in the same instant can still overwrite
-   each other; because each keeps its own copy and merges again on the next read, nothing is lost, it only
-   takes one more round to settle. */
+   each other's write; each keeps its own copy and merges again on the next read, so it settles a round
+   later. What a merge cannot repair is listed with mergeState. */
 
 const CAN_SHARE = typeof window.showSaveFilePicker === 'function';
 const SYNC_EVERY_MS = 15000;
@@ -4476,7 +4505,9 @@ async function syncSharedFile() {
     sharedFile.note = e.message || String(e);
   } finally {
     sharedFile.busy = false;
-    if (merged || st.view === 'set') render();
+    /* A redraw would wipe whatever is being typed, so it waits for the next action. */
+    const typing = document.activeElement.closest('#view input, #view textarea, #view select');
+    if (merged && !typing) render();
     else showFileStatus();
   }
 }
@@ -4655,7 +4686,7 @@ function sharingCard() {
         person opens this page and connects that file. The file never leaves your drive.
       </p>
       <p class="row">
-        <button type="button" class="btn pri" id="fnew">Create the shared file</button>
+        <button type="button" class="btn" id="fnew">Create the shared file</button>
         <button type="button" class="btn" id="fopen">Connect to an existing one</button>
       </p>
       <p class="small">
@@ -4668,8 +4699,8 @@ function sharingCard() {
         <span class="small">${note}</span>
       </p>
       <p class="small">
-        Everyone who connects this same file sees the same jobs. Changes are picked up within about 15 seconds, and two
-        people working at once are merged, not overwritten.
+        Everyone who connects this same file sees the same jobs. Changes are picked up within about 15 seconds and
+        merged with your own.
       </p>
       <p class="row">
         ${!ok && html`<button type="button" class="btn pri" id="frec">Reconnect</button>`}
@@ -4844,15 +4875,17 @@ on('click', '#wipe', async () => {
 
 on('click', '#tomode, #bswitch', () => {
   setMode(MODE === 'live' ? 'demo' : 'live');
-  if (MODE === 'live' && !st.shop) show('set');
+  show('today');
   toast(MODE === 'live' ? `Your own jobs. Today is ${fmtDay(T)}.` : 'Back in the demo shop.');
 });
 
 /* it.js: the "For your IT" sheet. It states what the page stores, where, and what leaves the computer, in
-   terms a shop's IT person can check against the browser's own tools.
+   terms a shop's IT person can check against the browser's own tools. Where a line cannot be checked that
+   way and rests on the team's word, the line says so.
 
    This sheet has to stay true. A change to what is stored or what leaves the computer changes this file in
-   the same commit, and the version date (BUILD in ospkit.py). */
+   the same commit, and the version date (BUILD in ospkit.py). A build with the usage signal (usage.js)
+   shows the alternative wording marked USAGE_ENDPOINT. */
 
 function itSection(title, note, rows) {
   return html`<div class="card facts">
@@ -4872,25 +4905,26 @@ function itSection(title, note, rows) {
 }
 
 function vIT() {
+  const usage = !!USAGE_ENDPOINT;
   return html`${pageHead(
       'For your IT',
-      'What this page stores, where, and what leaves the computer. Written so each line can be checked, not taken on trust.',
+      'What this page stores, where, and what leaves the computer. Most lines can be checked in your browser; where one rests on our word, it says so.',
       html`<button type="button" class="btn" data-print>Print</button>`,
     )}
-    <div class="card">
+    <div class="card facts">
       <div class="pad">
         <p>
           <b>Read this first.</b> OSP Watch is an early version built by a four-student senior project team at Cal Poly.
           Nobody has audited it and it holds no certification of any kind. This sheet describes what the page does so
           you can decide where, or whether, it belongs in your own inventory. Version of this page:
-          <b>2026-11-19${USAGE_ENDPOINT && ', with the usage-count option'}</b>.
+          <b>2026-11-19${usage && ', with the usage-count option'}</b>.
         </p>
       </div>
     </div>
     ${itSection('What it is', '', [
       [
         'One file',
-        'A single HTML page. No server of ours, no installer, no browser extension. The page itself has no user accounts. Where a sign-in is used, it sits in front of the page and is run by Cloudflare, not by the page.',
+        'A single HTML page. No server holds your jobs, and there is no installer and no browser extension. The page itself has no user accounts. Where a sign-in is used, it sits in front of the page and is run by Cloudflare, not by the page.',
       ],
       [
         'Third-party code',
@@ -4898,32 +4932,32 @@ function vIT() {
       ],
       [
         'Network',
-        USAGE_ENDPOINT
+        usage
           ? html`The page carries a Content-Security-Policy that tells the browser to refuse every request the page
-              might make except to one address, <code>${new URL(USAGE_ENDPOINT).host}</code>, which is used only for the
-              optional usage counts described under "What leaves the computer", and to run only the one script it was
-              built with, identified by its hash. To check: open developer tools, Network tab, and use the page; with
-              usage counts off, nothing appears after the page itself loads. The policy does not govern links a person
-              clicks.`
+              might make except to one address, <code>${new URL(USAGE_ENDPOINT).host}</code>, used only for the optional
+              usage counts described under "What leaves the computer", and to run only the one script it was built with,
+              identified by its hash. To check: open developer tools, Network tab, and use the page; with usage counts
+              off, nothing appears after the page itself loads. The policy is part of the page, so it describes the copy
+              in front of you. It does not govern links a person clicks.`
           : html`The page carries a Content-Security-Policy that tells the browser to refuse requests the page might
               make (<code>default-src 'none'; connect-src 'none'</code>) and to run only the one script it was built
               with, identified by its hash. To check: open developer tools, Network tab, and use the page; nothing
-              appears after the page itself loads. The policy does not govern links a person clicks, which are listed
-              under "What leaves the computer".`,
+              appears after the page itself loads. The policy is part of the page, so it describes the copy in front of
+              you. It does not govern links a person clicks, which are listed under "What leaves the computer".`,
       ],
       [
         'Where the page comes from',
-        "One of three. (1) Your shop's address behind a sign-in, served by Cloudflare. (2) The public demo copy on GitHub Pages. (3) A copy saved to your own drive and opened from there, which works without internet and never changes until you replace it. The hosted copies change when the team updates them. Whichever is used, the host sees an ordinary web request for the page and never any job data.",
+        "One of three. (1) Your shop's address behind a sign-in, served by Cloudflare from one team member's own account. (2) The public demo copy on GitHub Pages. (3) A copy saved to your own drive and opened from there, which works without internet and never changes until you replace it. Whoever hosts the page sees an ordinary web request for it and never any job data, but does control what code your browser receives, and the team can change a hosted copy. If that matters to you, use the saved copy.",
       ],
     ])}
     ${itSection('What it stores', 'only what a user types or imports', [
       [
         'Per job',
-        'Job number, PO number, processor name, process name, quantity, date sent, date due, carrier, tracking number, expedite fee and date, the dated steps a user logs (delivered, received, shipped, new date), how the job came back (good, for rework, or rejected, with a piece count), and whether it was already out on the day the shop started.',
+        'Job number, PO number, processor name, process name, quantity, date sent, date due, carrier, tracking number, expedite fee and date, the dated steps a user logs (delivered, received, shipped, new date), a dated note each time an email is drafted or copied for the job, how the job came back (good, for rework, or rejected, with a piece count), whether a credit was requested or received, and whether the job was already out on the day the shop started.',
       ],
       [
         'Per shop',
-        'Shop name, the name that signs emails, one contact email per processor, and three numbers for a time estimate.',
+        'Shop name, the name that signs emails, one contact email per processor, three numbers for a time estimate, the day the shop started, the time of the last import, and the numbers of any jobs removed.',
       ],
       [
         'Not stored',
@@ -4931,50 +4965,57 @@ function vIT() {
       ],
       [
         'What not to enter',
-        'Part numbers, drawings, specifications, program names and customer names. The page does not need them. Its fields are free text, so it cannot stop someone typing them; that has to be a rule for the user.',
+        'Enter only your own job and PO numbers, the processor, a generic process name, quantity and dates. Never part numbers, drawing or specification text, contract numbers, program names or customer names. If your job or PO numbers themselves contain any of those, use an alias. The fields are free text, so the page cannot stop someone typing them; that has to be a rule for the user.',
       ],
     ])}
     ${itSection('Where it is stored', '', [
       [
         'This browser',
-        html`The browser's local storage for this page (keys beginning <code>osp-watch-</code>), on this computer, in
-          this browser profile. Plain text, not encrypted by the page. Protected by whatever protects the computer and
-          the user's login. If sharing is turned on, the browser also keeps a reference to the shared file in an
-          IndexedDB database named <code>osp-watch</code>; it holds no job data.`,
+        html`The browser's local storage (keys beginning <code>osp-watch-</code>), on this computer, in this browser
+          profile. Plain text, not encrypted by the page. Protected by whatever protects the computer and the user's
+          login. Opened from the hosted address, that storage belongs to this page alone. Opened from a file on disk,
+          Chrome shares one storage area between all pages opened from disk, so another local page could read it. If
+          sharing is turned on, the browser also keeps a reference to the shared file in an IndexedDB database named
+          <code>osp-watch</code>; it holds no job data.`,
       ],
       [
         'Shared file (optional)',
-        "If the office turns on sharing in Setup, one JSON file in a folder you choose on your own drive. Chrome or Edge only. The browser asks the user for permission to that one file. Plain text; protected by your drive's own permissions. Whatever the page reads back from that file, or from a backup, is checked field by field before it is used.",
+        "If the office turns on sharing in Setup, one JSON file in a folder you choose on your own drive. Chrome or Edge only. The browser asks the user for permission to that one file. Plain text; protected by your drive's own permissions. Whatever the page reads back from that file, or from a backup, is checked for expected types and lengths before it is used. That is not a malware scan.",
       ],
       [
         'Backups and exports',
         'Files the user downloads on purpose: a JSON backup and a CSV of jobs. They go wherever the user saves them.',
       ],
       ['Who owns it', 'You do. It is your data on your computer or your drive.'],
-      ['The team', 'The student team has no copy of any of it and no way to reach it.'],
-    ])}
-    ${itSection('What leaves the computer', 'three things, each started by the user', [
       [
-        'Drafted emails',
-        '"Open in Outlook" hands the draft to the computer\'s own mail program through a mailto link. The message is sent from the user\'s mailbox like any other. The page never connects to a mailbox.',
+        'The team',
+        `The team has no copy unless you send us one, and this page sends ${usage ? 'no job data' : 'none'}. This rests on our word and on the Network row above.`,
       ],
-      [
-        'Carrier tracking',
-        'The "Track" link opens the UPS or FedEx website in a new tab with that tracking number in the address. The page asks the browser not to tell that site where the link came from.',
-      ],
-      ['Printing and downloads', 'The call sheet, the monthly summary, the scorecard, backups and exports.'],
-      ...(USAGE_ENDPOINT ? [USAGE_FACT] : []),
     ])}
+    ${itSection(
+      'What leaves the computer',
+      usage ? 'three things started by the user, and one optional signal' : 'three things, each started by the user',
+      [
+        [
+          'Drafted emails',
+          '"Open in Outlook" hands the draft to the computer\'s own mail program through a mailto link. The message is sent from the user\'s mailbox like any other. The page never connects to a mailbox.',
+        ],
+        [
+          'Carrier tracking',
+          'The "Track" link opens the UPS or FedEx website in a new tab with that tracking number in the address. The page asks the browser not to tell that site where the link came from.',
+        ],
+        ['Printing and downloads', 'The call sheet, the monthly summary, the scorecard, backups and exports.'],
+        ...(usage ? [USAGE_FACT] : []),
+      ],
+    )}
     ${itSection('Common questions', '', [
       [
         'Does a vendor hold our data?',
-        USAGE_ENDPOINT
-          ? 'Not your jobs. Nothing about a job is sent to the team or to any service. If someone switches on usage counts in Setup, the team receives the counts listed above and nothing else.'
-          : 'No. Nothing about your jobs is sent to the team or to any service.',
+        `No. Nothing about your jobs is sent to the team or to any service. The one thing that reaches an outside site is a tracking number, to UPS or FedEx, when a user clicks Track.${usage ? ' If someone switches on usage counts in Setup, the team receives the counts listed above and nothing else.' : ''}`,
       ],
       [
         'Who can see that we signed in?',
-        'On the signed-in address only: Cloudflare checks the email address by sending it a one-time code, and it and the student team can see the email address and time of each sign-in. The current plan keeps that record for 24 hours. It contains nothing about jobs.',
+        "On the signed-in address only: Cloudflare checks the email address by sending it a one-time code. Cloudflare and the student team can see the email address, network address, country and time of each sign-in. Cloudflare's free plan lists 24 hours for that log; the team cannot guarantee that, and Cloudflare may keep a record of each user for longer. None of it is about jobs.",
       ],
       [
         'Does it sign in to Microsoft 365?',
@@ -4987,7 +5028,7 @@ function vIT() {
       ],
       [
         'Is there an audit log?',
-        'Each logged step carries its date and time. It does not record which person logged it.',
+        'No. Each logged step carries its date and time, but not who logged it, and a step can be undone or a job edited afterwards.',
       ],
       [
         'How do we get our data out?',
@@ -4995,11 +5036,11 @@ function vIT() {
       ],
       [
         'What if a flaw is found in the page?',
-        'The team tells the person who set this up, fixes it, and changes the version date at the top of this sheet. There is no copy of your data on our side that a flaw could expose.',
+        'The team tells the person who set this up, fixes it, and changes the version date at the top of this sheet. We are students: no response time is promised, and no support is promised after the project ends. A copy saved to your drive keeps working either way.',
       ],
       [
         'How do we remove it?',
-        'Setup, "Erase my jobs", then clear this site\'s data in the browser. Delete the shared file and any backups. Nothing remains elsewhere.',
+        `Setup, "Erase my jobs", then clear this site's data in the browser. Delete the shared file and any backups. What remains elsewhere: emails already sent, printouts, any backup of the computer itself, and Cloudflare's sign-in records${usage ? ', and any usage counts already sent' : ''}.`,
       ],
       [
         'What if we want replies read automatically?',
@@ -5235,8 +5276,8 @@ on('click', '#reset', () => {
   toast('Demo reset to this morning.');
 });
 
-/* A page left open overnight would go on stamping yesterday's date. When the window is looked at again on a
-   new day, live mode moves to that day. */
+/* A page left open overnight would go on stamping yesterday's date, so live mode checks the date each minute
+   and whenever the window is looked at again. */
 function rollOverToToday() {
   if (MODE !== 'live' || document.hidden || localToday() === T) return;
   T = localToday();
@@ -5247,6 +5288,7 @@ function rollOverToToday() {
 }
 document.addEventListener('visibilitychange', rollOverToToday);
 addEventListener('focus', rollOverToToday);
+setInterval(rollOverToToday, 60 * 1000);
 
 render();
 startSharing();
