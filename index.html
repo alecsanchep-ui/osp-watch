@@ -9,7 +9,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser runs only the one script and one stylesheet below, identified by hash, and refuses any
      request the page tries to make. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-15/A6JqCfJ/8fUkZz6+JRX2MutpeLGlUbP66hU4Odao='; style-src 'sha256-ykxaHrusKwqH9+g+WJBcJYhdjRBLVzXcFTmt0afaPGs='; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-15/A6JqCfJ/8fUkZz6+JRX2MutpeLGlUbP66hU4Odao='; style-src 'sha256-/PzsDePcbNLlNEM6uflkmaW6P6pdy0KEeZTCXRMpSsI='; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>OSP Watch</title>
 <style>/* Plain office software: flat, square, dense, with visible gridlines. Today reads as a mail list with a
    reading pane, Jobs as a spreadsheet, and the running totals sit in a status bar at the foot of the window.
@@ -572,21 +572,27 @@ tr.sel:hover td {
 .inbox .card + .card h2 {
   display: flex;
 }
+/* Fixed column widths, so the list always fits its pane and long text wraps inside its own column. */
+.msgs {
+  table-layout: fixed;
+}
+.msgs th:nth-child(1) {
+  width: 22%;
+}
+.msgs th:nth-child(2) {
+  width: 24%;
+}
+.msgs th:nth-child(4) {
+  width: 78px;
+}
 .msgs td {
   vertical-align: top;
-}
-.msgs .sub {
-  white-space: nowrap;
+  white-space: normal;
 }
 /* Room on the right for the row's buttons, so they never sit on the text. */
 .msgs .needs {
   position: relative;
-  width: 55%;
   padding-right: 100px;
-  white-space: normal;
-}
-.msgs .needs .sub {
-  white-space: normal;
 }
 .from {
   font-weight: 600;
