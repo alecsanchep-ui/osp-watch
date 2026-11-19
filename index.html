@@ -269,8 +269,11 @@ function draftFor(j,s,T,sign){
  default:sub='Job '+id+': which step is it at?';
   b='Our '+what+' for job '+id+ref+(j.process?' ('+j.process+')':'')+(r?' reached you on '+fmtW(r.d)+' and':'')+' are due back '+fmtW(s.due)+'. Which step are they at right now: received, masked or racked, in process, processed, or in inspection?'
  }
- return {subject:sub,body:hi+b+sg}
+ return {subject:sub,body:hi+b+sg,core:b}
 }
+function draftForProc(items,T,sign){ /* one email for every job at one processor that needs a word today */
+ const p=items[0][0].proc,ids=items.map(([j])=>j.jn||j.id);
+ return {subject:items.length+' jobs: quick status check ('+ids.join(', ')+')',body:'Hi '+p+' team,\n\nWe have '+items.length+' jobs with you that need a quick word today.\n\n'+items.map(([j,s],i)=>(i+1)+'. '+draftFor(j,s,T,sign).core).join('\n\n')+'\n\nThank you,\n'+(sign||'Purchasing, Example Shop')}}
 function xlDate(n){n=Math.floor(+n);return n>20000&&n<80000?S(n-25569):null} /* Excel day serial -> yyyy-mm-dd */
 function expByProc(J,T){const g={};for(const x of ledger(J,T)){const p=g[x.proc]=g[x.proc]||{proc:x.proc,n:0,fees:0,met:0,missed:0,open:0,n_missed:0};p.n++;p.fees+=x.fee;p[x.res]+=x.fee;if(x.res==='missed')p.n_missed++}
  return Object.values(g).sort((a,b)=>b.missed-a.missed||b.fees-a.fees)}
@@ -425,7 +428,9 @@ document.addEventListener('click',e=>{if(e.target.closest('[data-close]'))closeP
 let cur=null;
 function openDraft(id,credit){
  const j=job(id),s=statusOf(j,T),d=draftFor(j,credit?{k:'credit'}:s,T,signText()),to=contactFor(j.proc);cur={id,credit,proc:j.proc};
+ const grp=credit||!s.action?[]:jobs().filter(isOpen).filter(g=>g.proc===j.proc).map(g=>[g,statusOf(g,T)]).filter(([g,gs])=>gs.action&&(g.id===id||!gs.asked));
  openPanel('<header><div><h3>'+(credit?'Credit request':'Draft email')+' · Job '+jn(j)+'</h3><div class="small">'+esc(j.proc)+' · '+esc(j.process)+(j.qty?' · '+j.qty+' pcs':'')+'</div><div style="margin-top:6px">'+(credit?'<span class="chip t-red">Expedite missed</span>':chip(s.k))+'</div></div><button class="x" type="button" data-close aria-label="Close">×</button></header>'+
+ (grp.length>1?'<div class="note" id="grpnote" style="margin:12px 16px 0"><b>'+esc(j.proc)+' has '+grp.length+' jobs on today\'s list.</b> <button type="button" class="btn sm" id="dgrp">One email for all '+grp.length+'</button></div>':'')+
  '<div class="body"><div class="field"><label>To</label><input type="text" id="dto" placeholder="Processor\'s email (remembered for next time)" value="'+esc(to)+'"></div>'+
  '<div class="field"><label>Subject</label><input type="text" id="dsub" value="'+esc(d.subject)+'"></div>'+
  '<div class="field"><label>Message</label><textarea id="dbody" rows="11">'+esc(d.body)+'</textarea></div>'+
@@ -438,6 +443,7 @@ function openDraft(id,credit){
  (credit?'<button type="button" class="btn pri" id="dcred">'+(st.credit[id]==='requested'?'Mark credit received':'Mark credit requested')+'</button>':'<button type="button" class="btn pri" id="dans">Mark answered</button>')+'</div>');
  const upd=()=>{$('#dmail').href=mailto($('#dto').value,{subject:$('#dsub').value,body:$('#dbody').value})};upd();
  ['#dto','#dsub','#dbody'].forEach(s=>$(s).addEventListener('input',upd));
+ if($('#dgrp'))$('#dgrp').onclick=()=>{const g=draftForProc(grp,T,signText());$('#dsub').value=g.subject;$('#dbody').value=g.body;cur.group=grp.map(([g])=>g.id);upd();$('#grpnote').innerHTML='<b>One email covering jobs '+grp.map(([g])=>jn(g)).join(', ')+'.</b> Sending it marks all of them as asked. Log each answer on its own job.'};
  $('#dto').addEventListener('change',()=>{const v=$('#dto').value.trim();if(v&&/@/.test(v)){st.contacts[j.proc]=v;save()}});
  $('#dcopy').onclick=()=>{const t='Subject: '+$('#dsub').value+'\n\n'+$('#dbody').value;
   const done=()=>{asked('Draft copied');toast('Copied. Paste it into a new email.')};
@@ -447,7 +453,7 @@ function openDraft(id,credit){
  if(credit)$('#dcred').onclick=()=>{st.credit[id]=st.credit[id]==='requested'?'credited':'requested';save();closePanel();render();toast(st.credit[id]==='credited'?'Marked credited: Job '+id:'Credit request logged: Job '+id)};
  else{$('#dans').onclick=()=>{const p=$('#pick');p.hidden=!p.hidden;if(!p.hidden)p.scrollIntoView({block:'nearest'})};wirePick(id)}
 }
-function asked(what){if(!cur)return;const to=($('#dto')||{}).value;if(to&&to.trim()&&to.trim()!==contactFor(cur.proc)){st.contacts[cur.proc]=to.trim();save()}if(cur.credit){if(!st.credit[cur.id]){st.credit[cur.id]='requested';save()}}else addEv(cur.id,{m:'ask',what});render()}
+function asked(what){if(!cur)return;const to=($('#dto')||{}).value;if(to&&to.trim()&&to.trim()!==contactFor(cur.proc)){st.contacts[cur.proc]=to.trim();save()}if(cur.credit){if(!st.credit[cur.id]){st.credit[cur.id]='requested';save()}}else (cur.group||[cur.id]).forEach(i=>addEv(i,{m:'ask',what}));render()}
 function wirePick(id){const rp=$('#rp');if(rp)rp.oninput=()=>{const r=parseReply(rp.value,T),n=$('#rpn');document.querySelectorAll('#panel [data-ms]').forEach(b=>b.classList.toggle('pri',!!r.m&&b.dataset.ms===r.m));
   if(r.date)$('#nd').value=r.date;if(r.trk)$('#trk').value=r.trk;
   const bits=[r.m?MS[r.m]:'',r.trk?'tracking '+r.trk:'',r.date?'date given: '+fmtW(r.date):''].filter(Boolean);n.hidden=!rp.value.trim();
@@ -749,7 +755,7 @@ function tourGo(i){if(i<0)return;if(i>=TOUR.length){tourEnd();return}
   document.body.insertAdjacentHTML('beforeend','<div class="tourblock" id="tourblock"></div><div class="tourhole" id="tourhole"></div><div class="tourpop" id="tourpop" role="dialog" aria-modal="true" aria-label="Tour"></div>')}
  tourI=i;const s=TOUR[i];closePanel();todayFilter='';st.view=s.v;render();if(s.pre)s.pre();
  $('#tourpop').innerHTML='<div class="tn">Stop '+(i+1)+' of '+TOUR.length+'</div><h3>'+s.t+'</h3><p>'+s.x+'</p><div class="ta"><button type="button" class="skip" data-tour="end">'+(i===TOUR.length-1?'Close':'Skip the tour')+'</button><span style="flex:1"></span>'+(i?'<button type="button" class="btn sm" data-tour="back">Back</button>':'')+'<button type="button" class="btn pri sm" data-tour="next">'+(i===TOUR.length-1?'Done':'Next')+'</button></div>';
- const el=document.querySelector(s.sel);if(el&&el.id!=='panel'&&el.scrollIntoView)el.scrollIntoView({block:el.offsetHeight>innerHeight*.55?'start':'center'});
+ const el=document.querySelector(s.sel);{const V=$('#view');if(el&&V.contains(el)){const r=el.getBoundingClientRect(),vr=V.getBoundingClientRect();V.scrollTop+=r.top-vr.top-(r.height>vr.height*.55?8:Math.max(8,(vr.height-r.height)/2))}} /* vertical only: a wide table must not drag the page sideways */
  tourPlace();setTimeout(tourPlace,180);const n=$('#tourpop [data-tour="next"]');if(n)n.focus()}
 function tourEnd(){if(tourI<0)return;tourI=-1;['tourblock','tourhole','tourpop'].forEach(id=>{const e=$('#'+id);if(e)e.remove()});try{localStorage.setItem(TOURKEY,'1')}catch(e){}
  closePanel();if(tourPrev&&tourPrev.mode!==MODE)setMode(tourPrev.mode);else{st.view='today';render()}tourPrev=null}
@@ -757,5 +763,5 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-tour]');if
 document.addEventListener('keydown',e=>{if(tourI<0)return;e.stopImmediatePropagation();if(e.key==='Escape')tourEnd();else if(e.key==='ArrowRight')tourGo(tourI+1);else if(e.key==='ArrowLeft')tourGo(tourI-1)},true);
 addEventListener('resize',()=>{if(tourI>=0)tourPlace()});
 $('#btour').onclick=()=>tourGo(0);
-{let seen=true;try{seen=!!localStorage.getItem(TOURKEY)}catch(e){}if(!seen&&MODE==='demo'&&!navigator.webdriver&&!matchMedia('print').matches)setTimeout(()=>tourGo(0),400)}
+{let seen=true;try{seen=!!localStorage.getItem(TOURKEY)}catch(e){}if(!seen&&MODE==='demo'&&innerWidth>=760&&!navigator.webdriver&&!matchMedia('print').matches)setTimeout(()=>tourGo(0),400)}
 </script></body></html>
