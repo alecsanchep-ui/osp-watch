@@ -449,63 +449,6 @@ th.n,
   background: var(--gray-bg);
   color: var(--mute);
 }
-/* route strip: steps the processor reported, and where today falls in the turn */
-.rt {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font: 500 13.5px var(--mono);
-}
-.rt .d {
-  width: 48px;
-}
-.rt .d:last-child {
-  text-align: right;
-}
-.strip {
-  position: relative;
-  display: flex;
-  gap: 2px;
-  width: 106px;
-  flex: none;
-  padding: 5px 0;
-}
-.strip i {
-  flex: 1;
-  height: 9px;
-  border: 1px solid var(--line);
-  background: #fff;
-}
-.strip i.f {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-.strip b {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  margin-left: -1px;
-  background: var(--ink);
-}
-.strip b:before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -3px;
-  border: 4px solid transparent;
-  border-top-color: var(--ink);
-}
-.strip.behind b {
-  background: var(--red);
-}
-.strip.behind b:before {
-  border-top-color: var(--red);
-}
-.strip.done i {
-  background: var(--green);
-  border-color: var(--green);
-}
 .btn {
   border: 1px solid var(--line);
   background: var(--sheet);
@@ -878,18 +821,6 @@ textarea {
 .bad {
   color: var(--red);
   font-weight: 600;
-}
-.legend {
-  display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
-  align-items: center;
-  font-size: 13px;
-  color: var(--mute);
-  margin: 0 0 6px;
-}
-.legend .strip {
-  width: 60px;
 }
 body.drag:after {
   content: 'Drop the file to import it';
@@ -2486,40 +2417,6 @@ document.addEventListener('click', (e) => {
   }
 });
 
-const SEQ = ['delivered', 'received', 'racked', 'in_process', 'processed', 'inspected', 'shipped'];
-function route(j, s) {
-  let at = -1;
-  SEQ.forEach((m, i) => {
-    if (j.ev.some((e) => e.m === m)) at = i;
-  });
-  if (at < 1 && j.ev.some((e) => PROC_M.includes(e.m) || e.m === 'newdate')) at = 1;
-  const back = j.ev.some((e) => e.m === 'back'),
-    f = Math.max(0, Math.min(1, (D(T) - D(j.sent)) / Math.max(1, D(s.due) - D(j.sent)))),
-    behind = !back && f * 7 > at + 2.5;
-  return (
-    '<div class="rt" title="' +
-    (back
-      ? 'Received back'
-      : (at < 0 ? 'Nothing reported yet' : 'Last reported: ' + MS[SEQ[at]].toLowerCase()) +
-        '. ' +
-        Math.round(f * 100) +
-        '% of the time is used.') +
-    '"><span class="d">' +
-    fmt(j.sent) +
-    '</span><span class="strip' +
-    (back ? ' done' : behind ? ' behind' : '') +
-    '">' +
-    SEQ.map((m, i) => '<i' + (back || i <= at ? ' class="f"' : '') + '></i>').join('') +
-    (back ? '' : '<b style="left:' + Math.round(f * 100) + '%"></b>') +
-    '</span><span class="d' +
-    (!back && T > s.due ? ' bad' : '') +
-    '">' +
-    fmt(s.due) +
-    '</span></div>'
-  );
-}
-const LEGEND =
-  '<p class="legend"><span>Reading the strip:</span><span class="rt"><span class="strip"><i class="f"></i><i class="f"></i><i></i><i></i></span></span><span>filled = steps the processor has reported, from delivered to shipped back</span><span>▼ = today, between the date sent and the date due</span><span class="bad">red ▼ = time is running ahead of the work</span></p>';
 function setupCard(J) {
   if (MODE !== 'live' || st.setupDone) return '';
   const steps = [
@@ -2761,7 +2658,6 @@ function vToday(J) {
           .join('') +
         '</tbody></table></div>'
       : '') +
-    LEGEND +
     '<p class="small">Delivery times come from the carrier\'s tracking page or your driver\'s drop-off; in this early version you mark them, they are not looked up automatically. Jobs your own driver drops off count as delivered the day they go out. Every check asks the processor for a physical step, not "are we on track?".</p></div>' +
     sheet
   );
@@ -4956,7 +4852,7 @@ const TOUR = [
     v: 'today',
     sel: '#view tr.click[data-job]',
     t: 'Each job says why it is here',
-    x: 'Delivered but nobody confirmed receipt. Halfway through the turn. Due in two days with no ship notice. The strip shows the last step the processor reported.',
+    x: 'Delivered but nobody confirmed receipt. Halfway through the turn. Due in two days with no ship notice. Select one and it opens beside the list, like a message.',
   },
   {
     v: 'today',
@@ -4972,7 +4868,7 @@ const TOUR = [
     v: 'jobs',
     sel: '#view table',
     t: 'Everything that is out',
-    x: 'Every open job at every processor, with where it stands between sent and due. Filter by processor or status, or search a job number.',
+    x: 'Every open job at every processor, one line each, like a spreadsheet. Click a column heading to sort, filter by processor or status, or search a job number.',
   },
   {
     v: 'exp',
