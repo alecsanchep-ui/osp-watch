@@ -9,7 +9,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser runs only the one script and one stylesheet below, identified by hash, and refuses any
      request the page tries to make. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-GMEnNcM/gs0+mQAteIS0IZDCtkDB//NiKZnUp2rNe/g='; style-src 'sha256-v/td01/zsA+Ytnddh7hTskbj7BWTJKyWPtQlnggTtQ4='; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7xlih1FdA3f1TsfRn06waPAwZiXlaR9GkeKCh8YHQBA='; style-src 'sha256-v/td01/zsA+Ytnddh7hTskbj7BWTJKyWPtQlnggTtQ4='; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>OSP Watch</title>
 <style>/* Plain office software: flat, square, dense, with visible gridlines. Today reads as a mail list with a
    reading pane, Jobs as a spreadsheet, and the running totals sit in a status bar at the foot of the window.
@@ -4929,6 +4929,7 @@ function vIT() {
         'Backups and exports',
         'Files the user downloads on purpose: a JSON backup and a CSV of jobs. They go wherever the user saves them.',
       ],
+      ['Who owns it', 'You do. It is your data on your computer or your drive.'],
       ['The team', 'The student team has no copy of any of it and no way to reach it.'],
     ])}
     ${itSection('What leaves the computer', 'three things, each started by the user', [
@@ -4960,6 +4961,14 @@ function vIT() {
       [
         'Is there an audit log?',
         'Each logged step carries its date and time. It does not record which person logged it.',
+      ],
+      [
+        'How do we get our data out?',
+        'Setup has two buttons: "Download backup" saves everything as one JSON file, and "Export jobs to CSV" saves the job list for Excel.',
+      ],
+      [
+        'What if a flaw is found in the page?',
+        'The team tells the person who set this up, fixes it, and changes the version date at the top of this sheet. There is no copy of your data on our side that a flaw could expose.',
       ],
       [
         'How do we remove it?',
