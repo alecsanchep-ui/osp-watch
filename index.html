@@ -9,32 +9,29 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser runs only the one script and one stylesheet below, identified by hash, and refuses any
      request the page tries to make. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-4lPQwgkoUxUCNUNqqne9Z6ZJXjmGybo/Ma/RksilbNs='; style-src 'sha256-PYUvMNPiCRumefddWoBNW2pxKDq9IgWiyPMNr2tmi5s='; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-15/A6JqCfJ/8fUkZz6+JRX2MutpeLGlUbP66hU4Odao='; style-src 'sha256-ykxaHrusKwqH9+g+WJBcJYhdjRBLVzXcFTmt0afaPGs='; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>OSP Watch</title>
-<style>/* The layout borrows from the office software these users already work in: Today is a mail inbox with a
-   reading pane, Jobs is a spreadsheet. Neutral grays, one blue accent, colour only where a job is in trouble.
-   System fonts only. */
+<style>/* Plain office software: flat, square, dense, with visible gridlines. Today reads as a mail list with a
+   reading pane, Jobs as a spreadsheet, and the running totals sit in a status bar at the foot of the window.
+   One blue accent; colour otherwise only where a job is in trouble. System fonts only. */
 
 :root {
-  --plate: #f5f5f5;
   --sheet: #fff;
-  --bg: #fafafa;
-  --ink: #242424;
-  --mute: #616161;
+  --chrome: #f3f3f3;
+  --ink: #1f1f1f;
+  --mute: #5c5c5c;
   --faint: #707070;
-  --line: #d1d1d1;
-  --hair: #ebebeb;
+  --line: #c8c8c8;
+  --grid: #e1e1e1;
+  --hover: #f0f6fc;
+  --selected: #cfe4fa;
   --accent: #0f6cbd;
   --accent-dark: #115ea3;
-  --accent-bg: #ebf3fc;
   --red: #c50f1f;
-  --red-bg: #fdf3f4;
-  --amber: #835c00;
+  --amber: #b07c00;
   --amber-bg: #fff4ce;
   --amber-line: #f2c661;
   --green: #107c10;
-  --green-bg: #f1faf1;
-  --gray-bg: #f0f0f0;
   --ui: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -51,9 +48,9 @@ body {
 body {
   display: flex;
   flex-direction: column;
-  background: var(--plate);
+  background: var(--sheet);
   color: var(--ink);
-  font: 14px/1.45 var(--ui);
+  font: 13px/1.4 var(--ui);
   font-variant-numeric: tabular-nums;
 }
 button,
@@ -68,16 +65,16 @@ a {
 }
 :focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 select,
 input[type='text'],
 input[type='search'],
 input[type='date'],
 textarea {
+  padding: 4px 7px;
   border: 1px solid var(--line);
-  border-radius: 4px;
-  padding: 6px 9px;
+  border-radius: 2px;
   background: var(--sheet);
 }
 select:focus,
@@ -90,27 +87,29 @@ textarea {
   resize: vertical;
 }
 table {
-  border-collapse: collapse;
   width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  padding: 5px 9px;
+  border: 1px solid var(--grid);
+  text-align: left;
+  white-space: nowrap;
 }
 th {
   position: sticky;
   top: 0;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--hair);
-  background: var(--sheet);
-  color: var(--mute);
-  font: 600 12px var(--ui);
-  text-align: left;
-  white-space: nowrap;
+  background: var(--chrome);
+  font-weight: 600;
 }
-td {
-  padding: 9px 12px;
-  border-bottom: 1px solid var(--hair);
-  vertical-align: middle;
-  white-space: nowrap;
+tr > :first-child {
+  border-left: 0;
 }
-tr:last-child td {
+tr > :last-child {
+  border-right: 0;
+}
+tbody tr:last-child td {
   border-bottom: 0;
 }
 
@@ -129,14 +128,9 @@ tr:last-child td {
 .n {
   text-align: right;
 }
-td.n,
-th.n,
-.kv .n {
-  font-size: 14.5px;
-}
 .small {
-  font-size: 13px;
   color: var(--mute);
+  font-size: 12px;
 }
 .muted {
   color: var(--mute);
@@ -153,12 +147,13 @@ th.n,
   font-weight: 600;
 }
 .jobcol {
-  width: 110px;
+  width: 100px;
 }
 .sub {
   display: block;
-  font-size: 13px;
   color: var(--mute);
+  font-size: 12px;
+  white-space: normal;
 }
 .short {
   width: 90px;
@@ -177,89 +172,89 @@ th.n,
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border: 1px solid var(--line);
-  border-radius: 4px;
+  padding: 3px 11px;
+  border: 1px solid #adadad;
+  border-radius: 2px;
   background: var(--sheet);
   color: var(--ink);
-  font: 400 13.5px var(--ui);
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
 }
 .btn:hover {
-  background: var(--plate);
+  border-color: var(--accent);
+  background: var(--hover);
 }
 .btn.pri {
   border-color: var(--accent);
   background: var(--accent);
   color: #fff;
-  font-weight: 600;
 }
 .btn.pri:hover {
   border-color: var(--accent-dark);
   background: var(--accent-dark);
 }
 .btn.sm {
-  padding: 4px 9px;
+  padding: 1px 8px;
   font-size: 12px;
 }
+/* A status is a small coloured square and its name, as a category is marked in a mail list. */
 .chip {
-  display: inline-block;
-  padding: 0 8px;
-  border-radius: 10px;
-  font: 600 12px/1.6 var(--ui);
   white-space: nowrap;
 }
+.chip::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  background: #a6a6a6;
+}
 .t-red {
-  background: var(--red-bg);
   color: var(--red);
+  font-weight: 600;
 }
-.t-amber {
-  background: var(--amber-bg);
-  color: var(--amber);
+.t-red::before {
+  background: var(--red);
 }
-.t-blue {
-  background: var(--accent-bg);
-  color: var(--accent);
+.t-amber::before {
+  background: var(--amber);
 }
-.t-green {
-  background: var(--green-bg);
-  color: var(--green);
+.t-blue::before {
+  background: var(--accent);
+}
+.t-green::before {
+  background: var(--green);
 }
 .t-gray {
-  background: var(--gray-bg);
   color: var(--mute);
 }
 .empty {
-  padding: 28px;
+  padding: 24px;
   color: var(--mute);
   text-align: center;
 }
 .note {
   margin-top: 10px;
-  padding: 8px 10px;
-  border-left: 3px solid var(--line);
-  background: var(--bg);
+  padding: 6px 9px;
+  border: 1px solid var(--grid);
+  background: var(--chrome);
   color: var(--mute);
-  font-size: 13px;
+  font-size: 12px;
 }
 .note.inset {
-  margin: 12px 16px 0;
+  margin: 10px 14px 0;
 }
 .box {
   margin-top: 12px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: 1px solid var(--line);
-  border-radius: 4px;
 }
 .kv {
   display: grid;
-  grid-template-columns: 130px 1fr;
-  gap: 4px 10px;
-  margin-bottom: 14px;
-  font-size: 14.5px;
+  grid-template-columns: 120px 1fr;
+  gap: 3px 10px;
+  margin-bottom: 12px;
 }
 .kv > :nth-child(odd) {
   color: var(--mute);
@@ -274,109 +269,57 @@ th.n,
 .grid2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 12px;
 }
 
-/* ---------- frame: banner, top bar, navigation ---------- */
+/* ---------- frame: banner, top bar, navigation, status bar ---------- */
 
 .banner {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 3px 16px;
+  gap: 12px;
+  padding: 3px 12px;
   border-bottom: 1px solid var(--amber-line);
   background: var(--amber-bg);
-  font-size: 12.5px;
+  font-size: 12px;
 }
 .banner b {
-  font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
 }
 .banner button {
   flex: none;
-  padding: 2px 10px;
-  border: 1px solid var(--line);
-  border-radius: 4px;
+  padding: 1px 9px;
+  border: 1px solid #adadad;
+  border-radius: 2px;
   background: var(--sheet);
-  font-size: 12.5px;
   white-space: nowrap;
   cursor: pointer;
 }
 .banner button:hover {
-  background: var(--plate);
+  border-color: var(--accent);
 }
 .tb {
   display: flex;
   align-items: center;
-  min-height: 48px;
+  gap: 16px;
+  min-height: 40px;
+  padding: 0 14px;
   background: var(--accent);
   color: #fff;
 }
-.tb > div {
-  flex: 0 1 auto;
-  min-width: 0;
-  padding: 6px 14px;
-}
 .tb .name {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 10px;
-  width: 200px;
+  width: 150px;
+  font-size: 15px;
+  font-weight: 600;
 }
-.tb .name b {
-  font: 600 16px/1 var(--ui);
-}
-.logo {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.18);
-}
-.tb .search {
-  flex: 1 0 260px;
-  max-width: 460px;
-}
-.tb .search input {
-  width: 100%;
-  padding: 7px 12px;
+.tb input {
+  width: 340px;
+  max-width: 40%;
   border: 0;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--ink);
 }
-.tb .search input:focus {
-  background: #fff;
+.tb input:focus {
   outline: 2px solid #fff;
-  outline-offset: 1px;
-}
-.tb .cap {
-  display: block;
-  color: rgba(255, 255, 255, 0.9);
-  font: 400 12px/1.2 var(--ui);
-  white-space: nowrap;
-}
-.tb .val {
-  display: block;
-  max-width: 210px;
-  overflow: hidden;
-  font: 600 13.5px/1.3 var(--ui);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-/* The shared file has stopped saving: the cell turns amber and reconnects when clicked. */
-.tb .alarm {
-  cursor: pointer;
-}
-.tb .alarm .val {
-  padding: 0 6px;
-  border-radius: 3px;
-  background: var(--amber-bg);
-  color: var(--ink);
 }
 .app {
   display: flex;
@@ -384,118 +327,108 @@ th.n,
   min-height: 0;
 }
 nav {
-  display: flex;
   flex: none;
-  flex-direction: column;
-  width: 200px;
-  padding: 8px 6px;
+  width: 180px;
+  padding: 6px 0;
   border-right: 1px solid var(--line);
-  background: var(--plate);
+  background: var(--chrome);
 }
 nav button {
-  position: relative;
   display: flex;
-  align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 8px;
   width: 100%;
-  padding: 7px 10px;
+  padding: 5px 14px;
   border: 0;
-  border-radius: 4px;
   background: none;
   text-align: left;
   cursor: pointer;
 }
 nav button:hover {
-  background: var(--hair);
+  background: #e6e6e6;
 }
 nav button[aria-current='page'] {
-  background: var(--accent-bg);
+  background: var(--selected);
   font-weight: 600;
 }
-nav button[aria-current='page']::before {
-  content: '';
-  position: absolute;
-  top: 7px;
-  bottom: 7px;
-  left: 0;
-  width: 3px;
-  border-radius: 2px;
-  background: var(--accent);
-}
-nav svg {
-  flex: none;
-  opacity: 0.75;
-}
 nav .badge {
-  margin-left: auto;
   color: var(--accent);
-  font: 600 13px/20px var(--ui);
+  font-weight: 600;
 }
 nav .badge.n {
   color: var(--mute);
   font-weight: 400;
 }
-nav .foot {
-  margin-top: auto;
-  padding: 10px 14px 0;
-  border-top: 1px solid var(--line);
-  color: var(--mute);
-  font-size: 12px;
-}
-nav kbd {
-  padding: 0 4px;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  background: var(--sheet);
-  font: 600 11px var(--ui);
-}
 main {
   flex: 1;
   overflow: auto;
-  padding: 16px 20px 32px;
-  background: var(--bg);
+  padding: 12px 16px 24px;
+}
+.status {
+  display: flex;
+  gap: 20px;
+  padding: 2px 12px;
+  border-top: 1px solid var(--line);
+  background: var(--chrome);
+  color: var(--mute);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.status b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.status kbd {
+  padding: 0 3px;
+  border: 1px solid var(--line);
+  background: var(--sheet);
+  font: inherit;
+}
+/* The shared file has stopped saving: the cell turns amber and reconnects when clicked. */
+.status .alarm {
+  padding: 0 6px;
+  background: var(--amber-bg);
+  cursor: pointer;
 }
 
-/* ---------- a screen: heading, tiles, cards ---------- */
+/* ---------- a screen: heading, figures, sections ---------- */
 
 .head {
   display: flex;
   align-items: flex-end;
-  gap: 16px;
-  margin-bottom: 14px;
+  gap: 14px;
+  margin-bottom: 10px;
 }
 .head h1 {
   margin: 0;
-  font: 600 20px/1.2 var(--ui);
+  font-size: 18px;
+  font-weight: 600;
 }
 .head p {
-  margin: 3px 0 0;
+  margin: 1px 0 0;
   color: var(--mute);
 }
 .head .sp {
   flex: 1;
 }
 .lead {
-  margin: -4px 0 12px;
+  margin: -2px 0 10px;
 }
 
-/* Figures side by side in one strip. */
+/* Figures side by side in one ruled strip. */
 .tiles {
   display: grid;
   grid-auto-columns: 1fr;
   grid-auto-flow: column;
-  margin-bottom: 14px;
-  overflow: hidden;
+  margin-bottom: 12px;
   border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--sheet);
 }
 .tile {
   display: flex;
   flex-direction: column-reverse;
-  padding: 8px 14px 10px;
+  padding: 6px 10px 7px;
   border: 0;
-  border-right: 1px solid var(--line);
+  border-right: 1px solid var(--grid);
   background: none;
   text-align: left;
 }
@@ -503,7 +436,8 @@ main {
   border-right: 0;
 }
 .tile .n {
-  font: 700 30px/1.1 var(--ui);
+  font-size: 18px;
+  font-weight: 600;
   text-align: left;
 }
 .tile .n.pos {
@@ -516,41 +450,38 @@ main {
   color: var(--amber);
 }
 .tile .l {
-  min-height: 29px;
   color: var(--mute);
-  font: 600 11.5px/1.25 var(--ui);
+  font-size: 12px;
 }
 .tile .s {
   order: -1;
-  margin-top: 2px;
   color: var(--faint);
-  font-size: 12.5px;
+  font-size: 12px;
 }
 
+/* A section: a ruled box with a grey title bar. */
 .card {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   overflow-x: auto;
-  border-radius: 8px;
-  background: var(--sheet);
-  box-shadow:
-    0 0 2px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.14);
+  border: 1px solid var(--line);
 }
 .card h2 {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 8px;
   margin: 0;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--hair);
-  font: 600 14px var(--ui);
+  padding: 5px 9px;
+  border-bottom: 1px solid var(--line);
+  background: var(--chrome);
+  font-size: 13px;
+  font-weight: 600;
 }
 .card h2 span {
   color: var(--mute);
-  font: 400 13px var(--ui);
+  font-weight: 400;
 }
 .card .pad {
-  padding: 14px 16px;
+  padding: 10px 12px;
 }
 .pad > p:first-child {
   margin-top: 0;
@@ -565,137 +496,108 @@ tr.click {
   cursor: pointer;
 }
 tr.click:hover td {
-  background: var(--plate);
+  background: var(--hover);
 }
 tr.kb td,
 tr.sel td,
 tr.sel:hover td {
-  background: var(--accent-bg);
-}
-/* A coloured edge marks how urgent the row is. */
-tr[class*='tag-'] td:first-child {
-  border-left: 3px solid var(--hair);
-}
-tr.tag-red td:first-child {
-  border-left-color: var(--red);
-}
-tr.tag-amber td:first-child {
-  border-left-color: var(--amber-line);
-}
-tr.tag-blue td:first-child {
-  border-left-color: var(--accent);
+  background: var(--selected);
 }
 .asked {
-  margin-left: 6px;
+  margin-left: 8px;
   color: var(--accent);
-  font: 600 12px var(--ui);
+  font-size: 12px;
 }
 .filters {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: 8px;
+  padding: 6px 9px;
   border-bottom: 1px solid var(--line);
 }
 .filters input[type='search'] {
   width: 180px;
 }
 
-/* Today as an inbox: filter pills, then one message per job. */
+/* Today: tabs that filter by reason, then the list. */
 .inbox .tiles {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 12px;
-  overflow: visible;
+  margin-bottom: 0;
   border: 0;
-  background: none;
+  border-bottom: 1px solid var(--line);
 }
 .inbox .tile {
   flex-direction: row-reverse;
   align-items: baseline;
-  gap: 6px;
-  padding: 4px 12px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: var(--sheet);
+  gap: 5px;
+  margin-bottom: -1px;
+  padding: 5px 9px;
+  border: 0;
+  border-bottom: 2px solid transparent;
   cursor: pointer;
 }
 .inbox .tile:hover {
-  background: var(--plate);
+  background: var(--hover);
 }
 .inbox .tile.on {
-  border-color: var(--accent);
-  background: var(--accent-bg);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
 }
-.inbox .tile .n {
-  font: 600 13.5px/1.4 var(--ui);
-}
+.inbox .tile .n,
 .inbox .tile .l {
-  min-height: 0;
-  color: var(--ink);
-  font: 400 13.5px/1.4 var(--ui);
+  color: inherit;
+  font-size: 13px;
+  font-weight: inherit;
 }
-.inbox .tile.zero .n,
-.inbox .tile.zero .l {
+.inbox .tile.zero {
   color: var(--faint);
 }
 .tile[data-tf='x']:not(.zero) .n,
 .tile[data-tf='late']:not(.zero) .n {
   color: var(--red);
-}
-.tile[data-tf='dnc']:not(.zero) .n,
-.tile[data-tf='due2']:not(.zero) .n {
-  color: var(--amber);
-}
-.tile[data-tf='mid']:not(.zero) .n {
-  color: var(--accent);
-}
-.msgs td {
-  position: relative;
-  padding: 10px 14px 10px 13px;
-  white-space: normal;
-}
-.m1 {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-.from {
-  font-size: 15px;
   font-weight: 600;
 }
-.when {
-  color: var(--mute);
-  font-size: 12.5px;
+.inbox .card {
+  border-top: 0;
+}
+.inbox .card h2 {
+  display: none;
+}
+.inbox .card + .card {
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.inbox .card + .card h2 {
+  display: flex;
+}
+.msgs td {
+  vertical-align: top;
+}
+.msgs .sub {
   white-space: nowrap;
 }
-.m2 {
-  font-size: 13.5px;
+/* Room on the right for the row's buttons, so they never sit on the text. */
+.msgs .needs {
+  position: relative;
+  width: 55%;
+  padding-right: 100px;
+  white-space: normal;
 }
-.m3 {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 8px;
-  margin-top: 5px;
-  color: var(--mute);
-  font-size: 13px;
+.msgs .needs .sub {
+  white-space: normal;
 }
-.m3 .why {
-  flex: 1 1 220px;
+.from {
+  font-weight: 600;
 }
 /* A row's buttons show when it is pointed at, selected, or reached with the keyboard. */
 .acts {
   position: absolute;
-  right: 10px;
-  bottom: 8px;
+  right: 6px;
+  bottom: 4px;
   display: none;
-  gap: 6px;
-  padding-left: 16px;
-  background: linear-gradient(to right, transparent, var(--sheet) 16px);
+  gap: 5px;
 }
 .msgs tr:hover .acts,
 .msgs tr:focus-within .acts,
@@ -703,37 +605,23 @@ tr.tag-blue td:first-child {
 .msgs tr.kb .acts {
   display: flex;
 }
-.msgs tr.sel .acts,
-.msgs tr.kb .acts {
-  background: linear-gradient(to right, transparent, var(--accent-bg) 16px);
-}
 
-/* Jobs as a spreadsheet: cell borders, and headings that sort. */
-.grid td {
-  padding-top: 6px;
-  padding-bottom: 6px;
-  border-right: 1px solid var(--hair);
-}
-.grid td:last-child {
-  border-right: 0;
-}
+/* Jobs: headings that sort. */
 .grid th {
   padding: 0;
 }
 .sort {
   width: 100%;
-  padding: 8px 12px;
+  padding: 5px 9px;
   border: 0;
   background: none;
-  color: inherit;
-  font: inherit;
+  font-weight: 600;
   text-align: inherit;
   white-space: nowrap;
   cursor: pointer;
 }
 .sort:hover {
-  background: var(--gray-bg);
-  color: var(--ink);
+  background: #e6e6e6;
 }
 .grid th:not([aria-sort='none']) {
   color: var(--accent);
@@ -745,10 +633,9 @@ tr.tag-blue td:first-child {
   position: fixed;
   inset: 0;
   z-index: 10;
-  background: rgba(20, 23, 26, 0.35);
+  background: rgba(0, 0, 0, 0.3);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.12s;
 }
 .scrim.on {
   opacity: 1;
@@ -762,11 +649,11 @@ tr.tag-blue td:first-child {
   z-index: 11;
   display: none;
   flex-direction: column;
-  width: 520px;
+  width: 500px;
   max-width: 100%;
   border-left: 1px solid var(--line);
   background: var(--sheet);
-  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.18);
 }
 .panel.on {
   display: flex;
@@ -778,52 +665,56 @@ tr.tag-blue td:first-child {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 16px 20px 12px;
-  border-bottom: 1px solid var(--hair);
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid var(--grid);
 }
 .panel h3 {
   margin: 0;
-  font: 600 18px/1.25 var(--ui);
+  font-size: 15px;
+  font-weight: 600;
 }
 .panel .chips {
-  margin-top: 6px;
+  margin-top: 4px;
 }
 .panel .x {
   margin-left: auto;
   border: 0;
   background: none;
   color: var(--mute);
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1;
   cursor: pointer;
 }
 .panel .body {
   flex: 1;
   overflow: auto;
-  padding: 16px 20px;
+  padding: 12px 14px;
 }
 .panel .body > b {
-  color: var(--mute);
-  font: 700 12px var(--ui);
+  display: block;
+  margin-top: 4px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--grid);
 }
 .panel .foot {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  padding: 10px 20px;
-  border-top: 1px solid var(--hair);
+  gap: 6px;
+  padding: 7px 14px;
+  border-top: 1px solid var(--grid);
+  background: var(--chrome);
 }
 .panel .grid2 {
   gap: 10px;
 }
 .field {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 .field label {
   display: block;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
   color: var(--mute);
-  font: 600 11px var(--ui);
+  font-size: 12px;
 }
 .field input,
 .field select {
@@ -832,45 +723,39 @@ tr.tag-blue td:first-child {
 .field input[data-set] {
   width: 260px;
 }
-#dbody {
-  line-height: 1.5;
-}
 .pick {
   margin-top: 12px;
-  padding: 12px;
-  border: 1.5px solid var(--accent);
-  border-radius: 6px;
-  background: var(--accent-bg);
+  padding: 10px;
+  border: 1px solid var(--line);
+  background: var(--chrome);
 }
 #rp {
   margin-top: 8px;
-  font-size: 13.5px;
 }
 
-/* A job's route as a dotted line: filled for steps reported, ringed for the latest. */
+/* A job's route: a filled mark for each step reported, a ring for the latest. */
 .tl {
-  margin: 6px 0 14px;
+  margin: 6px 0 12px;
   padding: 0;
   list-style: none;
 }
 .tl li {
   display: grid;
-  grid-template-columns: 28px 1fr auto;
+  grid-template-columns: 22px 1fr auto;
   align-items: center;
-  gap: 0 8px;
-  padding: 5px 0;
+  gap: 0 6px;
+  padding: 3px 0;
 }
 .tl li::before {
   content: '';
   justify-self: center;
-  width: 10px;
-  height: 10px;
-  border: 2px solid var(--line);
-  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  border: 1px solid #a6a6a6;
 }
 .tl .w {
   color: var(--mute);
-  font-size: 13px;
+  font-size: 12px;
 }
 .tl .todo {
   color: var(--faint);
@@ -883,58 +768,55 @@ tr.tag-blue td:first-child {
   font-weight: 600;
 }
 .tl .now::before {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-bg);
+  border: 2px solid var(--accent);
 }
 .tl.log li::before {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
   border: 0;
   background: var(--faint);
 }
 /* The first-day checklist numbers its steps and ticks the ones done. */
 .tl.setup {
   margin: 0;
+  padding: 0 10px;
   counter-reset: step;
 }
 .tl.setup li {
-  padding: 9px 14px 9px 0;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--grid);
   color: var(--ink);
   counter-increment: step;
 }
+.tl.setup li:last-child {
+  border-bottom: 0;
+}
 .tl.setup li::before {
-  content: counter(step);
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border-width: 1px;
+  content: counter(step) '.';
+  width: auto;
+  height: auto;
+  border: 0;
   color: var(--mute);
-  font: 600 12px var(--ui);
 }
 .tl.setup .done::before {
   content: '✓';
-  border-color: var(--green);
-  background: var(--green);
-  color: #fff;
+  background: none;
+  color: var(--green);
+  font-weight: 600;
 }
 
 /* The panel docked beside Today as a reading pane. Its actions move up under the title. */
 body.pane main {
-  padding: 14px 0 24px;
-  background: var(--sheet);
+  padding: 10px 0 0;
 }
 body.pane .inbox > .head,
-body.pane .inbox > .tiles,
 body.pane .inbox > .small {
-  padding-right: 16px;
-  padding-left: 16px;
+  padding: 0 12px;
 }
 body.pane .inbox .card {
   margin-bottom: 0;
-  border-top: 1px solid var(--hair);
-  border-radius: 0;
-  box-shadow: none;
+  border-right: 0;
+  border-left: 0;
 }
 body.pane .scrim,
 body.pane .panel .x {
@@ -944,14 +826,14 @@ body.pane .panel {
   position: static;
   display: flex;
   flex: 0 0 44%;
-  min-width: 400px;
-  max-width: 660px;
+  min-width: 380px;
+  max-width: 640px;
   box-shadow: none;
 }
 body.pane .panel .foot {
   order: 1;
   border-top: 0;
-  border-bottom: 1px solid var(--hair);
+  border-bottom: 1px solid var(--grid);
 }
 body.pane .panel .body {
   order: 2;
@@ -959,7 +841,7 @@ body.pane .panel .body {
 body.pane .panel:not(.on) {
   align-items: center;
   justify-content: center;
-  background: var(--bg);
+  background: var(--chrome);
 }
 body.pane .panel:not(.on) > * {
   display: none;
@@ -975,7 +857,6 @@ body.pane .panel:not(.on)::before {
 .bar {
   vertical-align: middle;
   border: 1px solid var(--line);
-  background: var(--sheet);
 }
 .bar rect {
   fill: var(--red);
@@ -983,16 +864,14 @@ body.pane .panel:not(.on)::before {
 
 /* Processors */
 .grp td {
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  background: var(--plate);
-  font: 700 14px var(--ui);
+  background: var(--chrome);
+  font-weight: 600;
 }
 .grp .small {
   font-weight: 400;
 }
 .indent {
-  padding-left: 24px;
+  padding-left: 22px;
 }
 .turns span {
   margin-right: 0.6em;
@@ -1002,8 +881,11 @@ body.pane .panel:not(.on)::before {
   align-items: center;
   gap: 10px;
 }
+.chip.quote::before {
+  display: none;
+}
 .chip.quote {
-  font-size: 14px;
+  color: var(--accent);
 }
 .spark {
   display: block;
@@ -1011,8 +893,7 @@ body.pane .panel:not(.on)::before {
 .spark polyline {
   fill: none;
   stroke: var(--accent);
-  stroke-width: 2;
-  stroke-linejoin: round;
+  stroke-width: 1.5;
 }
 .spark circle {
   fill: var(--accent);
@@ -1022,54 +903,41 @@ body.pane .panel:not(.on)::before {
   stroke-dasharray: 3 3;
 }
 
-/* Import */
+/* Import: the step in hand is bold. */
 .steps {
   display: flex;
-  width: max-content;
-  margin-bottom: 14px;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  background: var(--sheet);
-}
-.steps span {
-  padding: 5px 14px;
-  border-right: 1px solid var(--line);
+  gap: 18px;
+  margin-bottom: 10px;
   color: var(--mute);
-  font: 600 12px var(--ui);
-}
-.steps span:last-child {
-  border-right: 0;
 }
 .steps .on {
-  background: var(--accent);
-  color: #fff;
+  color: var(--ink);
+  font-weight: 600;
 }
 body.drag::after {
   content: 'Drop the file to import it';
   position: fixed;
-  inset: 14px;
+  inset: 12px;
   z-index: 50;
   display: grid;
   place-items: center;
-  border: 3px dashed var(--accent);
-  background: rgba(235, 243, 252, 0.92);
+  border: 2px dashed var(--accent);
+  background: rgba(255, 255, 255, 0.92);
   color: var(--accent);
-  font: 700 26px var(--ui);
+  font-size: 22px;
+  font-weight: 600;
   pointer-events: none;
 }
 
 /* For your IT: a topic and what is true of it. */
 .facts th {
   position: static;
-  width: 28%;
-  padding: 9px 12px;
-  color: var(--ink);
-  font: 600 14px/1.45 var(--ui);
+  width: 26%;
+  background: none;
   vertical-align: top;
   white-space: normal;
 }
 .facts td {
-  line-height: 1.45;
   white-space: normal;
 }
 .facts tr:last-child th {
@@ -1080,35 +948,28 @@ body.drag::after {
 
 .toast {
   position: fixed;
-  bottom: 24px;
+  bottom: 34px;
   left: 50%;
   z-index: 60;
-  padding: 9px 16px;
-  border-left: 5px solid var(--amber-line);
-  border-radius: 4px;
-  background: var(--ink);
+  padding: 7px 14px;
+  background: #323130;
   color: #fff;
-  font-size: 14.5px;
   opacity: 0;
   pointer-events: none;
-  transform: translateX(-50%) translateY(20px);
-  transition:
-    opacity 0.15s,
-    transform 0.15s;
+  transform: translateX(-50%);
+  transition: opacity 0.15s;
 }
 .toast.on {
   opacity: 1;
   pointer-events: auto;
-  transform: translateX(-50%);
 }
 .toast button {
   margin-left: 14px;
-  padding: 2px 9px;
-  border: 1px solid var(--faint);
-  border-radius: 4px;
+  padding: 0 8px;
+  border: 1px solid #8a8886;
+  border-radius: 2px;
   background: none;
-  color: var(--amber-bg);
-  font: 600 12px var(--ui);
+  color: #fff;
   cursor: pointer;
 }
 
@@ -1123,45 +984,41 @@ body.drag::after {
 .tourhole {
   position: fixed;
   z-index: 9001;
-  border: 2px solid var(--amber-bg);
-  border-radius: 4px;
-  box-shadow: 0 0 0 200vmax rgba(20, 23, 26, 0.55);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 200vmax rgba(0, 0, 0, 0.5);
   pointer-events: none;
 }
 .tourpop {
   position: fixed;
   z-index: 9002;
-  width: 340px;
+  width: 330px;
   max-width: calc(100vw - 24px);
-  padding: 12px 14px;
-  border-top: 4px solid var(--accent);
-  border-radius: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
   background: var(--sheet);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 .tourpop .tn {
   color: var(--mute);
-  font: 600 11px var(--ui);
+  font-size: 12px;
 }
 .tourpop h3 {
-  margin: 4px 0 6px;
-  font-size: 17px;
+  margin: 2px 0 5px;
+  font-size: 15px;
 }
 .tourpop p {
-  margin: 0 0 12px;
-  font-size: 14.5px;
+  margin: 0 0 10px;
 }
 .tourpop .ta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 .tourpop .skip {
   padding: 0;
   border: 0;
   background: none;
   color: var(--mute);
-  font-size: 13px;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -1170,46 +1027,28 @@ body.drag::after {
 
 @media (max-width: 900px) {
   nav {
-    width: 58px;
+    width: 130px;
   }
-  nav .lbl,
-  nav .foot,
-  .tb .opt,
+  .status .keys,
   .banner .sp {
     display: none;
   }
   .tb .name {
     width: auto;
   }
-  main {
-    padding: 14px;
-  }
   .grid2 {
     grid-template-columns: 1fr;
   }
   .banner {
     flex-wrap: wrap;
-    row-gap: 4px;
+    row-gap: 3px;
   }
   .tiles {
     grid-auto-flow: row;
   }
   .tile {
-    flex-direction: row-reverse;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 14px;
     border-right: 0;
-    border-bottom: 1px solid var(--line);
-  }
-  .tile:last-child {
-    border-bottom: 0;
-  }
-  .tile .l {
-    min-height: 0;
-  }
-  .tile .n {
-    font-size: 22px;
+    border-bottom: 1px solid var(--grid);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1228,6 +1067,7 @@ body.drag::after {
   .banner,
   nav,
   .tb,
+  .status,
   .toast,
   .panel,
   .scrim,
@@ -1247,29 +1087,23 @@ body.drag::after {
   body,
   .app {
     display: block;
-    background: #fff;
   }
   main {
     overflow: visible;
     padding: 12px 0;
-    background: #fff;
   }
   .card,
   .tiles {
     break-inside: avoid;
   }
-  /* Paper is narrower than the screen: nothing scrolls, so tables tighten up to fit the sheet. */
+  /* Paper is narrower than the screen and nothing scrolls, so tables tighten up to fit the sheet. */
   .card {
     overflow: visible;
-    box-shadow: none;
-    border: 1px solid var(--line);
   }
   th,
-  td,
-  td.n,
-  th.n {
+  td {
     position: static;
-    padding: 5px 7px;
+    padding: 4px 6px;
     font-size: 12px;
   }
 
@@ -1305,22 +1139,19 @@ body.drag::after {
     table-layout: fixed;
   }
   .psheet th,
-  .psheet td {
+  .psheet td,
+  .psheet tbody tr:last-child td {
     padding: 3px 5px;
     border: 1px solid #000;
     background: none;
     color: #000;
     font-size: 10.5px;
     overflow-wrap: break-word;
-    text-align: left;
     vertical-align: top;
     white-space: normal;
   }
   .psheet th {
     font-size: 9px;
-  }
-  .psheet tr:last-child td {
-    border-bottom: 1px solid #000;
   }
   .psheet td {
     height: 30px;
@@ -1365,30 +1196,26 @@ body.drag::after {
   <button id="reset" type="button">Reset demo</button>
 </div>
 <header class="tb">
-  <div class="name">
-    <div class="logo">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="square" aria-hidden="true"><path d="M2 12h4l3-8 6 16 3-8h4"/></svg>
-    </div>
-    <b>OSP Watch</b>
-  </div>
-  <div class="search"><input type="search" id="gsearch" placeholder="Search jobs, POs, processors" aria-label="Search jobs"></div>
-  <div><span class="cap">Shop</span><span class="val" id="shopname"></span></div>
-  <div><span class="cap">Date</span><span class="val" id="clock"></span></div>
-  <div class="opt"><span class="cap">Out at processors</span><span class="val" id="tb_open"></span></div>
-  <div><span class="cap">Need a word today</span><span class="val" id="tb_acts"></span></div>
-  <div class="opt"><span class="cap">Expedites this month</span><span class="val" id="tb_exp"></span></div>
-  <div class="opt" id="tb_impc"><span class="cap">Last import</span><span class="val" id="tb_imp"></span></div>
-  <div class="opt" id="tb_filec" hidden><span class="cap">Shared file</span><span class="val" id="tb_file"></span></div>
-  <div class="grow"></div>
+  <b class="name">OSP Watch</b>
+  <input type="search" id="gsearch" placeholder="Search jobs, POs, processors" aria-label="Search jobs">
+  <span class="grow"></span>
+  <span id="shopname"></span>
+  <span id="clock"></span>
 </header>
 <div class="app">
-  <nav aria-label="Screens">
-    <div id="navlist"></div>
-    <div class="foot"><kbd>↑</kbd> <kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>Esc</kbd> close</div>
-  </nav>
+  <nav aria-label="Screens" id="navlist"></nav>
   <main id="view"></main>
   <aside class="panel" id="panel" role="dialog" aria-labelledby="panel-title" aria-hidden="true" tabindex="-1"></aside>
 </div>
+<footer class="status">
+  <span>Out at processors <b id="tb_open"></b></span>
+  <span>Need a word today <b id="tb_acts"></b></span>
+  <span>Expedites this month <b id="tb_exp"></b></span>
+  <span id="tb_impc">Last import <b id="tb_imp"></b></span>
+  <span id="tb_filec" hidden>Shared file <b id="tb_file"></b></span>
+  <span class="grow"></span>
+  <span class="keys"><kbd>↑</kbd> <kbd>↓</kbd> move <kbd>Enter</kbd> open <kbd>Esc</kbd> close</span>
+</footer>
 <div class="scrim" id="scrim"></div>
 <div class="toast" id="toast" role="status"></div>
 <script>const DATA={"today":"2026-11-23","shop":"Example Shop","jobs":[{"proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":60,"sent":"2026-05-27","due":"2026-06-03","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-05-27"},{"m":"delivered","d":"2026-05-27","t":"15:07"},{"m":"back","d":"2026-06-04"}],"exp":null,"open":false,"id":"2401","po":"P-5101"},{"proc":"Paint House E","process":"Prime and paint","q":8,"qty":120,"sent":"2026-05-27","due":"2026-06-04","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-05-27"},{"m":"delivered","d":"2026-05-27","t":"13:39"},{"m":"back","d":"2026-06-05"}],"exp":null,"open":false,"id":"2402","po":"P-5102"},{"proc":"NDT Lab F","process":"Magnetic particle","q":3,"qty":80,"sent":"2026-05-27","due":"2026-05-30","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-05-27"},{"m":"delivered","d":"2026-05-27","t":"13:24"},{"m":"back","d":"2026-06-01"}],"exp":null,"open":false,"id":"2403","po":"P-5103"},{"proc":"Anodize House B","process":"Chem film","q":5,"qty":12,"sent":"2026-06-02","due":"2026-06-07","carrier":"UPS Ground","trk":"DEMO-UPS-5920","ev":[{"m":"sent","d":"2026-06-02"},{"m":"delivered","d":"2026-06-03","t":"11:30"},{"m":"back","d":"2026-06-08"}],"exp":null,"open":false,"id":"2404","po":"P-5104"},{"proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":12,"sent":"2026-06-04","due":"2026-06-14","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-06-04"},{"m":"delivered","d":"2026-06-04","t":"14:16"},{"m":"back","d":"2026-06-15"}],"exp":null,"open":false,"id":"2405","po":"P-5105"},{"proc":"Anodize House A","process":"Anodize, Type II","q":7,"qty":10,"sent":"2026-06-05","due":"2026-06-12","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-06-05"},{"m":"delivered","d":"2026-06-05","t":"10:28"},{"m":"back","d":"2026-06-11"}],"exp":null,"open":false,"id":"2406","po":"P-5106"},{"proc":"Plating House C","process":"Electroless nickel","q":10,"qty":30,"sent":"2026-06-08","due":"2026-06-18","carrier":"FedEx Ground","trk":"DEMO-FDX-5296","ev":[{"m":"sent","d":"2026-06-08"},{"m":"delivered","d":"2026-06-09","t":"12:40"},{"m":"back","d":"2026-06-18"}],"exp":null,"open":false,"id":"2407","po":"P-5107"},{"proc":"Paint House E","process":"Prime and paint","q":8,"qty":120,"sent":"2026-06-08","due":"2026-06-16","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-06-08"},{"m":"delivered","d":"2026-06-08","t":"11:14"},{"m":"back","d":"2026-06-18"}],"exp":null,"open":false,"id":"2408","po":"P-5108"},{"proc":"Heat Treat House D","process":"Stress relieve","q":4,"qty":80,"sent":"2026-06-09","due":"2026-06-13","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-06-09"},{"m":"delivered","d":"2026-06-09","t":"09:24"},{"m":"back","d":"2026-06-12"}],"exp":null,"open":false,"id":"2409","po":"P-5109"},{"proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":10,"sent":"2026-06-15","due":"2026-06-22","carrier":"UPS Ground","trk":"DEMO-UPS-5258","ev":[{"m":"sent","d":"2026-06-15"},{"m":"delivered","d":"2026-06-16","t":"13:38"},{"m":"back","d":"2026-06-22"}],"exp":null,"open":false,"id":"2410","po":"P-5110"},{"proc":"NDT Lab F","process":"Penetrant inspection","q":4,"qty":20,"sent":"2026-06-15","due":"2026-06-19","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-06-15"},{"m":"delivered","d":"2026-06-15","t":"13:46"},{"m":"back","d":"2026-06-19"}],"exp":null,"open":false,"id":"2411","po":"P-5111"},{"proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":40,"sent":"2026-06-15","due":"2026-06-22","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-06-15"},{"m":"delivered","d":"2026-06-15","t":"10:53"},{"m":"back","d":"2026-06-19"}],"exp":{"fee":250,"bought":"2026-06-15","by":"2026-06-19"},"open":false,"id":"2412","po":"P-5112"},{"proc":"Grinding House G","process":"Centerless grind","q":6,"qty":50,"sent":"2026-06-24","due":"2026-06-30","carrier":"UPS Ground","trk":"DEMO-UPS-2217","ev":[{"m":"sent","d":"2026-06-24"},{"m":"delivered","d":"2026-06-25","t":"13:56"},{"m":"back","d":"2026-06-29"}],"exp":null,"open":false,"id":"2413","po":"P-5113"},{"proc":"Grinding House G","process":"Centerless grind","q":6,"qty":40,"sent":"2026-06-25","due":"2026-07-01","carrier":"UPS Ground","trk":"DEMO-UPS-6855","ev":[{"m":"sent","d":"2026-06-25"},{"m":"delivered","d":"2026-06-26","t":"11:03"},{"m":"back","d":"2026-06-30"}],"exp":null,"open":false,"id":"2414","po":"P-5114"},{"proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":25,"sent":"2026-06-26","due":"2026-07-03","carrier":"UPS Ground","trk":"DEMO-UPS-2356","ev":[{"m":"sent","d":"2026-06-26"},{"m":"delivered","d":"2026-06-29","t":"13:42"},{"m":"back","d":"2026-07-06"}],"exp":null,"open":false,"id":"2415","po":"P-5115"},{"proc":"Plating House C","process":"Electroless nickel","q":10,"qty":24,"sent":"2026-06-29","due":"2026-07-09","carrier":"FedEx Ground","trk":"DEMO-FDX-6126","ev":[{"m":"sent","d":"2026-06-29"},{"m":"delivered","d":"2026-06-30","t":"11:33"},{"m":"back","d":"2026-07-09"}],"exp":null,"open":false,"id":"2416","po":"P-5116"},{"proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":6,"sent":"2026-07-02","due":"2026-07-09","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-07-02"},{"m":"delivered","d":"2026-07-02","t":"13:25"},{"m":"back","d":"2026-07-10"}],"exp":null,"open":false,"id":"2417","po":"P-5117"},{"proc":"Passivation House H","process":"Passivation","q":4,"qty":30,"sent":"2026-07-13","due":"2026-07-17","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-07-13"},{"m":"delivered","d":"2026-07-13","t":"09:25"},{"m":"back","d":"2026-07-17"}],"exp":null,"open":false,"id":"2418","po":"P-5118"},{"proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":24,"sent":"2026-07-13","due":"2026-07-20","carrier":"UPS Ground","trk":"DEMO-UPS-6844","ev":[{"m":"sent","d":"2026-07-13"},{"m":"delivered","d":"2026-07-14","t":"10:48"},{"m":"back","d":"2026-07-20"}],"exp":{"fee":400,"bought":"2026-07-13","by":"2026-07-17"},"open":false,"id":"2419","po":"P-5119"},{"proc":"NDT Lab F","process":"Magnetic particle","q":3,"qty":100,"sent":"2026-07-17","due":"2026-07-20","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-07-17"},{"m":"delivered","d":"2026-07-17","t":"09:52"},{"m":"back","d":"2026-07-20"}],"exp":null,"open":false,"id":"2420","po":"P-5120"},{"proc":"Paint House E","process":"Prime and paint","q":8,"qty":10,"sent":"2026-07-20","due":"2026-07-28","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-07-20"},{"m":"delivered","d":"2026-07-20","t":"10:58"},{"m":"back","d":"2026-07-30"}],"exp":null,"open":false,"id":"2421","po":"P-5121"},{"proc":"Heat Treat House D","process":"Stress relieve","q":4,"qty":10,"sent":"2026-07-21","due":"2026-07-25","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-07-21"},{"m":"delivered","d":"2026-07-21","t":"10:58"},{"m":"back","d":"2026-07-27","outcome":"rework","pcs":2}],"exp":null,"open":false,"id":"2422","po":"P-5122"},{"proc":"Plating House C","process":"Electroless nickel","q":10,"qty":16,"sent":"2026-07-23","due":"2026-08-02","carrier":"FedEx Ground","trk":"DEMO-FDX-5318","ev":[{"m":"sent","d":"2026-07-23"},{"m":"delivered","d":"2026-07-24","t":"11:24"},{"m":"back","d":"2026-08-03"}],"exp":null,"open":false,"id":"2423","po":"P-5123"},{"proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":30,"sent":"2026-07-24","due":"2026-08-03","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-07-24"},{"m":"delivered","d":"2026-07-24","t":"09:30"},{"m":"back","d":"2026-08-04"}],"exp":null,"open":false,"id":"2424","po":"P-5124"},{"proc":"NDT Lab F","process":"Magnetic particle","q":3,"qty":48,"sent":"2026-07-27","due":"2026-07-30","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-07-27"},{"m":"delivered","d":"2026-07-27","t":"14:56"},{"m":"back","d":"2026-07-29"}],"exp":null,"open":false,"id":"2425","po":"P-5125"},{"proc":"Anodize House B","process":"Chem film","q":5,"qty":16,"sent":"2026-07-30","due":"2026-08-04","carrier":"UPS Ground","trk":"DEMO-UPS-8019","ev":[{"m":"sent","d":"2026-07-30"},{"m":"delivered","d":"2026-07-31","t":"15:06"},{"m":"back","d":"2026-08-03"}],"exp":null,"open":false,"id":"2426","po":"P-5126"},{"proc":"Anodize House A","process":"Anodize, Type II","q":7,"qty":20,"sent":"2026-07-31","due":"2026-08-07","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-07-31"},{"m":"delivered","d":"2026-07-31","t":"13:14"},{"m":"back","d":"2026-08-06"}],"exp":null,"open":false,"id":"2427","po":"P-5127"},{"proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":50,"sent":"2026-08-03","due":"2026-08-10","carrier":"UPS Ground","trk":"DEMO-UPS-4078","ev":[{"m":"sent","d":"2026-08-03"},{"m":"delivered","d":"2026-08-04","t":"12:12"},{"m":"back","d":"2026-08-10"}],"exp":null,"open":false,"id":"2428","po":"P-5128"},{"proc":"Grinding House G","process":"Centerless grind","q":6,"qty":50,"sent":"2026-08-10","due":"2026-08-16","carrier":"UPS Ground","trk":"DEMO-UPS-4826","ev":[{"m":"sent","d":"2026-08-10"},{"m":"delivered","d":"2026-08-11","t":"13:52"},{"m":"back","d":"2026-08-17"}],"exp":null,"open":false,"id":"2429","po":"P-5129"},{"proc":"Plating House C","process":"Electroless nickel","q":10,"qty":80,"sent":"2026-08-10","due":"2026-08-20","carrier":"FedEx Ground","trk":"DEMO-FDX-3519","ev":[{"m":"sent","d":"2026-08-10"},{"m":"delivered","d":"2026-08-11","t":"13:48"},{"m":"back","d":"2026-08-17","outcome":"rework","pcs":20}],"exp":{"fee":500,"bought":"2026-08-10","by":"2026-08-17"},"open":false,"id":"2430","po":"P-5130"},{"proc":"NDT Lab F","process":"Penetrant inspection","q":4,"qty":25,"sent":"2026-08-13","due":"2026-08-17","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-08-13"},{"m":"delivered","d":"2026-08-13","t":"10:57"},{"m":"back","d":"2026-08-17"}],"exp":null,"open":false,"id":"2431","po":"P-5131"},{"proc":"Passivation House H","process":"Passivation","q":4,"qty":20,"sent":"2026-08-14","due":"2026-08-18","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-08-14"},{"m":"delivered","d":"2026-08-14","t":"09:00"},{"m":"back","d":"2026-08-18"}],"exp":null,"open":false,"id":"2432","po":"P-5132"},{"proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":48,"sent":"2026-08-17","due":"2026-08-24","carrier":"UPS Ground","trk":"DEMO-UPS-7083","ev":[{"m":"sent","d":"2026-08-17"},{"m":"delivered","d":"2026-08-18","t":"11:27"},{"m":"back","d":"2026-08-26"}],"exp":null,"open":false,"id":"2433","po":"P-5133"},{"proc":"Paint House E","process":"Prime and paint","q":8,"qty":25,"sent":"2026-08-20","due":"2026-08-28","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-08-20"},{"m":"delivered","d":"2026-08-20","t":"11:26"},{"m":"back","d":"2026-08-27"}],"exp":null,"open":false,"id":"2434","po":"P-5134"},{"proc":"Heat Treat House D","process":"Stress relieve","q":4,"qty":8,"sent":"2026-08-27","due":"2026-08-31","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-08-27"},{"m":"delivered","d":"2026-08-27","t":"11:43"},{"m":"back","d":"2026-08-31"}],"exp":null,"open":false,"id":"2435","po":"P-5135"},{"proc":"NDT Lab F","process":"Penetrant inspection","q":4,"qty":10,"sent":"2026-08-27","due":"2026-08-31","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-08-27"},{"m":"delivered","d":"2026-08-27","t":"12:11"},{"m":"back","d":"2026-08-31","outcome":"reject","pcs":2}],"exp":null,"open":false,"id":"2436","po":"P-5136"},{"proc":"Grinding House G","process":"Centerless grind","q":6,"qty":24,"sent":"2026-08-27","due":"2026-09-02","carrier":"UPS Ground","trk":"DEMO-UPS-3338","ev":[{"m":"sent","d":"2026-08-27"},{"m":"delivered","d":"2026-08-28","t":"16:19"},{"m":"back","d":"2026-09-02","outcome":"reject","pcs":24}],"exp":null,"open":false,"id":"2437","po":"P-5137"},{"proc":"Anodize House A","process":"Anodize, Type II","q":7,"qty":16,"sent":"2026-08-31","due":"2026-09-07","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-08-31"},{"m":"delivered","d":"2026-08-31","t":"10:58"},{"m":"back","d":"2026-09-07"}],"exp":null,"open":false,"id":"2438","po":"P-5138"},{"proc":"Anodize House B","process":"Chem film","q":5,"qty":8,"sent":"2026-09-01","due":"2026-09-06","carrier":"UPS Ground","trk":"DEMO-UPS-6129","ev":[{"m":"sent","d":"2026-09-01"},{"m":"delivered","d":"2026-09-02","t":"14:55"},{"m":"back","d":"2026-09-07"}],"exp":null,"open":false,"id":"2439","po":"P-5139"},{"proc":"NDT Lab F","process":"Magnetic particle","q":3,"qty":48,"sent":"2026-09-07","due":"2026-09-10","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-09-07"},{"m":"delivered","d":"2026-09-07","t":"14:57"},{"m":"back","d":"2026-09-09"}],"exp":null,"open":false,"id":"2440","po":"P-5140"},{"proc":"Plating House C","process":"Electroless nickel","q":10,"qty":8,"sent":"2026-09-09","due":"2026-09-19","carrier":"FedEx Ground","trk":"DEMO-FDX-7694","ev":[{"m":"sent","d":"2026-09-09"},{"m":"delivered","d":"2026-09-10","t":"16:17"},{"m":"back","d":"2026-09-21"}],"exp":null,"open":false,"id":"2441","po":"P-5141"},{"proc":"Paint House E","process":"Prime and paint","q":8,"qty":30,"sent":"2026-09-14","due":"2026-09-22","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-09-14"},{"m":"delivered","d":"2026-09-14","t":"13:29"},{"m":"back","d":"2026-09-22"}],"exp":{"fee":300,"bought":"2026-09-14","by":"2026-09-21"},"open":false,"id":"2442","po":"P-5142"},{"proc":"Passivation House H","process":"Passivation","q":4,"qty":16,"sent":"2026-09-15","due":"2026-09-19","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-09-15"},{"m":"delivered","d":"2026-09-15","t":"11:05"},{"m":"back","d":"2026-09-18","outcome":"rework","pcs":8}],"exp":null,"open":false,"id":"2443","po":"P-5143"},{"proc":"Anodize House B","process":"Chem film","q":5,"qty":120,"sent":"2026-09-16","due":"2026-09-21","carrier":"UPS Ground","trk":"DEMO-UPS-2134","ev":[{"m":"sent","d":"2026-09-16"},{"m":"delivered","d":"2026-09-17","t":"12:20"},{"m":"back","d":"2026-09-21"}],"exp":null,"open":false,"id":"2444","po":"P-5144"},{"proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":24,"sent":"2026-09-18","due":"2026-09-28","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-09-18"},{"m":"delivered","d":"2026-09-18","t":"11:16"},{"m":"back","d":"2026-09-28"}],"exp":null,"open":false,"id":"2445","po":"P-5145"},{"proc":"Heat Treat House D","process":"Stress relieve","q":4,"qty":100,"sent":"2026-09-21","due":"2026-09-25","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-09-21"},{"m":"delivered","d":"2026-09-21","t":"13:05"},{"m":"back","d":"2026-09-24"}],"exp":null,"open":false,"id":"2446","po":"P-5146"},{"proc":"Passivation House H","process":"Passivation","q":4,"qty":8,"sent":"2026-09-21","due":"2026-09-25","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-09-21"},{"m":"delivered","d":"2026-09-21","t":"09:11"},{"m":"back","d":"2026-09-25"}],"exp":null,"open":false,"id":"2447","po":"P-5147"},{"proc":"NDT Lab F","process":"Penetrant inspection","q":4,"qty":60,"sent":"2026-09-22","due":"2026-09-26","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-09-22"},{"m":"delivered","d":"2026-09-22","t":"09:16"},{"m":"back","d":"2026-09-28"}],"exp":null,"open":false,"id":"2448","po":"P-5148"},{"proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":30,"sent":"2026-09-23","due":"2026-09-30","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-09-23"},{"m":"delivered","d":"2026-09-23","t":"14:55"},{"m":"back","d":"2026-09-30","outcome":"rework","pcs":15}],"exp":null,"open":false,"id":"2449","po":"P-5149"},{"proc":"Anodize House B","process":"Chem film","q":5,"qty":50,"sent":"2026-10-05","due":"2026-10-10","carrier":"UPS Ground","trk":"DEMO-UPS-6844","ev":[{"m":"sent","d":"2026-10-05"},{"m":"delivered","d":"2026-10-06","t":"11:24"},{"m":"back","d":"2026-10-08","outcome":"rework","pcs":50}],"exp":{"fee":200,"bought":"2026-10-05","by":"2026-10-08"},"open":false,"id":"2450","po":"P-5150"},{"proc":"Anodize House A","process":"Anodize, Type II","q":7,"qty":40,"sent":"2026-10-12","due":"2026-10-19","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-10-12"},{"m":"delivered","d":"2026-10-12","t":"15:14"},{"m":"back","d":"2026-10-19"}],"exp":null,"open":false,"id":"2451","po":"P-5151"},{"proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":60,"sent":"2026-10-12","due":"2026-10-22","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-10-12"},{"m":"delivered","d":"2026-10-12","t":"09:05"},{"m":"back","d":"2026-10-26"}],"exp":null,"open":false,"id":"2452","po":"P-5152"},{"proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":120,"sent":"2026-10-12","due":"2026-10-19","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-10-12"},{"m":"delivered","d":"2026-10-12","t":"09:11"},{"m":"back","d":"2026-10-19"}],"exp":null,"open":false,"id":"2453","po":"P-5153"},{"proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":12,"sent":"2026-10-19","due":"2026-10-29","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-10-19"},{"m":"delivered","d":"2026-10-19","t":"15:28"},{"m":"back","d":"2026-10-26"}],"exp":{"fee":380,"bought":"2026-10-19","by":"2026-10-26"},"open":false,"id":"2454","po":"P-5154"},{"proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":12,"sent":"2026-11-02","due":"2026-11-12","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-02"},{"m":"delivered","d":"2026-11-02","t":"09:01"},{"m":"received","d":"2026-11-02"},{"m":"ask","d":"2026-11-09","what":"Midpoint check"},{"m":"in_process","d":"2026-11-09"},{"m":"newdate","d":"2026-11-09","to":"2026-11-13"},{"m":"shipped","d":"2026-11-13","trk":"Ready for pickup"},{"m":"back","d":"2026-11-13"}],"exp":null,"open":false,"id":"2455","po":"P-5155"},{"proc":"Plating House C","process":"Electroless nickel","q":10,"qty":25,"sent":"2026-11-02","due":"2026-11-12","carrier":"FedEx Ground","trk":"DEMO-FDX-1758","ev":[{"m":"sent","d":"2026-11-02"},{"m":"delivered","d":"2026-11-03","t":"11:38"},{"m":"received","d":"2026-11-03"},{"m":"ask","d":"2026-11-09","what":"Midpoint check"},{"m":"in_process","d":"2026-11-09"},{"m":"newdate","d":"2026-11-09","to":"2026-11-16"},{"m":"shipped","d":"2026-11-13","trk":"DEMO-FDX-7212"},{"m":"back","d":"2026-11-16"}],"exp":null,"open":false,"id":"2456","po":"P-5156"},{"proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":40,"sent":"2026-11-02","due":"2026-11-09","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-02"},{"m":"delivered","d":"2026-11-02","t":"11:22"},{"m":"received","d":"2026-11-02"},{"m":"ask","d":"2026-11-05","what":"Midpoint check"},{"m":"in_process","d":"2026-11-05"},{"m":"shipped","d":"2026-11-09","trk":"Ready for pickup"},{"m":"back","d":"2026-11-09"}],"exp":null,"open":false,"id":"2457","po":"P-5157"},{"proc":"Heat Treat House D","process":"Stress relieve","q":4,"qty":8,"sent":"2026-11-02","due":"2026-11-06","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-02"},{"m":"delivered","d":"2026-11-02","t":"13:23"},{"m":"received","d":"2026-11-02"},{"m":"ask","d":"2026-11-04","what":"Midpoint check"},{"m":"in_process","d":"2026-11-04"},{"m":"shipped","d":"2026-11-05","trk":"Ready for pickup"},{"m":"back","d":"2026-11-05"}],"exp":null,"open":false,"id":"2458","po":"P-5158"},{"proc":"Paint House E","process":"Prime and paint","q":8,"qty":48,"sent":"2026-11-02","due":"2026-11-10","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-02"},{"m":"delivered","d":"2026-11-02","t":"14:41"},{"m":"received","d":"2026-11-02"},{"m":"ask","d":"2026-11-06","what":"Midpoint check"},{"m":"in_process","d":"2026-11-06"},{"m":"newdate","d":"2026-11-06","to":"2026-11-11"},{"m":"shipped","d":"2026-11-11","trk":"Ready for pickup"},{"m":"back","d":"2026-11-11"}],"exp":null,"open":false,"id":"2459","po":"P-5159"},{"proc":"NDT Lab F","process":"Penetrant inspection","q":4,"qty":16,"sent":"2026-11-02","due":"2026-11-06","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-02"},{"m":"delivered","d":"2026-11-02","t":"15:55"},{"m":"ask","d":"2026-11-03","what":"Receipt check"},{"m":"received","d":"2026-11-03"},{"m":"ask","d":"2026-11-04","what":"Midpoint check"},{"m":"in_process","d":"2026-11-04"},{"m":"shipped","d":"2026-11-06","trk":"Ready for pickup"},{"m":"back","d":"2026-11-06"}],"exp":null,"open":false,"id":"2460","po":"P-5160"},{"proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":120,"sent":"2026-11-03","due":"2026-11-10","carrier":"UPS Ground","trk":"DEMO-UPS-3506","ev":[{"m":"sent","d":"2026-11-03"},{"m":"delivered","d":"2026-11-04","t":"14:52"},{"m":"received","d":"2026-11-04"},{"m":"ask","d":"2026-11-06","what":"Midpoint check"},{"m":"in_process","d":"2026-11-06"},{"m":"newdate","d":"2026-11-06","to":"2026-11-16"},{"m":"shipped","d":"2026-11-13","trk":"DEMO-UPS-7545"},{"m":"back","d":"2026-11-16"}],"exp":null,"open":false,"id":"2461","po":"P-5161"},{"proc":"Anodize House B","process":"Chem film","q":5,"qty":24,"sent":"2026-11-03","due":"2026-11-08","carrier":"UPS Ground","trk":"DEMO-UPS-8030","ev":[{"m":"sent","d":"2026-11-03"},{"m":"delivered","d":"2026-11-04","t":"12:41"},{"m":"received","d":"2026-11-04"},{"m":"ask","d":"2026-11-05","what":"Midpoint check"},{"m":"in_process","d":"2026-11-05"},{"m":"newdate","d":"2026-11-05","to":"2026-11-09"},{"m":"shipped","d":"2026-11-06","trk":"DEMO-UPS-7913"},{"m":"back","d":"2026-11-09"}],"exp":null,"open":false,"id":"2462","po":"P-5162"},{"proc":"Grinding House G","process":"Centerless grind","q":6,"qty":8,"sent":"2026-11-03","due":"2026-11-09","carrier":"UPS Ground","trk":"DEMO-UPS-2485","ev":[{"m":"sent","d":"2026-11-03"},{"m":"delivered","d":"2026-11-04","t":"15:39"},{"m":"ask","d":"2026-11-05","what":"Receipt check"},{"m":"received","d":"2026-11-05"},{"m":"ask","d":"2026-11-06","what":"Midpoint check"},{"m":"in_process","d":"2026-11-06"},{"m":"shipped","d":"2026-11-06","trk":"DEMO-UPS-2356"},{"m":"back","d":"2026-11-09"}],"exp":null,"open":false,"id":"2463","po":"P-5163"},{"proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":120,"sent":"2026-11-03","due":"2026-11-10","carrier":"UPS Ground","trk":"DEMO-UPS-9647","ev":[{"m":"sent","d":"2026-11-03"},{"m":"delivered","d":"2026-11-04","t":"14:18"},{"m":"received","d":"2026-11-04"},{"m":"ask","d":"2026-11-06","what":"Midpoint check"},{"m":"in_process","d":"2026-11-06"},{"m":"newdate","d":"2026-11-06","to":"2026-11-11"},{"m":"shipped","d":"2026-11-10","trk":"DEMO-UPS-7735"},{"m":"back","d":"2026-11-11"}],"exp":{"fee":450,"bought":"2026-11-03","by":"2026-11-09"},"open":false,"id":"2464","po":"P-5164"},{"proc":"Anodize House A","process":"Anodize, Type II","q":7,"qty":60,"sent":"2026-11-04","due":"2026-11-11","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-04"},{"m":"delivered","d":"2026-11-04","t":"12:31"},{"m":"received","d":"2026-11-04"},{"m":"ask","d":"2026-11-09","what":"Midpoint check"},{"m":"in_process","d":"2026-11-09"},{"m":"shipped","d":"2026-11-10","trk":"Ready for pickup"},{"m":"back","d":"2026-11-10"}],"exp":null,"open":false,"id":"2465","po":"P-5165"},{"proc":"NDT Lab F","process":"Magnetic particle","q":3,"qty":40,"sent":"2026-11-04","due":"2026-11-07","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-04"},{"m":"delivered","d":"2026-11-04","t":"12:53"},{"m":"received","d":"2026-11-04"},{"m":"ask","d":"2026-11-05","what":"Midpoint check"},{"m":"in_process","d":"2026-11-05"},{"m":"newdate","d":"2026-11-05","to":"2026-11-09"},{"m":"shipped","d":"2026-11-09","trk":"Ready for pickup"},{"m":"back","d":"2026-11-09"}],"exp":null,"open":false,"id":"2466","po":"P-5166"},{"proc":"Passivation House H","process":"Passivation","q":4,"qty":16,"sent":"2026-11-04","due":"2026-11-08","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-04"},{"m":"delivered","d":"2026-11-04","t":"10:20"},{"m":"received","d":"2026-11-04"},{"m":"ask","d":"2026-11-06","what":"Midpoint check"},{"m":"in_process","d":"2026-11-06"},{"m":"newdate","d":"2026-11-06","to":"2026-11-09"},{"m":"shipped","d":"2026-11-09","trk":"Ready for pickup"},{"m":"back","d":"2026-11-09"}],"exp":null,"open":false,"id":"2467","po":"P-5167"},{"proc":"Paint House E","process":"Prime and paint","q":8,"qty":8,"sent":"2026-11-09","due":"2026-11-17","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-09"},{"m":"delivered","d":"2026-11-09","t":"10:39"},{"m":"received","d":"2026-11-09"},{"m":"ask","d":"2026-11-13","what":"Midpoint check"},{"m":"in_process","d":"2026-11-13"},{"m":"shipped","d":"2026-11-16","trk":"Ready for pickup"},{"m":"back","d":"2026-11-16"}],"exp":{"fee":300,"bought":"2026-11-09","by":"2026-11-16"},"open":false,"id":"2468","po":"P-5168"},{"proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":48,"sent":"2026-11-12","due":"2026-11-19","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-12"},{"m":"delivered","d":"2026-11-12","t":"14:04"},{"m":"received","d":"2026-11-12"},{"m":"shipped","d":"2026-11-16","trk":"Ready for pickup"},{"m":"back","d":"2026-11-16"}],"exp":{"fee":250,"bought":"2026-11-12","by":"2026-11-16"},"open":false,"id":"2469","po":"P-5169"},{"id":"2601","po":"P-5301","proc":"Plating House C","process":"Electroless nickel","q":10,"qty":40,"sent":"2026-11-13","due":"2026-11-23","carrier":"FedEx Ground","trk":"DEMO-FDX-6479","ev":[{"m":"sent","d":"2026-11-13"},{"m":"delivered","d":"2026-11-16","t":"11:20"},{"m":"received","d":"2026-11-16"},{"m":"ask","d":"2026-11-18","what":"Midpoint check"},{"m":"in_process","d":"2026-11-18"}],"open":true,"exp":{"fee":520,"bought":"2026-11-13","by":"2026-11-20"}},{"id":"2602","po":"P-5302","proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":40,"sent":"2026-11-11","due":"2026-11-18","carrier":"UPS Ground","trk":"DEMO-UPS-3387","ev":[{"m":"sent","d":"2026-11-11"},{"m":"delivered","d":"2026-11-12","t":"10:05"},{"m":"received","d":"2026-11-12"},{"m":"ask","d":"2026-11-16","what":"Midpoint check"},{"m":"racked","d":"2026-11-16"}],"open":true,"exp":null},{"id":"2603","po":"P-5303","proc":"Paint House E","process":"Prime and paint","q":8,"qty":24,"sent":"2026-11-12","due":"2026-11-20","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-12"},{"m":"delivered","d":"2026-11-12","t":"13:30"},{"m":"received","d":"2026-11-12"},{"m":"ask","d":"2026-11-17","what":"Midpoint check"},{"m":"in_process","d":"2026-11-17"}],"open":true,"exp":null},{"id":"2604","po":"P-5304","proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":30,"sent":"2026-11-17","due":"2026-11-27","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-17"},{"m":"delivered","d":"2026-11-17","t":"09:40"},{"m":"received","d":"2026-11-17"},{"m":"ask","d":"2026-11-19","what":"Midpoint check"},{"m":"racked","d":"2026-11-19"}],"open":true,"exp":{"fee":380,"bought":"2026-11-17","by":"2026-11-24"}},{"id":"2605","po":"P-5305","proc":"Passivation House H","process":"Passivation","q":4,"qty":60,"sent":"2026-11-23","due":"2026-11-27","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-23"},{"m":"delivered","d":"2026-11-23","t":"09:12"}],"open":true,"exp":null},{"id":"2606","po":"P-5306","proc":"Anodize House B","process":"Chem film","q":5,"qty":40,"sent":"2026-11-19","due":"2026-11-24","carrier":"UPS Ground","trk":"DEMO-UPS-9815","ev":[{"m":"sent","d":"2026-11-19"},{"m":"delivered","d":"2026-11-20","t":"14:14"}],"open":true,"exp":null},{"id":"2607","po":"P-5307","proc":"Grinding House G","process":"Centerless grind","q":6,"qty":100,"sent":"2026-11-18","due":"2026-11-24","carrier":"UPS Ground","trk":"DEMO-UPS-2960","ev":[{"m":"sent","d":"2026-11-18"},{"m":"delivered","d":"2026-11-19","t":"11:40"}],"open":true,"exp":null},{"id":"2608","po":"P-5308","proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":16,"sent":"2026-11-18","due":"2026-11-25","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-18"},{"m":"delivered","d":"2026-11-18","t":"10:15"},{"m":"received","d":"2026-11-18"},{"m":"ask","d":"2026-11-20","what":"Midpoint check"},{"m":"in_process","d":"2026-11-20"}],"open":true,"exp":null},{"id":"2609","po":"P-5309","proc":"NDT Lab F","process":"Magnetic particle","q":3,"qty":12,"sent":"2026-11-20","due":"2026-11-23","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-20"},{"m":"delivered","d":"2026-11-20","t":"08:50"},{"m":"received","d":"2026-11-20"}],"open":true,"exp":null},{"id":"2610","po":"P-5310","proc":"Anodize House A","process":"Anodize, Type II","q":7,"qty":50,"sent":"2026-11-19","due":"2026-11-26","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-19"},{"m":"delivered","d":"2026-11-19","t":"10:30"},{"m":"received","d":"2026-11-19"}],"open":true,"exp":null},{"id":"2611","po":"P-5311","proc":"Plating House C","process":"Electroless nickel","q":10,"qty":20,"sent":"2026-11-17","due":"2026-11-27","carrier":"FedEx Ground","trk":"DEMO-FDX-9423","ev":[{"m":"sent","d":"2026-11-17"},{"m":"delivered","d":"2026-11-18","t":"15:05"},{"m":"received","d":"2026-11-18"}],"open":true,"exp":null},{"id":"2612","po":"P-5312","proc":"Paint House E","process":"Prime and paint","q":8,"qty":8,"sent":"2026-11-18","due":"2026-11-26","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-18"},{"m":"delivered","d":"2026-11-18","t":"11:00"},{"m":"received","d":"2026-11-18"}],"open":true,"exp":null},{"id":"2613","po":"P-5313","proc":"Heat Treat House D","process":"Vacuum heat treat","q":7,"qty":25,"sent":"2026-11-20","due":"2026-11-27","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-20"},{"m":"delivered","d":"2026-11-20","t":"09:20"},{"m":"received","d":"2026-11-20"}],"open":true,"exp":null},{"id":"2614","po":"P-5314","proc":"Plating House C","process":"Electroless nickel","q":10,"qty":48,"sent":"2026-11-16","due":"2026-11-26","carrier":"FedEx Ground","trk":"DEMO-FDX-3531","ev":[{"m":"sent","d":"2026-11-16"},{"m":"delivered","d":"2026-11-17","t":"12:30"},{"m":"received","d":"2026-11-17"},{"m":"ask","d":"2026-11-23","what":"Midpoint check"},{"m":"in_process","d":"2026-11-23"}],"open":true,"exp":null},{"id":"2615","po":"P-5315","proc":"Plating House C","process":"Electroless nickel","q":10,"qty":10,"sent":"2026-11-20","due":"2026-11-30","carrier":"FedEx Ground","trk":"DEMO-FDX-3209","ev":[{"m":"sent","d":"2026-11-20"},{"m":"delivered","d":"2026-11-23","t":"10:45"},{"m":"received","d":"2026-11-23"}],"open":true,"exp":null},{"id":"2616","po":"P-5316","proc":"Anodize House A","process":"Hard anodize, Type III","q":10,"qty":20,"sent":"2026-11-20","due":"2026-11-30","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-20"},{"m":"delivered","d":"2026-11-20","t":"10:10"},{"m":"received","d":"2026-11-20"}],"open":true,"exp":null},{"id":"2617","po":"P-5317","proc":"NDT Lab F","process":"Penetrant inspection","q":4,"qty":80,"sent":"2026-11-23","due":"2026-11-27","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-23"},{"m":"delivered","d":"2026-11-23","t":"08:40"},{"m":"received","d":"2026-11-23"}],"open":true,"exp":null},{"id":"2618","po":"P-5318","proc":"Anodize House A","process":"Anodize, Type II","q":7,"qty":24,"sent":"2026-11-20","due":"2026-11-27","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-20"},{"m":"delivered","d":"2026-11-20","t":"14:00"},{"m":"received","d":"2026-11-20"}],"open":true,"exp":null},{"id":"2619","po":"P-5319","proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":30,"sent":"2026-11-13","due":"2026-11-20","carrier":"UPS Ground","trk":"DEMO-UPS-1083","ev":[{"m":"sent","d":"2026-11-13"},{"m":"delivered","d":"2026-11-16","t":"09:55"},{"m":"received","d":"2026-11-16"},{"m":"ask","d":"2026-11-17","what":"Midpoint check"},{"m":"racked","d":"2026-11-17"},{"m":"newdate","d":"2026-11-17","to":"2026-11-30"}],"open":true,"exp":null},{"id":"2620","po":"P-5320","proc":"Paint House E","process":"Prime and paint","q":8,"qty":12,"sent":"2026-11-12","due":"2026-11-20","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-12"},{"m":"delivered","d":"2026-11-12","t":"10:40"},{"m":"received","d":"2026-11-12"},{"m":"ask","d":"2026-11-16","what":"Midpoint check"},{"m":"in_process","d":"2026-11-16"},{"m":"newdate","d":"2026-11-16","to":"2026-12-01"}],"open":true,"exp":null},{"id":"2621","po":"P-5321","proc":"Grinding House G","process":"Centerless grind","q":6,"qty":50,"sent":"2026-11-16","due":"2026-11-22","carrier":"UPS Ground","trk":"DEMO-UPS-4994","ev":[{"m":"sent","d":"2026-11-16"},{"m":"delivered","d":"2026-11-17","t":"10:20"},{"m":"received","d":"2026-11-17"},{"m":"ask","d":"2026-11-19","what":"Midpoint check"},{"m":"in_process","d":"2026-11-19"},{"m":"shipped","d":"2026-11-20","trk":"DEMO-UPS-4471"}],"open":true,"exp":null},{"id":"2622","po":"P-5322","proc":"Passivation House H","process":"Passivation","q":4,"qty":40,"sent":"2026-11-17","due":"2026-11-21","carrier":"Local courier","trk":"","ev":[{"m":"sent","d":"2026-11-17"},{"m":"delivered","d":"2026-11-17","t":"13:15"},{"m":"received","d":"2026-11-17"},{"m":"shipped","d":"2026-11-20","trk":"Courier ticket 2290"}],"open":true,"exp":null},{"id":"2623","po":"P-5323","proc":"Heat Treat House D","process":"Stress relieve","q":4,"qty":30,"sent":"2026-11-18","due":"2026-11-22","carrier":"Shop driver","trk":"","ev":[{"m":"sent","d":"2026-11-18"},{"m":"delivered","d":"2026-11-18","t":"09:30"},{"m":"received","d":"2026-11-18"},{"m":"ask","d":"2026-11-20","what":"Midpoint check"},{"m":"processed","d":"2026-11-20"},{"m":"shipped","d":"2026-11-20","trk":"Ready for our driver"}],"open":true,"exp":null},{"id":"2624","po":"P-5324","proc":"Anodize House B","process":"Anodize, Type II","q":7,"qty":20,"sent":"2026-11-23","due":"2026-11-30","carrier":"UPS Ground","trk":"DEMO-UPS-6690","ev":[{"m":"sent","d":"2026-11-23"}],"open":true,"exp":null},{"id":"2625","po":"P-5325","proc":"Plating House C","process":"Electroless nickel","q":10,"qty":16,"sent":"2026-11-23","due":"2026-12-03","carrier":"FedEx Ground","trk":"DEMO-FDX-7382","ev":[{"m":"sent","d":"2026-11-23"}],"open":true,"exp":null}],"assume":{"calls_per_job":2,"min_per_call":10,"min_per_email":3},"contacts":{"Anodize House A":"orders@anodize-house-a.example","Anodize House B":"orders@anodize-house-b.example","Grinding House G":"orders@grinding-house-g.example","Heat Treat House D":"orders@heat-treat-house-d.example","NDT Lab F":"orders@ndt-lab-f.example","Paint House E":"orders@paint-house-e.example","Passivation House H":"orders@passivation-house-h.example","Plating House C":"orders@plating-house-c.example"}};
@@ -2715,21 +2542,11 @@ function on(type, selector, fn) {
   });
 }
 
-/* render.js: the frame around every screen (navigation, top bar, banner) and the redraw.
+/* render.js: the frame around every screen (navigation, top bar, status bar, banner) and the redraw.
 
    A change follows one path: a handler updates st, calls save(), then render(), which redraws the current
    screen from scratch. Each screen is a function of the job list that returns markup. */
 
-const ICON = {
-  today: '<path d="M3 12h4l3-7 4 14 3-7h4"/>',
-  jobs: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h8"/>',
-  exp: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1.2 1.1-2 2.5-2s2.5.8 2.5 2-1.1 1.8-2.5 2.2-2.5 1-2.5 2.3 1.1 2 2.5 2 2.5-.8 2.5-2"/>',
-  procs: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
-  imp: '<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>',
-  sum: '<path d="M4 4h16v16H4zM8 15l3-3 2 2 4-5"/>',
-  set: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
-  it: '<path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
-};
 const SCREENS = [
   { id: 'today', label: 'Today', draw: vToday },
   { id: 'jobs', label: 'Jobs at processors', draw: vJobs },
@@ -2746,19 +2563,6 @@ let drawnScreen = null;
 
 function navButton(screen, badge) {
   return html`<button type="button" data-v="${screen.id}" aria-current="${st.view === screen.id ? 'page' : 'false'}">
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.8"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      ${trusted(ICON[screen.id])}
-    </svg>
     <span class="lbl">${screen.label}</span>${badge}
   </button>`;
 }
@@ -2792,7 +2596,7 @@ function render() {
   const thisMonth = expedites.filter((x) => x.bought >= monthStart);
   const fees = thisMonth.reduce((a, x) => a + x.fee, 0);
   $('#shopname').textContent = shopName();
-  $('#clock').textContent = `${fmtDay(T).toUpperCase()} ${T.slice(0, 4)}`;
+  $('#clock').textContent = `${fmtDay(T)}, ${T.slice(0, 4)}`;
   $('#tb_open').textContent = open.length;
   $('#tb_acts').textContent = needWord;
   $('#tb_exp').textContent = `${money(fees)} · ${thisMonth.filter((x) => x.res === 'missed').length} missed`;
@@ -2853,23 +2657,22 @@ const byUrgency = ([, a], [, b]) => URGENCY.indexOf(a.k) - URGENCY.indexOf(b.k) 
 
 function todayRow([j, s]) {
   const track = s.k === 'chk' && trackUrl(j);
-  return html`<tr class="click tag-${STATUS[s.k][1]}" data-job="${j.id}">
+  return html`<tr class="click" data-job="${j.id}">
+    <td class="from">${j.proc}</td>
     <td>
-      <div class="m1"><b class="from">${j.proc}</b><span class="when">Due ${fmtDate(s.due)}</span></div>
-      <div class="m2">
-        Job <span class="job">${jobNo(j)}</span>${j.po && ` · PO ${j.po}`} ·
-        ${j.process}${j.qty > 0 && ` · ${j.qty} pcs`}
-      </div>
-      <div class="m3">
-        ${chip(s.k)}${s.asked && html`<span class="asked">Asked ${fmtTime(s.asked.t)}</span>`}
-        <span class="why">${reason(j, s)}</span>
-      </div>
+      <span class="job">${jobNo(j)}</span>
+      <span class="sub">${j.process}${j.qty > 0 && `, ${j.qty} pcs`}</span>
+    </td>
+    <td class="needs">
+      ${chip(s.k)}${s.asked && html`<span class="asked">Asked ${fmtTime(s.asked.t)}</span>`}
+      <span class="sub">${reason(j, s)}</span>
       <div class="acts">
         ${track && html`<a class="btn sm" target="_blank" rel="noopener noreferrer" href="${track}">Track</a>`}
         ${s.k === 'chk' && html`<button type="button" class="btn sm" data-deliv="${j.id}">Mark delivered</button>`}
         <button type="button" class="btn pri sm" data-draft="${j.id}">Draft email</button>
       </div>
     </td>
+    <td class="when">${fmtDate(s.due)}</td>
   </tr>`;
 }
 
@@ -3029,6 +2832,14 @@ function vToday(J) {
         </h2>
         ${shown.length
           ? html`<table class="msgs">
+              <thead>
+                <tr>
+                  <th>Processor</th>
+                  <th>Job</th>
+                  <th>What it needs</th>
+                  <th>Due back</th>
+                </tr>
+              </thead>
               <tbody>
                 ${shown.map(todayRow)}
               </tbody>
@@ -3782,7 +3593,7 @@ function columnHeading([key, label, cls]) {
 function jobRow([j, s]) {
   const latest = j.ev[j.ev.length - 1];
   const overdue = isOpen(j) && s.due < T;
-  return html`<tr class="click tag-${STATUS[s.k][1]}" data-job="${j.id}">
+  return html`<tr class="click" data-job="${j.id}">
     <td><span class="job">${jobNo(j)}</span></td>
     <td>${j.po}</td>
     <td>${j.proc}</td>
