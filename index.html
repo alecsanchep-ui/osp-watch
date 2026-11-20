@@ -9,7 +9,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser runs only the one script and one stylesheet below, identified by hash. connect-src lists
      every address the page may send to: 'none' unless this build carries the optional usage signal. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-DLmEppRkipZSwrXW0++zl835nwhQFQ6e7jQ8iN52Cqo='; style-src 'sha256-QxgsXtp5epP8j+O8pLvjTmVFBpntKS4Tiqt6COk2T4E='; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-qnOsac2GHLbxW0TpUkFIu/Xsh54DIRJUE3U+Rxmj31o='; style-src 'sha256-QxgsXtp5epP8j+O8pLvjTmVFBpntKS4Tiqt6COk2T4E='; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>OSP Watch</title>
 <style>/* Plain office software: flat, square, dense, with visible gridlines. Today reads as a mail list with a
    reading pane, Jobs as a spreadsheet, and the running totals sit in a status bar at the foot of the window.
@@ -1242,10 +1242,17 @@ const dayNum = (s) => Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 1
 const isoDay = (n) => new Date(n * DAY_MS).toISOString().slice(0, 10);
 const addDays = (s, k) => isoDay(dayNum(s) + k);
 const dayOfWeek = (s) => (dayNum(s) + 4) % 7; /* 0 = Sunday; day 0 of the epoch was a Thursday */
-/* Checks are never due on a weekend: one that would land on Saturday or Sunday moves to Monday. */
+/* Checks are never due on a weekend or on a day the shop has marked closed (a holiday, a processor's
+   shutdown): one that would land there moves to the next working day. The closed days are the shop's own
+   list from Setup, handed in by setClosedDays(); with none set, only weekends are skipped. */
+let closedDays = new Set();
+const setClosedDays = (days) => {
+  closedDays = new Set(days);
+};
 const isWeekend = (s) => dayOfWeek(s) % 6 === 0;
+const isClosed = (s) => isWeekend(s) || closedDays.has(s);
 function nextWorkday(s) {
-  while (isWeekend(s)) s = addDays(s, 1);
+  while (isClosed(s)) s = addDays(s, 1);
   return s;
 }
 function addWorkdays(s, n) {
@@ -1583,7 +1590,9 @@ const usd = (n) =>
   '$' +
   Number(n).toLocaleString('en-US', Number.isInteger(+n) ? {} : { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const MASKED_PROCESS = /plat|nickel|anodi[sz]|chem|film|coat|paint|prim|passivat/i;
-const letter = (proc, text, sign) => `Hi ${proc} team,\n\n${text}\n\nThank you,\n${sign || DEFAULT_SIGN}`;
+/* `who` is the contact's first name when the shop has entered one; without it the letter greets the team. */
+const letter = (proc, text, sign, who) =>
+  `Hi ${who || proc + ' team'},\n\n${text}\n\nThank you,\n${sign || DEFAULT_SIGN}`;
 
 /* Each draft asks for a physical step or a date, never "are we on track?", because a step can be checked. */
 function draftText(j, s, T) {
@@ -1658,13 +1667,13 @@ function draftText(j, s, T) {
 }
 
 /** The email for one job in status s. */
-function draftFor(j, s, T, sign) {
+function draftFor(j, s, T, sign, who) {
   const { subject, text } = draftText(j, s, T);
-  return { subject, body: letter(j.proc, text, sign) };
+  return { subject, body: letter(j.proc, text, sign, who) };
 }
 
 /** One email covering every job at one processor that needs a word today. items = [[job, status], ...]. */
-function draftForProc(items, T, sign) {
+function draftForProc(items, T, sign, who) {
   const ids = items.map(([j]) => (j.po ? `PO ${j.po} / job ${j.jn || j.id}` : `job ${j.jn || j.id}`));
   const lines = items.map(([j, s], i) => `${i + 1}. ${draftText(j, s, T).text}`);
   return {
@@ -1673,12 +1682,13 @@ function draftForProc(items, T, sign) {
       items[0][0].proc,
       `We have ${items.length} jobs with you that need a quick word today.\n\n${lines.join('\n\n')}`,
       sign,
+      who,
     ),
   };
 }
 
 /** The credit request for an expedite whose date was missed. */
-function creditDraft(j, T, sign) {
+function creditDraft(j, T, sign, who) {
   const id = j.jn || j.id;
   const ref = j.po ? `PO ${j.po} (our job ${id})` : `job ${id}`;
   const tag = ref[0].toUpperCase() + ref.slice(1);
@@ -1699,6 +1709,7 @@ function creditDraft(j, T, sign) {
       j.proc,
       `On ${fmtDay(bought)} we paid a ${usd(fee)} expedite for ${ref} (${what}${proc}) to be back by ${fmtDay(by)}. ${outcome} The expedited date was missed. Would you be able to credit the ${usd(fee)} expedite charge?${stillOut}`,
       sign,
+      who,
     ),
   };
 }
@@ -1966,6 +1977,8 @@ function mergeState(mine, theirs) {
         if (!removed.has(id)) out[k][id] = id in out[k] ? pick(out[k][id], side[id]) : side[id];
   }
   out.contacts = { ...older.contacts, ...newer.contacts };
+  out.people = { ...older.people, ...newer.people };
+  out.closed = newer.closed || older.closed || [];
   for (const k of ['started', 'lastImport']) if (!out[k]) delete out[k];
   return out;
 }
@@ -2172,6 +2185,8 @@ async function readXlsx(buffer) {
      exp        { jobId: expedite } added after the job was entered
      credit     { jobId: 'requested' | 'credited' }
      contacts   { processor: email address }
+     people     { processor: { name, phone } }, the person to ask for
+     closed     days the shop has marked closed, so no check falls on them
      removed    ids of removed jobs, so a removal reaches every computer on a shared file
      handled    { jobId: note } for the "Handled today" list; cleared each morning (handledOn)
      shop, signer, assume, settingsAt   the Setup screen
@@ -2302,6 +2317,14 @@ function cleanMap(raw, cleanValue) {
 }
 const cleanText = (v, max = 200) => (v == null ? '' : String(v).slice(0, max));
 const cleanDay = (v) => (typeof v === 'string' && isDate(v) ? v : null);
+const MAX_CLOSED_DAYS = 60;
+const cleanDays = (list) =>
+  [...new Set((Array.isArray(list) ? list : []).map(cleanDay).filter(Boolean))].sort().slice(0, MAX_CLOSED_DAYS);
+function cleanPerson(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const person = { name: cleanText(raw.name, 80).trim(), phone: cleanText(raw.phone, 40).trim() };
+  return person.name || person.phone ? person : null;
+}
 const cleanCount = (v) => Math.max(0, Math.floor(Number(v)) || 0);
 
 function cleanEvent(e) {
@@ -2357,6 +2380,8 @@ function blankState() {
     exp: emptyMap(),
     credit: emptyMap(),
     contacts: emptyMap(),
+    people: emptyMap(),
+    closed: [],
     removed: [],
     handled: emptyMap(),
     handledOn: T,
@@ -2377,6 +2402,8 @@ function cleanState(raw) {
   s.exp = cleanMap(raw.exp, cleanExpedite);
   s.credit = cleanMap(raw.credit, (v) => (v === 'requested' || v === 'credited' ? v : null));
   s.contacts = cleanMap(raw.contacts, (v) => cleanText(v, 200).trim());
+  s.people = cleanMap(raw.people, cleanPerson);
+  s.closed = cleanDays(raw.closed);
   s.removed = (Array.isArray(raw.removed) ? raw.removed : []).map((id) => cleanText(id, 60)).filter(Boolean);
   s.handled = cleanMap(raw.handled, (v) => cleanText(v, 120));
   s.handledOn = cleanDay(raw.handledOn) || T;
@@ -2480,6 +2507,7 @@ function settingsChanged() {
 
 /** Every job, with what was logged here folded in. */
 function jobs() {
+  setClosedDays(st.closed);
   const all = MODE === 'demo' ? DATA.jobs.concat(st.added) : st.added;
   return all.map((j) => {
     const events = st.ev[j.id];
@@ -2493,6 +2521,9 @@ const isOpen = (j) => j.open && !isBack(j);
 const shopName = () => st.shop || 'Your shop';
 const signature = () => (st.signer || 'Purchasing') + (st.shop ? `, ${st.shop}` : '');
 const contactFor = (proc) => st.contacts[proc] || (MODE === 'demo' && DATA.contacts[proc]) || '';
+const personFor = (proc) => st.people[proc] || { name: '', phone: '' };
+/** The first name a draft greets, or '' so the draft greets the processor's team. */
+const greetingFor = (proc) => personFor(proc).name.split(/\s+/)[0];
 
 function logEvent(id, event) {
   (st.ev[id] = st.ev[id] || []).push({ d: T, t: now(), ...event });
@@ -2720,6 +2751,10 @@ function handledRow([j, note]) {
 
 /* The printed call sheet: the same list grouped by processor, with blank columns for the answers. It is
    in the page all the time and shown only when printing. */
+/* Who to ask for at a processor, as printed on the call sheet: name, phone, then the email. */
+const callSheetContact = (proc) =>
+  [personFor(proc).name, personFor(proc).phone, contactFor(proc)].filter(Boolean).join(' · ');
+
 function callSheet(rows, group) {
   const byProc = new Map();
   for (const row of rows) byProc.set(row[0].proc, [...(byProc.get(row[0].proc) || []), row]);
@@ -2744,7 +2779,7 @@ function callSheet(rows, group) {
     ${[...byProc].map(
       ([proc, list]) =>
         html`<div class="pg">
-          <h3>${proc}${contactFor(proc) && html` <span>${contactFor(proc)}</span>`}</h3>
+          <h3>${proc}${callSheetContact(proc) && html` <span>${callSheetContact(proc)}</span>`}</h3>
           <table>
             <thead>
               <tr>
@@ -3008,7 +3043,8 @@ function replyPicker(open) {
 function openDraft(id, { credit = false, showReply = false } = {}) {
   const j = job(id);
   const s = statusOf(j, T);
-  const draft = credit ? creditDraft(j, T, signature()) : draftFor(j, s, T, signature());
+  const who = greetingFor(j.proc);
+  const draft = credit ? creditDraft(j, T, signature(), who) : draftFor(j, s, T, signature(), who);
   const group = credit || !s.action ? [] : sameProcessorToday(j);
   const creditState = st.credit[id];
 
@@ -3078,7 +3114,7 @@ function rememberContact() {
 on('change', '#dto', rememberContact);
 
 on('click', '#dgrp', () => {
-  const all = draftForProc(panel.group, T, signature());
+  const all = draftForProc(panel.group, T, signature(), greetingFor(panel.group[0][0].proc));
   $('#dsub').value = all.subject;
   $('#dbody').value = all.body;
   panel.sendTo = panel.group.map(([j]) => j.id);
@@ -4586,6 +4622,8 @@ on('click', '#fdrop', async () => {
 
 /* setup.js: the shop's name and signature, processor contacts, the shared file, backup and export. */
 
+const usDate = (s) => `${+s.slice(5, 7)}/${+s.slice(8, 10)}/${s.slice(0, 4)}`;
+
 function setting(key, value, size) {
   return html`<input type="text" data-set="${key}" id="set-${key}" class="${size}" value="${value}" />`;
 }
@@ -4608,6 +4646,20 @@ function shopCard(live) {
     <div class="pad">
       <div class="field"><label for="set-shop">Shop name (signs the emails)</label>${setting('shop', st.shop)}</div>
       <div class="field"><label for="set-signer">Signed by</label>${setting('signer', st.signer)}</div>
+      <div class="field">
+        <label for="set-closed">Days your processors are closed (holidays, shutdowns)</label>
+        <input
+          type="text"
+          id="set-closed"
+          class="wide"
+          value="${st.closed.map(usDate).join(', ')}"
+          placeholder="11/26/2026, 11/27/2026, 12/25/2026"
+        />
+      </div>
+      <p class="small">
+        A check that would fall on one of these days, or on a weekend, moves to the next working day. Due dates are not
+        changed.
+      </p>
       <p class="small">
         Emails end with: <b>${signature()}</b>. Processor email addresses are remembered the first time you type one
         into a draft.
@@ -4640,12 +4692,14 @@ function contactsCard(J) {
   const processors = [...new Set(J.map((j) => j.proc))].sort();
   if (!processors.length) return '';
   return html`<div class="card">
-    <h2>Processor contacts <span>· where each check is sent</span></h2>
+    <h2>Processor contacts <span>· who to ask, and where each check is sent</span></h2>
     <table>
       <thead>
         <tr>
           <th>Processor</th>
           <th>Email for status checks</th>
+          <th>Contact name</th>
+          <th>Phone</th>
           <th class="n">Open jobs</th>
         </tr>
       </thead>
@@ -4662,6 +4716,25 @@ function contactsCard(J) {
                   aria-label="Email for ${proc}"
                   value="${st.contacts[proc] || ''}"
                   placeholder="name@processor.com"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  data-person="${proc}"
+                  data-field="name"
+                  aria-label="Contact name at ${proc}"
+                  value="${personFor(proc).name}"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  class="short"
+                  data-person="${proc}"
+                  data-field="phone"
+                  aria-label="Phone for ${proc}"
+                  value="${personFor(proc).phone}"
                 />
               </td>
               <td class="n">${J.filter((j) => isOpen(j) && j.proc === proc).length}</td>
@@ -4846,6 +4919,26 @@ on('change', '[data-contact]', (el) => {
   toast('Saved.');
 });
 
+on('change', '[data-person]', (el) => {
+  const proc = el.dataset.person;
+  const person = cleanPerson({ ...personFor(proc), [el.dataset.field]: el.value });
+  if (person) st.people[proc] = person;
+  else delete st.people[proc];
+  settingsChanged();
+  toast('Saved.');
+});
+
+on('change', '#set-closed', (el) => {
+  const typed = el.value.split(/[,;\n]+/).map((part) => part.trim());
+  const days = typed.filter(Boolean).map((part) => [part, parseDate(part)]);
+  const unread = days.filter(([, day]) => !day).map(([part]) => part);
+  if (unread.length) return toast(`Could not read "${unread[0]}" as a date. Use month/day/year.`);
+  st.closed = cleanDays(days.map(([, day]) => day));
+  settingsChanged();
+  render();
+  toast(st.closed.length ? `${plural(st.closed.length, 'closed day')} saved.` : 'No closed days.');
+});
+
 on('change', '[data-set]', (el) => {
   const key = el.dataset.set;
   if (key in st.assume) {
@@ -4957,7 +5050,7 @@ function vIT() {
       ],
       [
         'Per shop',
-        'Shop name, the name that signs emails, one contact email per processor, three numbers for a time estimate, the day the shop started, the time of the last import, and the numbers of any jobs removed.',
+        'Shop name, the name that signs emails, a contact email, name and phone number per processor, the days you mark as closed, three numbers for a time estimate, the day the shop started, the time of the last import, and the numbers of any jobs removed.',
       ],
       [
         'Not stored',
