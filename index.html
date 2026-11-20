@@ -9,7 +9,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser runs only the one script and one stylesheet below, identified by hash. connect-src lists
      every address the page may send to: 'none' unless this build carries the optional usage signal. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-qnOsac2GHLbxW0TpUkFIu/Xsh54DIRJUE3U+Rxmj31o='; style-src 'sha256-QxgsXtp5epP8j+O8pLvjTmVFBpntKS4Tiqt6COk2T4E='; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MSbHz5XGwJE/NDfXCs2WDT9hKvvUVQ6tC4r3Xts87rA='; style-src 'sha256-Ny5sfKf5R7ndwnkUbZ/quEt61pCGWOf9MuTT+VJAF0s='; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>OSP Watch</title>
 <style>/* Plain office software: flat, square, dense, with visible gridlines. Today reads as a mail list with a
    reading pane, Jobs as a spreadsheet, and the running totals sit in a status bar at the foot of the window.
@@ -861,6 +861,15 @@ body.pane .panel:not(.on) > * {
 body.pane .panel:not(.on)::before {
   content: 'Select a job to see it here';
   color: var(--mute);
+}
+
+/* Beside Jobs and Expedites the panel is a fixed, narrower column, so the grid keeps its width. */
+body.pane:not([data-view='today']) main {
+  padding: 10px 12px 0;
+}
+body.pane:not([data-view='today']) .panel {
+  flex: 0 0 380px;
+  min-width: 0;
 }
 
 /* ---------- single screens ---------- */
@@ -2640,6 +2649,7 @@ function render() {
   if (drawnScreen !== screen.id) $('#view').scrollTop = 0;
   drawnScreen = screen.id;
 
+  document.body.dataset.view = st.view;
   document.body.classList.toggle('pane', paneFits());
   const firstRow = $('#view .msgs tr[data-job]');
   if (selectFirst && isDocked() && !panel && firstRow) openJob(firstRow.dataset.job);
@@ -2936,14 +2946,17 @@ on('click', '#setupx', () => {
 
 /* panel.js: the side panel, and the email draft shown in it.
 
-   On Today, on a wide screen, the panel is docked beside the list as a reading pane (body.pane). On every
-   other screen it opens over the page as a dialog. */
+   On Today, Jobs and Expedites the panel is docked beside the list as a reading pane (body.pane) when the
+   window is wide enough for both. Otherwise, and on every other screen, it opens over the page as a dialog. */
 
 /* What the panel is showing: { kind: 'draft' | 'job' | 'add', id, ... }, or null when it is closed. */
 let panel = null;
 let panelOpener = null;
 
-const paneFits = () => st.view === 'today' && innerWidth >= 1100;
+/* The narrowest window, per screen, in which the list still fits beside the docked panel. Today's list is
+   built for it. Jobs is a wide grid, so it needs the most room. */
+const PANE_FROM = { today: 1100, exp: 1380, jobs: 1640 };
+const paneFits = () => innerWidth >= (PANE_FROM[st.view] || Infinity);
 const isDocked = () => document.body.classList.contains('pane');
 
 function markSelectedRow() {
