@@ -9,29 +9,32 @@
 <meta name="referrer" content="no-referrer">
 <!-- The browser runs only the one script and one stylesheet below, identified by hash. connect-src lists
      every address the page may send to: 'none' unless this build carries the optional usage signal. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MSbHz5XGwJE/NDfXCs2WDT9hKvvUVQ6tC4r3Xts87rA='; style-src 'sha256-Ny5sfKf5R7ndwnkUbZ/quEt61pCGWOf9MuTT+VJAF0s='; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-P73W3Q4bqIV8jVA7mR5hH4IlpHO5tWZ5bfb+OnSCWYA='; style-src 'sha256-I3q0WdmbEL4VVBYIVGlbsW6EAV8flvab/A39Vp+LhrI='; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <title>OSP Watch</title>
-<style>/* Plain office software: flat, square, dense, with visible gridlines. Today reads as a mail list with a
-   reading pane, Jobs as a spreadsheet, and the running totals sit in a status bar at the foot of the window.
-   One blue accent; colour otherwise only where a job is in trouble. System fonts only. */
+<style>/* Plain office software, tidied: flat, dense, quiet. Today reads as a mail list with a reading pane, Jobs as
+   a spreadsheet, and the running totals sit in a status bar at the foot of the window. Neutrals and status
+   colours follow GitHub's Primer primitives (MIT) and the accent is Microsoft Fluent's, so the page sits
+   comfortably next to Outlook and Excel. Colour appears only where a job is in trouble. System fonts only. */
 
 :root {
   --sheet: #fff;
-  --chrome: #f3f3f3;
-  --ink: #1f1f1f;
-  --mute: #5c5c5c;
-  --faint: #707070;
-  --line: #c8c8c8;
-  --grid: #e1e1e1;
-  --hover: #f0f6fc;
-  --selected: #cfe4fa;
+  --chrome: #f6f8fa;
+  --ink: #1f2328;
+  --mute: #59636e;
+  --faint: #6e7781;
+  --line: #d1d9e0;
+  --grid: #e7ebef;
+  --hover: #f3f8fd;
+  --selected: #deebf9;
   --accent: #0f6cbd;
-  --accent-dark: #115ea3;
-  --red: #c50f1f;
-  --amber: #8a6100;
-  --amber-bg: #fff4ce;
-  --amber-line: #f2c661;
-  --green: #107c10;
+  --accent-dark: #0c5a9e;
+  --bar: #0b3d66;
+  --red: #c4141f;
+  --amber: #8a5a00;
+  --amber-bg: #fff8c5;
+  --amber-line: #e9c46a;
+  --green: #1a7f37;
+  --radius: 6px;
   --ui: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -74,8 +77,8 @@ input[type='date'],
 textarea {
   padding: 4px 7px;
   /* A field's edge is darker than a gridline, so the field can be found. */
-  border: 1px solid #8a8a8a;
-  border-radius: 2px;
+  border: 1px solid #8c959f;
+  border-radius: var(--radius);
   background: var(--sheet);
 }
 select:focus,
@@ -93,15 +96,19 @@ table {
 }
 th,
 td {
-  padding: 5px 9px;
-  border: 1px solid var(--grid);
+  padding: 6px 10px;
+  border: 0;
+  border-bottom: 1px solid var(--grid);
   text-align: left;
   white-space: nowrap;
 }
 th {
   position: sticky;
   top: 0;
+  border-bottom-color: var(--line);
   background: var(--chrome);
+  color: var(--mute);
+  font-size: 12px;
   font-weight: 600;
 }
 tr > :first-child {
@@ -176,18 +183,19 @@ tbody tr:last-child td {
 .btn {
   display: inline-flex;
   align-items: center;
-  padding: 3px 11px;
-  border: 1px solid #adadad;
-  border-radius: 2px;
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   background: var(--sheet);
   color: var(--ink);
+  font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
 }
 .btn:hover {
-  border-color: var(--accent);
-  background: var(--hover);
+  border-color: #afb8c1;
+  background: var(--chrome);
 }
 .btn.pri {
   border-color: var(--accent);
@@ -199,7 +207,7 @@ tbody tr:last-child td {
   background: var(--accent-dark);
 }
 .btn.sm {
-  padding: 1px 8px;
+  padding: 2px 9px;
   font-size: 12px;
 }
 /* A status is a small coloured square and its name, as a category is marked in a mail list. */
@@ -212,7 +220,8 @@ tbody tr:last-child td {
   width: 8px;
   height: 8px;
   margin-right: 6px;
-  background: #a6a6a6;
+  border-radius: 50%;
+  background: #afb8c1;
 }
 .t-red {
   color: var(--red);
@@ -243,8 +252,9 @@ tbody tr:last-child td {
 }
 .note {
   margin-top: 10px;
-  padding: 6px 9px;
+  padding: 7px 10px;
   border: 1px solid var(--grid);
+  border-radius: var(--radius);
   background: var(--chrome);
   color: var(--mute);
   font-size: 12px;
@@ -253,9 +263,10 @@ tbody tr:last-child td {
   margin: 10px 14px 0;
 }
 .box {
-  margin-top: 12px;
-  padding: 8px 10px;
+  margin-top: 14px;
+  padding: 10px 12px;
   border: 1px solid var(--line);
+  border-radius: var(--radius);
 }
 .kv {
   display: grid;
@@ -297,8 +308,8 @@ tbody tr:last-child td {
 .banner button {
   flex: none;
   padding: 1px 9px;
-  border: 1px solid #adadad;
-  border-radius: 2px;
+  border: 1px solid #d4a72c;
+  border-radius: var(--radius);
   background: var(--sheet);
   white-space: nowrap;
   cursor: pointer;
@@ -310,20 +321,30 @@ tbody tr:last-child td {
   display: flex;
   align-items: center;
   gap: 16px;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 14px;
-  background: var(--accent);
+  background: var(--bar);
   color: #fff;
 }
 .tb .name {
-  width: 150px;
+  width: 182px;
   font-size: 15px;
   font-weight: 600;
+  letter-spacing: 0.2px;
 }
 .tb input {
-  width: 340px;
+  width: 360px;
   max-width: 40%;
-  border: 0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+.tb input::placeholder {
+  color: rgba(255, 255, 255, 0.75);
+}
+.tb input:focus {
+  background: #fff;
+  color: var(--ink);
 }
 .tb input:focus {
   outline: 2px solid #fff;
@@ -335,28 +356,43 @@ tbody tr:last-child td {
 }
 nav {
   flex: none;
-  width: 180px;
-  padding: 6px 0;
+  width: 196px;
+  padding: 8px 8px;
   border-right: 1px solid var(--line);
   background: var(--chrome);
 }
 nav button {
+  position: relative;
+  white-space: nowrap;
   display: flex;
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  padding: 5px 14px;
+  margin-bottom: 1px;
+  padding: 6px 10px;
   border: 0;
+  border-radius: var(--radius);
   background: none;
   text-align: left;
   cursor: pointer;
 }
 nav button:hover {
-  background: #e6e6e6;
+  background: #eaeef2;
 }
+/* The current screen: a short accent bar at the left edge, as in Outlook's folder list. */
 nav button[aria-current='page'] {
-  background: var(--selected);
+  background: #e3ebf4;
   font-weight: 600;
+}
+nav button[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  left: 0;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
 }
 nav .badge {
   color: var(--accent);
@@ -411,8 +447,9 @@ main {
 }
 .head h1 {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
+  letter-spacing: -0.2px;
 }
 .head p {
   margin: 1px 0 0;
@@ -430,8 +467,10 @@ main {
   display: grid;
   grid-auto-columns: 1fr;
   grid-auto-flow: column;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  overflow: hidden;
   border: 1px solid var(--line);
+  border-radius: var(--radius);
 }
 .tile {
   display: flex;
@@ -446,7 +485,7 @@ main {
   border-right: 0;
 }
 .tile .n {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   text-align: left;
 }
@@ -465,19 +504,20 @@ main {
 
 /* A section: a ruled box with a grey title bar. */
 .card {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   overflow-x: auto;
   border: 1px solid var(--line);
+  border-radius: var(--radius);
 }
 .card h2 {
   display: flex;
   align-items: baseline;
   gap: 8px;
   margin: 0;
-  padding: 5px 9px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--line);
-  background: var(--chrome);
-  font-size: 13px;
+  background: var(--sheet);
+  font-size: 14px;
   font-weight: 600;
 }
 .card h2 span {
@@ -603,7 +643,9 @@ tr.sel:hover td {
 }
 .sort {
   width: 100%;
-  padding: 5px 9px;
+  padding: 6px 10px;
+  color: inherit;
+  font-size: 12px;
   border: 0;
   background: none;
   font-weight: 600;
@@ -612,10 +654,14 @@ tr.sel:hover td {
   cursor: pointer;
 }
 .sort:hover {
-  background: #e6e6e6;
+  background: #eaeef2;
 }
 .grid th:not([aria-sort='none']) {
   color: var(--accent);
+}
+.grid td + td,
+.grid th + th {
+  border-left: 1px solid var(--grid);
 }
 
 /* ---------- the side panel ---------- */
@@ -644,7 +690,7 @@ tr.sel:hover td {
   max-width: 100%;
   border-left: 1px solid var(--line);
   background: var(--sheet);
-  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.18);
+  box-shadow: -8px 0 24px rgba(31, 35, 40, 0.16);
 }
 .panel.on {
   display: flex;
@@ -656,12 +702,12 @@ tr.sel:hover td {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 10px 14px 8px;
+  padding: 14px 16px 10px;
   border-bottom: 1px solid var(--grid);
 }
 .panel h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
 }
 .panel .chips {
@@ -679,19 +725,22 @@ tr.sel:hover td {
 .panel .body {
   flex: 1;
   overflow: auto;
-  padding: 12px 14px;
+  padding: 14px 16px;
 }
 .panel .body > b {
   display: block;
-  margin-top: 4px;
-  padding-bottom: 2px;
+  margin-top: 6px;
+  padding-bottom: 3px;
   border-bottom: 1px solid var(--grid);
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  color: var(--mute);
 }
 .panel .foot {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 7px 14px;
+  padding: 10px 16px;
   border-top: 1px solid var(--grid);
   background: var(--chrome);
 }
@@ -780,6 +829,14 @@ tr.sel:hover td {
   height: 4px;
   border: 0;
   background: var(--faint);
+}
+/* A logged phone call or note stands out a little from the drafted emails around it. */
+.tl.log li.call::before,
+.tl.log li.note::before {
+  background: var(--accent);
+}
+.tl.log li.note > div:first-child {
+  white-space: pre-wrap;
 }
 /* The first-day checklist numbers its steps and ticks the ones done. */
 .tl.setup {
@@ -1352,7 +1409,8 @@ function statusOf(j, T) {
   /* An answer settles most checks for good. A job that is past due is different: an answer without a new
      date quiets it for that day only, and it is back on the list the next morning. */
   const overdue = k === 'late' || k === 'xmiss';
-  const asks = j.ev.filter((e) => e.m === 'ask' && e.d === T);
+  /* A phone call counts as asking, answered or not: the job shows it was chased today. */
+  const asks = j.ev.filter((e) => (e.m === 'ask' || e.m === 'call') && e.d === T);
   return {
     k,
     since,
@@ -2220,7 +2278,9 @@ const STATUS = {
 };
 const URGENCY = Object.keys(STATUS);
 const OUTCOME_LABEL = { rework: 'Needs rework', reject: 'Rejected or scrapped' };
-const EVENT_STEPS = ['sent', 'delivered', ...PROC_STEPS, 'back', 'newdate', 'ask'];
+/* 'call' is a phone call to the processor (ok: whether anyone answered); 'note' is the shop's own dated note. */
+const EVENT_STEPS = ['sent', 'delivered', ...PROC_STEPS, 'back', 'newdate', 'ask', 'call', 'note'];
+const NOTE_MAX = 200;
 const MONTHS = [
   'January',
   'February',
@@ -2345,6 +2405,15 @@ function cleanEvent(e) {
     out.to = e.to;
   }
   if (e.m === 'ask') out.what = cleanText(e.what, 80);
+  if (e.m === 'call') {
+    out.ok = e.ok === true;
+    const said = cleanText(e.text, NOTE_MAX).trim();
+    if (said) out.text = said;
+  }
+  if (e.m === 'note') {
+    out.text = cleanText(e.text, NOTE_MAX).trim();
+    if (!out.text) return null;
+  }
   if (e.m === 'shipped' && e.trk) out.trk = cleanText(e.trk, 60);
   if (e.m === 'back' && OUTCOME_LABEL[e.outcome]) {
     out.outcome = e.outcome;
@@ -2729,7 +2798,8 @@ function todayRow([j, s]) {
       <span class="sub">${j.process}${j.qty > 0 && `, ${j.qty} pcs`}</span>
     </td>
     <td class="needs">
-      ${chip(s.k)}${s.asked && html`<span class="asked">Asked ${fmtTime(s.asked.t)}</span>`}
+      ${chip(s.k)}${s.asked &&
+      html`<span class="asked">${s.asked.m === 'call' ? 'Called' : 'Asked'} ${fmtTime(s.asked.t)}</span>`}
       <span class="why">${reason(j, s)}</span>
     </td>
     <td class="when">${fmtDate(s.due)}</td>
@@ -3298,9 +3368,16 @@ function routeStep(j, step, index, lastReported) {
   </li>`;
 }
 
+function activityText(e) {
+  if (e.m === 'ask') return `We asked: ${e.what || 'check'}`;
+  if (e.m === 'call') return `Called: ${e.ok ? 'talked to them' : 'no answer'}${e.text ? `. ${e.text}` : ''}`;
+  if (e.m === 'note') return `Note: ${e.text}`;
+  return `New date given: ${fmtDay(e.to)}`;
+}
+
 function activityLine(e) {
-  return html`<li>
-    <div>${e.m === 'ask' ? `We asked: ${e.what || 'check'}` : `New date given: ${fmtDay(e.to)}`}</div>
+  return html`<li class="${e.m}">
+    <div>${activityText(e)}</div>
     <div class="w">${fmtDay(e.d)}${e.t && `, ${fmtTime(e.t)}`}</div>
   </li>`;
 }
@@ -3310,7 +3387,7 @@ function openJob(id) {
   const s = statusOf(j, T);
   const open = isOpen(j);
   const lastReported = ROUTE.reduce((at, step, i) => (j.ev.some((e) => e.m === step) ? i : at), -1);
-  const activity = j.ev.filter((e) => e.m === 'ask' || e.m === 'newdate');
+  const activity = j.ev.filter((e) => ['ask', 'newdate', 'call', 'note'].includes(e.m));
   const expedite = j.exp && ledger([j], T)[0];
   const enteredHere = st.added.some((a) => a.id === id);
   const awaitingDelivery = open && !last(j, ['delivered']) && !j.ev.some((e) => PROC_STEPS.includes(e.m));
@@ -3374,6 +3451,22 @@ function openJob(id) {
             <button type="button" class="btn sm" id="xadd">Add expedite</button>
           </div>
         </div>`}
+        <div class="box">
+          <b>Log a call or a note</b>
+          <textarea
+            id="jnote"
+            rows="2"
+            maxlength="${NOTE_MAX}"
+            aria-label="Note for this job"
+            placeholder="What was said, or anything to remember (no part numbers or customer names)"
+          ></textarea>
+          <div class="row">
+            ${open &&
+            html`<button type="button" class="btn sm" data-call="yes">Called: talked to them</button>
+              <button type="button" class="btn sm" data-call="no">Called: no answer</button>`}
+            <button type="button" class="btn sm" id="jnadd">Add note</button>
+          </div>
+        </div>
         ${enteredHere &&
         html`<p class="small">
           <button type="button" class="link" id="jed">Edit this job</button> (fix a date, quantity or processor) ·
@@ -3399,6 +3492,32 @@ function openJob(id) {
 /* ---------- what can be done to a job ---------- */
 
 on('click', '#jupd', () => openDraft(panel.id, { showReply: true }));
+
+/* A call or a note goes on the job's activity list, dated and timed, like the notes a buyer types into a PO. */
+function logActivity(event, said) {
+  const { id } = panel;
+  snap();
+  logEvent(id, event);
+  render();
+  openJob(id);
+  toast(`Job ${jobNo(job(id))}: ${said}`, true);
+}
+on('click', '#panel [data-call]', (el) => {
+  const ok = el.dataset.call === 'yes';
+  const text = $('#jnote').value.trim();
+  logActivity(
+    { m: 'call', ok, ...(text && { text: text.slice(0, NOTE_MAX) }) },
+    ok ? 'call logged' : 'call with no answer logged',
+  );
+});
+on('click', '#jnadd', () => {
+  const text = $('#jnote').value.trim();
+  if (!text) {
+    $('#jnote').focus();
+    return toast('Type the note first.');
+  }
+  logActivity({ m: 'note', text: text.slice(0, NOTE_MAX) }, 'note added');
+});
 
 function receiveBack(id, outcome, pcs) {
   const j = job(id);
@@ -5059,7 +5178,7 @@ function vIT() {
     ${itSection('What it stores', 'only what a user types or imports', [
       [
         'Per job',
-        'Job number, PO number, processor name, process name, quantity, date sent, date due, carrier, tracking number, expedite fee and date, the dated steps a user logs (delivered, received, shipped, new date), a dated note each time an email is drafted or copied for the job, how the job came back (good, for rework, or rejected, with a piece count), whether a credit was requested or received, and whether the job was already out on the day the shop started.',
+        'Job number, PO number, processor name, process name, quantity, date sent, date due, carrier, tracking number, expedite fee and date, the dated steps a user logs (delivered, received, shipped, new date), a dated note each time an email is drafted or copied for the job, each phone call a user logs (and whether anyone answered), the free-text notes a user types on a job (up to 200 characters each), how the job came back (good, for rework, or rejected, with a piece count), whether a credit was requested or received, and whether the job was already out on the day the shop started.',
       ],
       [
         'Per shop',
